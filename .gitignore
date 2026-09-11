@@ -1,0 +1,25 @@
+# proposal binaries / large local files
+*.hwpx
+*.hwp
+*.pdf
+!data/guidance/.gitkeep
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+# data snapshots (fetched by script; hashed)
+data/snapshots/
+data/db/*.sqlite*
+# secrets
+.env
+.env.*
+# node
+web/node_modules/
+web/dist/
+# os
+.DS_Store
