@@ -1,0 +1,135 @@
+{
+  "question": "우리 후보물질의 현재 자료로 다음 시험에서 어떤 용량들을 비교하고, 최종 용량 선택을 위해 어떤 추가 자료가 필요한가?",
+  "context": {
+    "asset": "SYNTHETIC_ASSET",
+    "indication": "합성 적응증",
+    "cohort": "cohort_a",
+    "population": "합성 전체 평가집단",
+    "window": "합성 고정 관찰기간"
+  },
+  "arms": [
+    "dose_a",
+    "dose_b"
+  ],
+  "sources": [
+    {
+      "id": "synthetic_table",
+      "title": "합성 초기 검토자료 — 실제 임상자료 아님",
+      "version": "fixture-v1",
+      "kind": "synthetic",
+      "records": [
+        {
+          "id": "dose_a_response",
+          "context": {
+            "asset": "SYNTHETIC_ASSET",
+            "indication": "합성 적응증",
+            "cohort": "cohort_a",
+            "population": "합성 전체 평가집단",
+            "window": "합성 고정 관찰기간"
+          },
+          "arm": "dose_a",
+          "metric": "response",
+          "events": 6,
+          "denominator": 20,
+          "unit": "proportion"
+        },
+        {
+          "id": "dose_a_adverse_event",
+          "context": {
+            "asset": "SYNTHETIC_ASSET",
+            "indication": "합성 적응증",
+            "cohort": "cohort_a",
+            "population": "합성 전체 평가집단",
+            "window": "합성 고정 관찰기간"
+          },
+          "arm": "dose_a",
+          "metric": "adverse_event",
+          "events": 2,
+          "denominator": 20,
+          "unit": "proportion"
+        },
+        {
+          "id": "dose_b_response",
+          "context": {
+            "asset": "SYNTHETIC_ASSET",
+            "indication": "합성 적응증",
+            "cohort": "cohort_a",
+            "population": "합성 전체 평가집단",
+            "window": "합성 고정 관찰기간"
+          },
+          "arm": "dose_b",
+          "metric": "response",
+          "events": 7,
+          "denominator": 20,
+          "unit": "proportion"
+        }
+      ],
+      "digest": "064b56c80dd5fe0489c47e0c3a38ed7bfa6867effcde89e70c224807b5af273d"
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim_dose_a_response",
+      "source_id": "synthetic_table",
+      "source_version": "fixture-v1",
+      "record_id": "dose_a_response",
+      "stated": {
+        "id": "dose_a_response",
+        "context": {
+          "asset": "SYNTHETIC_ASSET",
+          "indication": "합성 적응증",
+          "cohort": "cohort_a",
+          "population": "합성 전체 평가집단",
+          "window": "합성 고정 관찰기간"
+        },
+        "arm": "dose_a",
+        "metric": "response",
+        "events": 6,
+        "denominator": 20,
+        "unit": "proportion"
+      }
+    },
+    {
+      "id": "claim_dose_a_adverse_event",
+      "source_id": "synthetic_table",
+      "source_version": "fixture-v1",
+      "record_id": "dose_a_adverse_event",
+      "stated": {
+        "id": "dose_a_adverse_event",
+        "context": {
+          "asset": "SYNTHETIC_ASSET",
+          "indication": "합성 적응증",
+          "cohort": "cohort_a",
+          "population": "합성 전체 평가집단",
+          "window": "합성 고정 관찰기간"
+        },
+        "arm": "dose_a",
+        "metric": "adverse_event",
+        "events": 2,
+        "denominator": 20,
+        "unit": "proportion"
+      }
+    },
+    {
+      "id": "claim_dose_b_response",
+      "source_id": "synthetic_table",
+      "source_version": "fixture-v1",
+      "record_id": "dose_b_response",
+      "stated": {
+        "id": "dose_b_response",
+        "context": {
+          "asset": "SYNTHETIC_ASSET",
+          "indication": "합성 적응증",
+          "cohort": "cohort_a",
+          "population": "합성 전체 평가집단",
+          "window": "합성 고정 관찰기간"
+        },
+        "arm": "dose_b",
+        "metric": "response",
+        "events": 7,
+        "denominator": 20,
+        "unit": "proportion"
+      }
+    }
+  ]
+}

@@ -1,0 +1,456 @@
+{
+  "question": "우리 후보물질의 현재 자료로 다음 시험에서 어떤 용량들을 비교하고, 최종 용량 선택을 위해 어떤 추가 자료가 필요한가?",
+  "context": {
+    "asset": "SYNTHETIC_ASSET",
+    "indication": "합성 적응증",
+    "cohort": "cohort_a",
+    "population": "합성 전체 평가집단",
+    "window": "합성 고정 관찰기간"
+  },
+  "status": "PARTIAL_ABSTENTION",
+  "evidence_mode": "SYNTHETIC_ONLY",
+  "input_digest": "266881e06119f10d0be9a6aa3f62afa403c558c5a9fe9912fee39688a3d7533b",
+  "checked_claims": [
+    {
+      "claim": {
+        "id": "claim_dose_a_response",
+        "source_id": "synthetic_table",
+        "source_version": "fixture-v1",
+        "record_id": "dose_a_response",
+        "stated": {
+          "id": "dose_a_response",
+          "context": {
+            "asset": "SYNTHETIC_ASSET",
+            "indication": "합성 적응증",
+            "cohort": "cohort_a",
+            "population": "합성 전체 평가집단",
+            "window": "합성 고정 관찰기간"
+          },
+          "arm": "dose_a",
+          "metric": "response",
+          "events": 6,
+          "denominator": 20,
+          "unit": "proportion"
+        }
+      },
+      "locator": "synthetic_table@fixture-v1#record=dose_a_response",
+      "status": "synthetic_record_matched"
+    },
+    {
+      "claim": {
+        "id": "claim_dose_a_adverse_event",
+        "source_id": "synthetic_table",
+        "source_version": "fixture-v1",
+        "record_id": "dose_a_adverse_event",
+        "stated": {
+          "id": "dose_a_adverse_event",
+          "context": {
+            "asset": "SYNTHETIC_ASSET",
+            "indication": "합성 적응증",
+            "cohort": "cohort_a",
+            "population": "합성 전체 평가집단",
+            "window": "합성 고정 관찰기간"
+          },
+          "arm": "dose_a",
+          "metric": "adverse_event",
+          "events": 2,
+          "denominator": 20,
+          "unit": "proportion"
+        }
+      },
+      "locator": "synthetic_table@fixture-v1#record=dose_a_adverse_event",
+      "status": "synthetic_record_matched"
+    },
+    {
+      "claim": {
+        "id": "claim_dose_b_adverse_event",
+        "source_id": "synthetic_table",
+        "source_version": "fixture-v1",
+        "record_id": "dose_b_adverse_event",
+        "stated": {
+          "id": "dose_b_adverse_event",
+          "context": {
+            "asset": "SYNTHETIC_ASSET",
+            "indication": "합성 적응증",
+            "cohort": "cohort_a",
+            "population": "합성 전체 평가집단",
+            "window": "합성 고정 관찰기간"
+          },
+          "arm": "dose_b",
+          "metric": "adverse_event",
+          "events": 5,
+          "denominator": 20,
+          "unit": "proportion"
+        }
+      },
+      "locator": "synthetic_table@fixture-v1#record=dose_b_adverse_event",
+      "status": "synthetic_record_matched"
+    }
+  ],
+  "issues": [
+    {
+      "code": "RECORD_VALUE_MISMATCH",
+      "message": "주장의 값·분모 또는 문맥이 자료와 다릅니다.",
+      "claim_id": "claim_dose_b_response",
+      "affected_decision": "해당 근거를 이용한 용량군 비교",
+      "owner": "자료 검토 담당자",
+      "needed": "지정된 자료 버전과 레코드를 대조하고 수정된 주장으로 재실행"
+    },
+    {
+      "code": "EVIDENCE_GAP",
+      "message": "dose_b의 response 비교 근거가 부족합니다.",
+      "claim_id": null,
+      "affected_decision": "현재 자료에 근거한 용량 선택",
+      "owner": "임상개발·안전성 담당자",
+      "needed": "dose_b: 같은 분석집단·관찰기간의 response 사건 수와 분모 확인"
+    }
+  ],
+  "simulations": [
+    {
+      "scenario": {
+        "id": "plateau",
+        "label": "효능 포화 가정",
+        "arms": [
+          "dose_a",
+          "dose_b"
+        ],
+        "response": [
+          0.3,
+          0.32
+        ],
+        "adverse_event": [
+          0.12,
+          0.25
+        ],
+        "adverse_event_penalty": 0.7,
+        "maximum_adverse_event_rate": 0.35,
+        "rationale": "소프트웨어 동작 검증을 위해 지정한 합성 확률·가중치·한계값",
+        "provenance": "synthetic_assumption"
+      },
+      "design": {
+        "id": "small",
+        "label": "각 군 30명 고정 비교 예제",
+        "per_arm": 30
+      },
+      "seed": 42,
+      "repetitions": 10000,
+      "total_sample_size": 60,
+      "selection_probability": {
+        "dose_a": 0.7131,
+        "dose_b": 0.2869
+      },
+      "no_selection_probability": 0.0,
+      "selects_true_utility_best_probability": 0.7131,
+      "selects_true_unsafe_probability": 0.0,
+      "monte_carlo_se": {
+        "dose_a": 0.0045231448130697745,
+        "dose_b": 0.0045231448130697745,
+        "no_selection": 0.0,
+        "true_utility_best": 0.0045231448130697745,
+        "true_unsafe": 0.0
+      },
+      "true_utility_best_arms": [
+        "dose_a"
+      ],
+      "assumptions": [
+        "합성 모수이며 실제 약물의 추정치가 아님",
+        "각 군 동일 표본수, 독립 환자, 고정 관찰기간, 결측·탈락·중간중단 없음",
+        "반응과 이상반응은 독립 Bernoulli 결과로 가정",
+        "utility = 반응률 - 가정한 가중치 × 이상반응률; 임상적으로 검증된 함수가 아님",
+        "관측 이상반응률 한계 이하의 군 중 utility 최대 군 선택; 동률은 균등 추첨",
+        "모든 군이 관측 한계를 넘으면 선택 보류; 실제 한계 초과 군의 오선택률 별도 보고",
+        "군 간 우월성·비열등성 검정이나 허가 확률 계산이 아님"
+      ]
+    },
+    {
+      "scenario": {
+        "id": "plateau",
+        "label": "효능 포화 가정",
+        "arms": [
+          "dose_a",
+          "dose_b"
+        ],
+        "response": [
+          0.3,
+          0.32
+        ],
+        "adverse_event": [
+          0.12,
+          0.25
+        ],
+        "adverse_event_penalty": 0.7,
+        "maximum_adverse_event_rate": 0.35,
+        "rationale": "소프트웨어 동작 검증을 위해 지정한 합성 확률·가중치·한계값",
+        "provenance": "synthetic_assumption"
+      },
+      "design": {
+        "id": "larger",
+        "label": "각 군 60명 고정 비교 예제",
+        "per_arm": 60
+      },
+      "seed": 42,
+      "repetitions": 10000,
+      "total_sample_size": 120,
+      "selection_probability": {
+        "dose_a": 0.7696,
+        "dose_b": 0.2304
+      },
+      "no_selection_probability": 0.0,
+      "selects_true_utility_best_probability": 0.7696,
+      "selects_true_unsafe_probability": 0.0,
+      "monte_carlo_se": {
+        "dose_a": 0.004210888742296572,
+        "dose_b": 0.004210888742296572,
+        "no_selection": 0.0,
+        "true_utility_best": 0.004210888742296572,
+        "true_unsafe": 0.0
+      },
+      "true_utility_best_arms": [
+        "dose_a"
+      ],
+      "assumptions": [
+        "합성 모수이며 실제 약물의 추정치가 아님",
+        "각 군 동일 표본수, 독립 환자, 고정 관찰기간, 결측·탈락·중간중단 없음",
+        "반응과 이상반응은 독립 Bernoulli 결과로 가정",
+        "utility = 반응률 - 가정한 가중치 × 이상반응률; 임상적으로 검증된 함수가 아님",
+        "관측 이상반응률 한계 이하의 군 중 utility 최대 군 선택; 동률은 균등 추첨",
+        "모든 군이 관측 한계를 넘으면 선택 보류; 실제 한계 초과 군의 오선택률 별도 보고",
+        "군 간 우월성·비열등성 검정이나 허가 확률 계산이 아님"
+      ]
+    },
+    {
+      "scenario": {
+        "id": "higher_activity",
+        "label": "용량 B 효능 증가 가정",
+        "arms": [
+          "dose_a",
+          "dose_b"
+        ],
+        "response": [
+          0.25,
+          0.5
+        ],
+        "adverse_event": [
+          0.12,
+          0.25
+        ],
+        "adverse_event_penalty": 0.7,
+        "maximum_adverse_event_rate": 0.35,
+        "rationale": "소프트웨어 동작 검증을 위해 지정한 합성 확률·가중치·한계값",
+        "provenance": "synthetic_assumption"
+      },
+      "design": {
+        "id": "small",
+        "label": "각 군 30명 고정 비교 예제",
+        "per_arm": 30
+      },
+      "seed": 42,
+      "repetitions": 10000,
+      "total_sample_size": 60,
+      "selection_probability": {
+        "dose_a": 0.1959,
+        "dose_b": 0.804
+      },
+      "no_selection_probability": 0.0001,
+      "selects_true_utility_best_probability": 0.804,
+      "selects_true_unsafe_probability": 0.0,
+      "monte_carlo_se": {
+        "dose_a": 0.003968919122380803,
+        "dose_b": 0.003969685126052191,
+        "no_selection": 0.00009999499987499375,
+        "true_utility_best": 0.003969685126052191,
+        "true_unsafe": 0.0
+      },
+      "true_utility_best_arms": [
+        "dose_b"
+      ],
+      "assumptions": [
+        "합성 모수이며 실제 약물의 추정치가 아님",
+        "각 군 동일 표본수, 독립 환자, 고정 관찰기간, 결측·탈락·중간중단 없음",
+        "반응과 이상반응은 독립 Bernoulli 결과로 가정",
+        "utility = 반응률 - 가정한 가중치 × 이상반응률; 임상적으로 검증된 함수가 아님",
+        "관측 이상반응률 한계 이하의 군 중 utility 최대 군 선택; 동률은 균등 추첨",
+        "모든 군이 관측 한계를 넘으면 선택 보류; 실제 한계 초과 군의 오선택률 별도 보고",
+        "군 간 우월성·비열등성 검정이나 허가 확률 계산이 아님"
+      ]
+    },
+    {
+      "scenario": {
+        "id": "higher_activity",
+        "label": "용량 B 효능 증가 가정",
+        "arms": [
+          "dose_a",
+          "dose_b"
+        ],
+        "response": [
+          0.25,
+          0.5
+        ],
+        "adverse_event": [
+          0.12,
+          0.25
+        ],
+        "adverse_event_penalty": 0.7,
+        "maximum_adverse_event_rate": 0.35,
+        "rationale": "소프트웨어 동작 검증을 위해 지정한 합성 확률·가중치·한계값",
+        "provenance": "synthetic_assumption"
+      },
+      "design": {
+        "id": "larger",
+        "label": "각 군 60명 고정 비교 예제",
+        "per_arm": 60
+      },
+      "seed": 42,
+      "repetitions": 10000,
+      "total_sample_size": 120,
+      "selection_probability": {
+        "dose_a": 0.078,
+        "dose_b": 0.922
+      },
+      "no_selection_probability": 0.0,
+      "selects_true_utility_best_probability": 0.922,
+      "selects_true_unsafe_probability": 0.0,
+      "monte_carlo_se": {
+        "dose_a": 0.0026817158686184487,
+        "dose_b": 0.002681715868618448,
+        "no_selection": 0.0,
+        "true_utility_best": 0.002681715868618448,
+        "true_unsafe": 0.0
+      },
+      "true_utility_best_arms": [
+        "dose_b"
+      ],
+      "assumptions": [
+        "합성 모수이며 실제 약물의 추정치가 아님",
+        "각 군 동일 표본수, 독립 환자, 고정 관찰기간, 결측·탈락·중간중단 없음",
+        "반응과 이상반응은 독립 Bernoulli 결과로 가정",
+        "utility = 반응률 - 가정한 가중치 × 이상반응률; 임상적으로 검증된 함수가 아님",
+        "관측 이상반응률 한계 이하의 군 중 utility 최대 군 선택; 동률은 균등 추첨",
+        "모든 군이 관측 한계를 넘으면 선택 보류; 실제 한계 초과 군의 오선택률 별도 보고",
+        "군 간 우월성·비열등성 검정이나 허가 확률 계산이 아님"
+      ]
+    },
+    {
+      "scenario": {
+        "id": "both_unsafe",
+        "label": "두 군 모두 이상반응 한계 초과 가정",
+        "arms": [
+          "dose_a",
+          "dose_b"
+        ],
+        "response": [
+          0.3,
+          0.4
+        ],
+        "adverse_event": [
+          0.55,
+          0.65
+        ],
+        "adverse_event_penalty": 0.7,
+        "maximum_adverse_event_rate": 0.35,
+        "rationale": "소프트웨어 동작 검증을 위해 지정한 합성 확률·가중치·한계값",
+        "provenance": "synthetic_assumption"
+      },
+      "design": {
+        "id": "small",
+        "label": "각 군 30명 고정 비교 예제",
+        "per_arm": 30
+      },
+      "seed": 42,
+      "repetitions": 10000,
+      "total_sample_size": 60,
+      "selection_probability": {
+        "dose_a": 0.0137,
+        "dose_b": 0.0002
+      },
+      "no_selection_probability": 0.9861,
+      "selects_true_utility_best_probability": 0.9861,
+      "selects_true_unsafe_probability": 0.0139,
+      "monte_carlo_se": {
+        "dose_a": 0.0011624246212120594,
+        "dose_b": 0.00014140721339450828,
+        "no_selection": 0.0011707600095664365,
+        "true_utility_best": 0.0011707600095664365,
+        "true_unsafe": 0.0011707600095664354
+      },
+      "true_utility_best_arms": [],
+      "assumptions": [
+        "합성 모수이며 실제 약물의 추정치가 아님",
+        "각 군 동일 표본수, 독립 환자, 고정 관찰기간, 결측·탈락·중간중단 없음",
+        "반응과 이상반응은 독립 Bernoulli 결과로 가정",
+        "utility = 반응률 - 가정한 가중치 × 이상반응률; 임상적으로 검증된 함수가 아님",
+        "관측 이상반응률 한계 이하의 군 중 utility 최대 군 선택; 동률은 균등 추첨",
+        "모든 군이 관측 한계를 넘으면 선택 보류; 실제 한계 초과 군의 오선택률 별도 보고",
+        "군 간 우월성·비열등성 검정이나 허가 확률 계산이 아님"
+      ]
+    },
+    {
+      "scenario": {
+        "id": "both_unsafe",
+        "label": "두 군 모두 이상반응 한계 초과 가정",
+        "arms": [
+          "dose_a",
+          "dose_b"
+        ],
+        "response": [
+          0.3,
+          0.4
+        ],
+        "adverse_event": [
+          0.55,
+          0.65
+        ],
+        "adverse_event_penalty": 0.7,
+        "maximum_adverse_event_rate": 0.35,
+        "rationale": "소프트웨어 동작 검증을 위해 지정한 합성 확률·가중치·한계값",
+        "provenance": "synthetic_assumption"
+      },
+      "design": {
+        "id": "larger",
+        "label": "각 군 60명 고정 비교 예제",
+        "per_arm": 60
+      },
+      "seed": 42,
+      "repetitions": 10000,
+      "total_sample_size": 120,
+      "selection_probability": {
+        "dose_a": 0.0016,
+        "dose_b": 0.0
+      },
+      "no_selection_probability": 0.9984,
+      "selects_true_utility_best_probability": 0.9984,
+      "selects_true_unsafe_probability": 0.0016,
+      "monte_carlo_se": {
+        "dose_a": 0.0003996798718974975,
+        "dose_b": 0.0,
+        "no_selection": 0.0003996798718975032,
+        "true_utility_best": 0.0003996798718975032,
+        "true_unsafe": 0.0003996798718974975
+      },
+      "true_utility_best_arms": [],
+      "assumptions": [
+        "합성 모수이며 실제 약물의 추정치가 아님",
+        "각 군 동일 표본수, 독립 환자, 고정 관찰기간, 결측·탈락·중간중단 없음",
+        "반응과 이상반응은 독립 Bernoulli 결과로 가정",
+        "utility = 반응률 - 가정한 가중치 × 이상반응률; 임상적으로 검증된 함수가 아님",
+        "관측 이상반응률 한계 이하의 군 중 utility 최대 군 선택; 동률은 균등 추첨",
+        "모든 군이 관측 한계를 넘으면 선택 보류; 실제 한계 초과 군의 오선택률 별도 보고",
+        "군 간 우월성·비열등성 검정이나 허가 확률 계산이 아님"
+      ]
+    }
+  ],
+  "runtime": {
+    "engine": "review-prototype/0.1",
+    "python": "3.12.14",
+    "numpy": "2.5.3",
+    "rng": "PCG64"
+  },
+  "limitations": [
+    "전체 사례와 수치는 합성 데이터. 실제 sotorasib 또는 기업 임상자료가 아님",
+    "구조화 레코드 대조만 구현. PDF 문맥 검증·외부 검색·LLM 에이전트는 미연결",
+    "두 설계는 사전 정의한 예제이며 자동 생성 또는 권장 설계가 아님",
+    "합성 시뮬레이션은 근거 결측을 해소하지 않으며 현실의 용량 선택을 허용하지 않음",
+    "장기 내약성·PK/PD·노출–반응·모집 가능성은 별도 검토 필요",
+    "전문가 검증과 임상적 성능 평가 전의 연구용 프로토타입"
+  ]
+}
