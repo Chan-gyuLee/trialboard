@@ -21,5 +21,7 @@ data/db/*.sqlite*
 # node
 web/node_modules/
 web/dist/
+# generated local review reports
+/output/
 # os
 .DS_Store

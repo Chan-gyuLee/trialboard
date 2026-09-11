@@ -1,36 +1,26 @@
 [project]
 name = "trialboard"
 version = "0.1.0"
-description = "Evidence-linked, verifiable clinical trial design multi-agent (dose optimization)"
+description = "Research prototype for source-linked dose-design review and synthetic simulation"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "pydantic>=2.7",
-    "httpx>=0.27",
-    "sqlalchemy>=2.0",
-    "pymupdf>=1.24",
     "numpy>=1.26",
-    "scipy>=1.13",
-    "rdkit>=2024.3",
-    "fastapi>=0.111",
-    "uvicorn[standard]>=0.30",
-    "sse-starlette>=2.1",
-    "openai>=1.40",
-    "rank-bm25>=0.2",
-    "typer>=0.12",
-    "rich>=13.7",
-    "python-dotenv>=1.0",
+    "pdfplumber>=0.11,<0.12",
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.30,<1",
 ]
 
 [project.scripts]
-trialboard = "trialboard.cli:app"
+trialboard = "trialboard.review.__main__:main"
+trialboard-api = "trialboard.api.__main__:main"
 
 [dependency-groups]
 dev = [
+    "httpx>=0.27,<1",
     "pytest>=8.2",
-    "pytest-asyncio>=0.23",
     "ruff>=0.5",
-    "respx>=0.21",
 ]
 
 [build-system]
@@ -50,6 +40,3 @@ select = ["E", "F", "I", "B", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
-
-[tool.ruff.lint.per-file-ignores]
-"trialboard/cli.py" = ["B008", "E501"]

@@ -1,3 +1,3 @@
-"""Trial Board — evidence-linked clinical trial design agents."""
+"""TrialBoard research prototype: public evidence and synthetic design review."""
 
 __version__ = "0.1.0"
