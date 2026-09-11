@@ -70,3 +70,21 @@ class PDFDocument:
 
     def close(self) -> None:
         self.doc.close()
+
+
+def render_with_highlights(
+    path: str | Path, page: int, bboxes: list[list[float]], out: str | Path, zoom: float = 2.0
+) -> Path:
+    """Render a page to PNG with translucent yellow boxes over the given bboxes."""
+    doc = fitz.open(str(path))
+    pg = doc[page - 1]
+    for b in bboxes:
+        annot = pg.add_highlight_annot(fitz.Rect(*b))
+        annot.set_colors(stroke=(1, 0.85, 0.2))
+        annot.update()
+    pix = pg.get_pixmap(matrix=fitz.Matrix(zoom, zoom))
+    out = Path(out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    pix.save(str(out))
+    doc.close()
+    return out

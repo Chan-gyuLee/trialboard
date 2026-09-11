@@ -65,8 +65,15 @@ class FDAClient:
         docs.sort(key=lambda x: (x["submission_status_date"] or "", x["doc_type"] or ""))
         return docs
 
-    def fetch_pdf(self, url: str, *, title: str, doc_type: str, date_yyyymmdd: str | None,
-                  version: str | None = None) -> Source:
+    def fetch_pdf(
+        self,
+        url: str,
+        *,
+        title: str,
+        doc_type: str,
+        date_yyyymmdd: str | None,
+        version: str | None = None,
+    ) -> Source:
         f = self.store.get(url)
         stype = _DOC_TYPE_MAP.get(doc_type, SourceType.FDA_REVIEW)
         # Reviews contain both applicant data and reviewer judgement; default to

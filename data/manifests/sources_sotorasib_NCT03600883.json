@@ -14,7 +14,7 @@
   "attribution_default": "registry",
   "meta": {
    "nct": "NCT03600883",
-   "from_cache": false
+   "from_cache": true
   }
  },
  {
@@ -308,6 +308,114 @@
   }
  },
  {
+  "source_id": "src_b7de88fd18fe",
+  "type": "odac_briefing",
+  "url": "https://www.fda.gov/media/172698/download",
+  "title": "ODAC Meeting Briefing Document: Sotorasib (Amgen), 05 Oct 2023",
+  "issuer": "Amgen (submitted to FDA ODAC)",
+  "doc_date": "2023-10-05",
+  "version": null,
+  "fetched_at": "2026-09-11T10:56:58.156559Z",
+  "content_hash": "710da0374f73a175c8447eb6b14775efa513476556cabfe760127fd363c3717c",
+  "media_type": "application/pdf",
+  "local_path": "data/snapshots/710da0374f73a175c8447eb6b14775efa513476556cabfe760127fd363c3717c.pdf",
+  "attribution_default": "sponsor",
+  "meta": {
+   "seed": true,
+   "key": null
+  }
+ },
+ {
+  "source_id": "src_c69ae50acfcf",
+  "type": "fda_review",
+  "url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2021/214665Orig1s000MultidisciplineR.pdf",
+  "title": "NDA 214665 Multi-Discipline Review (original approval)",
+  "issuer": "FDA",
+  "doc_date": "2021-05-28",
+  "version": "ORIG-1",
+  "fetched_at": "2026-09-11T10:57:19.768715Z",
+  "content_hash": "59f6cad47a05cb446055b90b9445caf178e57ef7f6eeb6a6d651dfd06e48cacf",
+  "media_type": "application/pdf",
+  "local_path": "data/snapshots/59f6cad47a05cb446055b90b9445caf178e57ef7f6eeb6a6d651dfd06e48cacf.pdf",
+  "attribution_default": "reviewer",
+  "meta": {
+   "seed": true,
+   "key": null
+  }
+ },
+ {
+  "source_id": "src_5bcfeb687dc9",
+  "type": "guidance",
+  "url": "https://www.fda.gov/media/164555/download",
+  "title": "FDA Guidance: Optimizing the Dosage of Human Prescription Drugs and Biological Products for the Treatment of Oncologic Diseases (Final, Aug 2024)",
+  "issuer": "FDA OCE/CDER",
+  "doc_date": "2024-08-01",
+  "version": null,
+  "fetched_at": "2026-09-11T10:56:58.698819Z",
+  "content_hash": "13b25858865d8b26db65f51cfa05eaaeed69094a7bc33099b75e5d16d248d0e3",
+  "media_type": "application/pdf",
+  "local_path": "data/snapshots/13b25858865d8b26db65f51cfa05eaaeed69094a7bc33099b75e5d16d248d0e3.pdf",
+  "attribution_default": "agency_guidance",
+  "meta": {
+   "seed": true,
+   "key": "FDA_DOSE_OPT_2024"
+  }
+ },
+ {
+  "source_id": "src_b55d52e3da5d",
+  "type": "guidance",
+  "url": "https://database.ich.org/sites/default/files/ICH_E8-R1_Guideline_Step4_2021_1006.pdf",
+  "title": "ICH E8(R1) General Considerations for Clinical Studies",
+  "issuer": "ICH",
+  "doc_date": "2021-10-06",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:10.435550Z",
+  "content_hash": "6a5bb9cfa6d0f8b56f6832dadae9bb7931302fe0e8892969ac922cb67ae19a20",
+  "media_type": "application/pdf",
+  "local_path": "data/snapshots/6a5bb9cfa6d0f8b56f6832dadae9bb7931302fe0e8892969ac922cb67ae19a20.pdf",
+  "attribution_default": "agency_guidance",
+  "meta": {
+   "seed": true,
+   "key": "ICH_E8R1"
+  }
+ },
+ {
+  "source_id": "src_1bb33b55c512",
+  "type": "guidance",
+  "url": "https://database.ich.org/sites/default/files/E9-R1_Step4_Guideline_2019_1203.pdf",
+  "title": "ICH E9(R1) Estimands and Sensitivity Analysis in Clinical Trials",
+  "issuer": "ICH",
+  "doc_date": "2019-11-20",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:12.055103Z",
+  "content_hash": "f7471f411f1c87ee76783d5b2b9faaeca31d01d530213f71b50d136b39e3b0d9",
+  "media_type": "application/pdf",
+  "local_path": "data/snapshots/f7471f411f1c87ee76783d5b2b9faaeca31d01d530213f71b50d136b39e3b0d9.pdf",
+  "attribution_default": "agency_guidance",
+  "meta": {
+   "seed": true,
+   "key": "ICH_E9R1"
+  }
+ },
+ {
+  "source_id": "src_5636085c3d87",
+  "type": "guidance",
+  "url": "https://database.ich.org/sites/default/files/E4_Guideline.pdf",
+  "title": "ICH E4 Dose-Response Information to Support Drug Registration",
+  "issuer": "ICH",
+  "doc_date": "1994-03-10",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:13.674820Z",
+  "content_hash": "2bd6c8be24ac7238f7ed61da6c1c345b3fade38a149eb8b801fd44438442b432",
+  "media_type": "application/pdf",
+  "local_path": "data/snapshots/2bd6c8be24ac7238f7ed61da6c1c345b3fade38a149eb8b801fd44438442b432.pdf",
+  "attribution_default": "agency_guidance",
+  "meta": {
+   "seed": true,
+   "key": "ICH_E4"
+  }
+ },
+ {
   "source_id": "src_12c444a4694f",
   "type": "compound_db",
   "url": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/sotorasib/property/MolecularFormula,MolecularWeight,InChIKey,ConnectivitySMILES,IsomericSMILES,IUPACName/JSON",
@@ -325,83 +433,41 @@
   }
  },
  {
-  "source_id": "src_46ac01cf0678",
+  "source_id": "src_6e80af52f170",
   "type": "publication",
-  "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=25&query=\"sotorasib\" AND (NCT03600883 OR \"CodeBreaK 100\" OR \"dose\")&resultType=lite",
-  "title": "Europe PMC search: \"sotorasib\" AND (NCT03600883 OR \"CodeBreaK 100\" OR \"dose\")",
+  "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=25&query=\"sotorasib\" AND (NCT03600883 OR \"dose comparison\" OR \"dose optimization\")&resultType=lite",
+  "title": "Europe PMC search: \"sotorasib\" AND (NCT03600883 OR \"dose comparison\" OR \"dose optimization\")",
   "issuer": "Europe PMC",
   "doc_date": null,
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
    "n": 25
   }
  },
  {
-  "source_id": "src_270b99024960",
+  "source_id": "src_bad645d394be",
   "type": "publication",
-  "url": "https://doi.org/10.1016/j.jtocrr.2026.100974",
-  "title": "Sotorasib in Advanced &lt;i&gt;KRAS&lt;/i&gt; G12C-Mutated NSCLC: Results From the Global Expanded Access Program, Including Patients With Poor Performance Status and a History of CNS Metastases.",
-  "issuer": "JTO Clin Res Rep",
-  "doc_date": "2026-02-13",
+  "url": "https://doi.org/10.1200/op-25-01315",
+  "title": "Standard Versus Reduced Sotorasib Dosing in KRAS G12C-Mutated Non-Small Cell Lung Cancer: A Systematic Review and Meta-Analysis-Have We Answered the Dosing Question?",
+  "issuer": "JCO Oncol Pract",
+  "doc_date": "2026-06-01",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
-   "pmid": "42006282",
-   "pmcid": "PMC13090643",
-   "doi": "10.1016/j.jtocrr.2026.100974",
-   "is_oa": true,
-   "authors": "Novello S, Rabinovich NM, Shih JY, Pelizzari G, Stevenson J, Majem M, Ferreira CG, Petty WJ, Arriola E, Castagneris N, De Castro J, Morbeck I, Bauman J, Toschi L, Zer A, Metro G, Kalmadi S, Martinez AA, Al Husaini H, Meloni AR, Nduka C, Ardito-Abraham C, Xia C, Awad MM."
-  }
- },
- {
-  "source_id": "src_c7f428d4e0ad",
-  "type": "publication",
-  "url": "https://doi.org/10.1016/j.esmoop.2026.108338",
-  "title": "Safety and efficacy of sotorasib plus panitumumab and FOLFIRI for previously treated KRAS G12C-mutated metastatic colorectal cancer in the CodeBreaK 101 phase Ib study.",
-  "issuer": "ESMO Open",
-  "doc_date": "2026-08-19",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "42617424",
-   "pmcid": "PMC13520892",
-   "doi": "10.1016/j.esmoop.2026.108338",
-   "is_oa": true,
-   "authors": "Masuishi T, Strickler JH, Kuboki Y, Fakih M, Greil R, Galot R, Price TJ, Élez E, Siena S, Nolte-Hippenmeyer J, Nduka C, Strydom N, Xia C, Hong DS."
-  }
- },
- {
-  "source_id": "src_6dd1510aa2b0",
-  "type": "publication",
-  "url": "https://doi.org/10.3390/pharmaceutics18070773",
-  "title": "RAS Inhibitors: Changing the Paradigm from the Undruggable.",
-  "issuer": "Pharmaceutics",
-  "doc_date": "2026-06-24",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "42514855",
-   "pmcid": "PMC13415134",
-   "doi": "10.3390/pharmaceutics18070773",
-   "is_oa": true,
-   "authors": "Campana F, De Bellis E, Porcaro F, Di Guida G, Della Gravara L, Servetto A, Morgillo F, Papaccio F, Filippelli A, Della Corte CM, Conti V."
+   "pmid": "42224643",
+   "pmcid": null,
+   "doi": "10.1200/op-25-01315",
+   "is_oa": false,
+   "authors": "Aung WY, Neumann M, Wang KY, Chukkalore D, Morales J, Seetharamu N."
   }
  },
  {
@@ -412,10 +478,10 @@
   "issuer": "Transl Oncol",
   "doc_date": "2026-01-12",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
    "pmid": "41529383",
@@ -426,66 +492,45 @@
   }
  },
  {
-  "source_id": "src_2c3faa6b67db",
+  "source_id": "src_c7f428d4e0ad",
   "type": "publication",
-  "url": "https://doi.org/10.3390/ijms27146455",
-  "title": "KRAS G12C-Targeted Therapy in Non-Small Cell Lung Cancer: From Resistant Salvage to Potential First-Line Backbone.",
-  "issuer": "Int J Mol Sci",
-  "doc_date": "2026-07-20",
+  "url": "https://doi.org/10.1016/j.esmoop.2026.108338",
+  "title": "Safety and efficacy of sotorasib plus panitumumab and FOLFIRI for previously treated KRAS G12C-mutated metastatic colorectal cancer in the CodeBreaK 101 phase Ib study.",
+  "issuer": "ESMO Open",
+  "doc_date": "2026-08-19",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
-   "pmid": "42511798",
-   "pmcid": "PMC13411004",
-   "doi": "10.3390/ijms27146455",
+   "pmid": "42617424",
+   "pmcid": "PMC13520892",
+   "doi": "10.1016/j.esmoop.2026.108338",
    "is_oa": true,
-   "authors": "Rosas D, Barad P, Wright J, Raez L."
+   "authors": "Masuishi T, Strickler JH, Kuboki Y, Fakih M, Greil R, Galot R, Price TJ, Élez E, Siena S, Nolte-Hippenmeyer J, Nduka C, Strydom N, Xia C, Hong DS."
   }
  },
  {
-  "source_id": "src_04ff05a02486",
+  "source_id": "src_270b99024960",
   "type": "publication",
-  "url": "https://doi.org/10.3389/fphar.2025.1704347",
-  "title": "Therapeutic strategies for KRAS G12C-mutant non-small cell lung cancer: from bench to bedside and beyond.",
-  "issuer": "Front Pharmacol",
-  "doc_date": "2026-01-26",
+  "url": "https://doi.org/10.1016/j.jtocrr.2026.100974",
+  "title": "Sotorasib in Advanced &lt;i&gt;KRAS&lt;/i&gt; G12C-Mutated NSCLC: Results From the Global Expanded Access Program, Including Patients With Poor Performance Status and a History of CNS Metastases.",
+  "issuer": "JTO Clin Res Rep",
+  "doc_date": "2026-02-13",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
-   "pmid": "41668807",
-   "pmcid": "PMC12883982",
-   "doi": "10.3389/fphar.2025.1704347",
+   "pmid": "42006282",
+   "pmcid": "PMC13090643",
+   "doi": "10.1016/j.jtocrr.2026.100974",
    "is_oa": true,
-   "authors": "Huang R, Gong X, Du J, Xu G, Qian J, Liao G, Lin Y, Pan M, Zheng B, Yuan W, Huang Q, Chen C, Yang Z."
-  }
- },
- {
-  "source_id": "src_4f504b3a88f4",
-  "type": "publication",
-  "url": "https://doi.org/10.62347/zzuw3272",
-  "title": "Targeted therapy for KRAS G12C-mutated colorectal cancer: advances, challenges, and future directions.",
-  "issuer": "Am J Cancer Res",
-  "doc_date": "2025-12-15",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "41523245",
-   "pmcid": "PMC12789924",
-   "doi": "10.62347/zzuw3272",
-   "is_oa": false,
-   "authors": "Lin Y, Cheng SH, Wang D, Zhang SH, Li HL."
+   "authors": "Novello S, Rabinovich NM, Shih JY, Pelizzari G, Stevenson J, Majem M, Ferreira CG, Petty WJ, Arriola E, Castagneris N, De Castro J, Morbeck I, Bauman J, Toschi L, Zer A, Metro G, Kalmadi S, Martinez AA, Al Husaini H, Meloni AR, Nduka C, Ardito-Abraham C, Xia C, Awad MM."
   }
  },
  {
@@ -496,10 +541,10 @@
   "issuer": "Cancers (Basel)",
   "doc_date": "2025-08-27",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
    "pmid": "40940900",
@@ -510,66 +555,24 @@
   }
  },
  {
-  "source_id": "src_6c3aeda9750e",
+  "source_id": "src_d99c28fce0ea",
   "type": "publication",
-  "url": "https://doi.org/10.1093/oncolo/oyae356",
-  "title": "Pooled safety analysis and management of sotorasib-related adverse events in KRAS G12C-mutated advanced non-small cell lung cancer.",
-  "issuer": "Oncologist",
-  "doc_date": "2025-01-01",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "39846981",
-   "pmcid": "PMC11756274",
-   "doi": "10.1093/oncolo/oyae356",
-   "is_oa": true,
-   "authors": "Skoulidis F, Li BT, Hochmair M, Govindan R, Vincent M, van der Wekken AJ, Reguart Aransay N, O'Byrne KJ, Girard N, Griesinger F, Nishio M, Häfliger S, Lindsay C, Reinmuth N, Paulus A, Papakotoulas P, Kim SW, Ferreira CG, Pasello G, Duruisseaux M, Gennatas S, Dimou A, Mehta B, Kormany W, Nduka C, Sylvester BE, Ardito-Abraham C, Wang Y, de Langen AJ."
-  }
- },
- {
-  "source_id": "src_dd64191fe772",
-  "type": "publication",
-  "url": "https://doi.org/10.1177/20363613261481747",
-  "title": "Pulmonary carcinoid harboring a &lt;i&gt;KRAS&lt;/i&gt; G12C mutation identified through comprehensive genomic profiling and responding to sotorasib: A case report.",
-  "issuer": "Rare Tumors",
-  "doc_date": "2026-08-20",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "42630346",
-   "pmcid": "PMC13494277",
-   "doi": "10.1177/20363613261481747",
-   "is_oa": true,
-   "authors": "Hamai K, Abe M, Miyake S, Katsura R, Kozuki N, Shimizu A, Nakahara M, Hanada K, Yonehara S, Hinoi T."
-  }
- },
- {
-  "source_id": "src_858a59755b00",
-  "type": "publication",
-  "url": "https://doi.org/10.1200/po-25-01077",
-  "title": "Targeting KRAS G12C in Rare Mesonephric Carcinoma of the Cervix: A Promising Response to Sotorasib.",
-  "issuer": "JCO Precis Oncol",
+  "url": "https://doi.org/10.1016/j.ctrv.2026.103144",
+  "title": "KRAS G12C-mutant non-small cell lung cancer: A practical guide for clinicians.",
+  "issuer": "Cancer Treat Rev",
   "doc_date": "2026-05-06",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
-   "pmid": "42090632",
-   "pmcid": "PMC13155224",
-   "doi": "10.1200/po-25-01077",
-   "is_oa": true,
-   "authors": "Li BCW, Li JJX, Tse KY, Lu H, Chan KKL."
+   "pmid": "42114275",
+   "pmcid": null,
+   "doi": "10.1016/j.ctrv.2026.103144",
+   "is_oa": false,
+   "authors": "Remon J, La-Cava G, Borgeaud M, Saw SPL, Hendriks LE, Ricciuti B."
   }
  },
  {
@@ -580,10 +583,10 @@
   "issuer": "Int J Mol Sci",
   "doc_date": "2025-07-24",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
    "pmid": "40806294",
@@ -594,192 +597,87 @@
   }
  },
  {
-  "source_id": "src_860563373629",
+  "source_id": "src_b82a3fc8b2d2",
   "type": "publication",
-  "url": "https://doi.org/10.1038/s41392-025-02473-8",
-  "title": "Targeting KRAS mutations: orchestrating cancer evolution and therapeutic challenges.",
-  "issuer": "Signal Transduct Target Ther",
-  "doc_date": "2025-11-28",
+  "url": "https://doi.org/10.1016/j.ejca.2024.114204",
+  "title": "Sotorasib (960 mg or 240 mg) once daily in patients with previously treated KRAS G12C-mutated advanced NSCLC.",
+  "issuer": "Eur J Cancer",
+  "doc_date": "2024-07-05",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
-   "pmid": "41309533",
-   "pmcid": "PMC12660860",
-   "doi": "10.1038/s41392-025-02473-8",
-   "is_oa": true,
-   "authors": "Choucair K, Imtiaz H, Uddin MH, Nagasaka M, Al-Hallak MN, Philip PA, El-Rayes B, El-Rayes B, Pasche BC, Azmi AS."
-  }
- },
- {
-  "source_id": "src_8b8b92c73dc2",
-  "type": "publication",
-  "url": "https://doi.org/10.3390/ph18101574",
-  "title": "Sex-Related Safety Signals of Sotorasib in Non-Small Cell Lung Cancer: A Real-World, Pharmacovigilance Study from the EudraVigilance Database.",
-  "issuer": "Pharmaceuticals (Basel)",
-  "doc_date": "2025-10-19",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "41155693",
-   "pmcid": "PMC12566659",
-   "doi": "10.3390/ph18101574",
-   "is_oa": true,
-   "authors": "Speranza D, Marafioti M, Musarra M, Cianci V, Omero F, Spagnolo CC, Calabrò M, Silvestris N, Irrera N, Santarpia M."
-  }
- },
- {
-  "source_id": "src_063febf2ee3f",
-  "type": "publication",
-  "url": "https://doi.org/10.3892/or.2026.9044",
-  "title": "Advances in targeting KRAS mutations: A promising approach for the treatment of non‑small cell lung cancer (Review).",
-  "issuer": "Oncol Rep",
-  "doc_date": "2026-01-09",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "41508946",
-   "pmcid": "PMC12805455",
-   "doi": "10.3892/or.2026.9044",
-   "is_oa": true,
-   "authors": "Sharma U, Song J, Kandu H, Zhu Y, Dai Z."
-  }
- },
- {
-  "source_id": "src_c12db603bd90",
-  "type": "publication",
-  "url": "https://doi.org/10.1038/s41591-025-03732-5",
-  "title": "Molecular determinants of sotorasib clinical efficacy in KRAS<sup>G12C</sup>-mutated non-small-cell lung cancer.",
-  "issuer": "Nat Med",
-  "doc_date": "2025-05-28",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "40437272",
-   "pmcid": "PMC12353874",
-   "doi": "10.1038/s41591-025-03732-5",
-   "is_oa": true,
-   "authors": "Skoulidis F, Li BT, de Langen AJ, Hong DS, Lena H, Wolf J, Dy GK, Curioni Fontecedro A, Tomasini P, Velcheti V, van der Wekken AJ, Dooms C, Paz-Ares Rodriguez L, Mountzios G, Sacher A, Nadal E, Couraud S, Kim SW, O'Byrne K, Rocco D, Toyozawa R, Chmielewska I, Lindsay CR, Hindoyan A, Mukundan L, Wilmanski T, Anderson A, Ardito-Abraham C, Pati A, Reddy A, Mehta B, Schuler M."
-  }
- },
- {
-  "source_id": "src_59784415e40d",
-  "type": "publication",
-  "url": "https://doi.org/10.21037/jtd-2025-1-2712",
-  "title": "Chemotherapy in combination with KRAS inhibitors in &lt;i&gt;KRAS&lt;/i&gt;-mutated non-small cell lung cancer.",
-  "issuer": "J Thorac Dis",
-  "doc_date": "2026-04-24",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "42182651",
-   "pmcid": "PMC13189986",
-   "doi": "10.21037/jtd-2025-1-2712",
-   "is_oa": true,
-   "authors": "Rosell R, González-Cao M."
-  }
- },
- {
-  "source_id": "src_4fa04bc92c57",
-  "type": "publication",
-  "url": "https://doi.org/10.1002/ccr3.8866",
-  "title": "Mixed response to the first-line treatment of KRAS G12C inhibitor, sotorasib, in non-small cell lung cancer: A brief report.",
-  "issuer": "Clin Case Rep",
-  "doc_date": "2024-05-24",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "38799516",
-   "pmcid": "PMC11126647",
-   "doi": "10.1002/ccr3.8866",
-   "is_oa": true,
-   "authors": "Yang J, Huang J, Yuan G, Lin XC, Chen HJ, Yang JJ."
-  }
- },
- {
-  "source_id": "src_eb2030f66f28",
-  "type": "publication",
-  "url": "https://doi.org/10.2147/ott.s473368",
-  "title": "KRAS<sup>G12C</sup> Inhibitors in Non-Small Cell Lung Cancer: A Review.",
-  "issuer": "Onco Targets Ther",
-  "doc_date": "2024-08-24",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "39206059",
-   "pmcid": "PMC11352592",
-   "doi": "10.2147/ott.s473368",
-   "is_oa": true,
-   "authors": "Tang M, Wu Y, Bai X, Lu Y."
-  }
- },
- {
-  "source_id": "src_2e39561e1ace",
-  "type": "publication",
-  "url": "https://doi.org/10.1016/j.jtocrr.2026.100994",
-  "title": "Lung Adenocarcinoma Developing Pleomorphic Carcinoma With &lt;i&gt;ERBB3&lt;/i&gt; Amplification After Acquired Resistance to Sotorasib: A Case Report.",
-  "issuer": "JTO Clin Res Rep",
-  "doc_date": "2026-03-28",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "42293289",
-   "pmcid": "PMC13253119",
-   "doi": "10.1016/j.jtocrr.2026.100994",
-   "is_oa": true,
-   "authors": "Senoo S, Takata K, Matsumori S, Baba T, Sugisaki Y, Omori H, Matsuura H, Matsuura Y, Omote R, Ichihara E, Okada T."
-  }
- },
- {
-  "source_id": "src_2b04429fd18b",
-  "type": "publication",
-  "url": "https://doi.org/10.2217/fon-2023-0560",
-  "title": "Long-term benefit of sotorasib in patients with KRAS G12C-mutated non-small-cell lung cancer: plain language summary.",
-  "issuer": "Future Oncol",
-  "doc_date": "2023-11-27",
-  "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
-  "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
-  "attribution_default": "author",
-  "meta": {
-   "pmid": "38010044",
+   "pmid": "39029295",
    "pmcid": null,
-   "doi": "10.2217/fon-2023-0560",
+   "doi": "10.1016/j.ejca.2024.114204",
    "is_oa": false,
-   "authors": "Dy GK, Govindan R, Velcheti V, Falchook GS, Italiano A, Wolf J, Sacher AG, Takahashi T, Ramalingam SS, Dooms C, Kim DW, Addeo A, Desai J, Schuler M, Tomasini P, Hong DS, Lito P, Tran Q, Jones S, Anderson A, Hindoyan A, Snyder W, Skoulidis F, Li BT."
+   "authors": "Hochmair MJ, Vermaelen K, Mountzios G, Carcereny E, Dooms C, Lee SH, Morocz E, Kato T, Ciuleanu TE, Dy GK, Parente B, O'Byrne KJ, Chu QS, Castro Junior G, Girard N, Snyder W, Tran Q, Kormany W, Houk B, Mehta B, Curioni-Fontecedro A."
+  }
+ },
+ {
+  "source_id": "src_04ff05a02486",
+  "type": "publication",
+  "url": "https://doi.org/10.3389/fphar.2025.1704347",
+  "title": "Therapeutic strategies for KRAS G12C-mutant non-small cell lung cancer: from bench to bedside and beyond.",
+  "issuer": "Front Pharmacol",
+  "doc_date": "2026-01-26",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "41668807",
+   "pmcid": "PMC12883982",
+   "doi": "10.3389/fphar.2025.1704347",
+   "is_oa": true,
+   "authors": "Huang R, Gong X, Du J, Xu G, Qian J, Liao G, Lin Y, Pan M, Zheng B, Yuan W, Huang Q, Chen C, Yang Z."
+  }
+ },
+ {
+  "source_id": "src_6dd1510aa2b0",
+  "type": "publication",
+  "url": "https://doi.org/10.3390/pharmaceutics18070773",
+  "title": "RAS Inhibitors: Changing the Paradigm from the Undruggable.",
+  "issuer": "Pharmaceutics",
+  "doc_date": "2026-06-24",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "42514855",
+   "pmcid": "PMC13415134",
+   "doi": "10.3390/pharmaceutics18070773",
+   "is_oa": true,
+   "authors": "Campana F, De Bellis E, Porcaro F, Di Guida G, Della Gravara L, Servetto A, Morgillo F, Papaccio F, Filippelli A, Della Corte CM, Conti V."
+  }
+ },
+ {
+  "source_id": "src_c1729e2b4eb9",
+  "type": "publication",
+  "url": "https://doi.org/10.1158/2767-9764.crc-24-0582",
+  "title": "RAS Pathway Inhibitors Combined with Targeted Agents Are Active in Patient-Derived Spheroids with Oncogenic KRAS Variants from Multiple Cancer Types.",
+  "issuer": "Cancer Res Commun",
+  "doc_date": "2025-10-01",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "40960119",
+   "pmcid": "PMC12505081",
+   "doi": "10.1158/2767-9764.crc-24-0582",
+   "is_oa": true,
+   "authors": "Davoudi Z, Dexheimer TS, Coussens NP, Silvers T, Fox RG, Kemp SB, Juneja P, Morris J, Hollingshead MG, Takebe N, Doroshow JH, Teicher BA."
   }
  },
  {
@@ -790,10 +688,10 @@
   "issuer": "Nat Commun",
   "doc_date": "2025-09-01",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
    "pmid": "40890128",
@@ -804,6 +702,132 @@
   }
  },
  {
+  "source_id": "src_236c47bbf201",
+  "type": "publication",
+  "url": "https://doi.org/10.3389/fonc.2026.1817943",
+  "title": "Therapeutic inhibition of RAS in non-small cell lung cancer.",
+  "issuer": "Front Oncol",
+  "doc_date": "2026-06-30",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "42453876",
+   "pmcid": "PMC13364904",
+   "doi": "10.3389/fonc.2026.1817943",
+   "is_oa": true,
+   "authors": "Nichols KB, Herzberg BO."
+  }
+ },
+ {
+  "source_id": "src_4f504b3a88f4",
+  "type": "publication",
+  "url": "https://doi.org/10.62347/zzuw3272",
+  "title": "Targeted therapy for KRAS G12C-mutated colorectal cancer: advances, challenges, and future directions.",
+  "issuer": "Am J Cancer Res",
+  "doc_date": "2025-12-15",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "41523245",
+   "pmcid": "PMC12789924",
+   "doi": "10.62347/zzuw3272",
+   "is_oa": false,
+   "authors": "Lin Y, Cheng SH, Wang D, Zhang SH, Li HL."
+  }
+ },
+ {
+  "source_id": "src_063febf2ee3f",
+  "type": "publication",
+  "url": "https://doi.org/10.3892/or.2026.9044",
+  "title": "Advances in targeting KRAS mutations: A promising approach for the treatment of non‑small cell lung cancer (Review).",
+  "issuer": "Oncol Rep",
+  "doc_date": "2026-01-09",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "41508946",
+   "pmcid": "PMC12805455",
+   "doi": "10.3892/or.2026.9044",
+   "is_oa": true,
+   "authors": "Sharma U, Song J, Kandu H, Zhu Y, Dai Z."
+  }
+ },
+ {
+  "source_id": "src_860563373629",
+  "type": "publication",
+  "url": "https://doi.org/10.1038/s41392-025-02473-8",
+  "title": "Targeting KRAS mutations: orchestrating cancer evolution and therapeutic challenges.",
+  "issuer": "Signal Transduct Target Ther",
+  "doc_date": "2025-11-28",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "41309533",
+   "pmcid": "PMC12660860",
+   "doi": "10.1038/s41392-025-02473-8",
+   "is_oa": true,
+   "authors": "Choucair K, Imtiaz H, Uddin MH, Nagasaka M, Al-Hallak MN, Philip PA, El-Rayes B, El-Rayes B, Pasche BC, Azmi AS."
+  }
+ },
+ {
+  "source_id": "src_6661060f6531",
+  "type": "publication",
+  "url": "https://doi.org/10.1186/s12885-025-14033-y",
+  "title": "The complex journey of targeting RAS in oncology.",
+  "issuer": "BMC Cancer",
+  "doc_date": "2025-07-01",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "40597785",
+   "pmcid": "PMC12211582",
+   "doi": "10.1186/s12885-025-14033-y",
+   "is_oa": true,
+   "authors": "Wasiak K, Ciunowicz D, Kierasińska-Kałka A, Węgierska M, Pacholczyk M, Rieske P, Stoczyńska-Fidelus E."
+  }
+ },
+ {
+  "source_id": "src_15924f6bbb31",
+  "type": "publication",
+  "url": "https://doi.org/10.1093/oncolo/oyae042",
+  "title": "The Impact of Exuberance on Equipoise in Oncology Clinical Trials: Sotorasib as Archetype.",
+  "issuer": "Oncologist",
+  "doc_date": "2024-04-01",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "38498045",
+   "pmcid": "PMC10994247",
+   "doi": "10.1093/oncolo/oyae042",
+   "is_oa": true,
+   "authors": "Fojo T, LaRose M, Bates SE."
+  }
+ },
+ {
   "source_id": "src_33c3d2145658",
   "type": "publication",
   "url": "https://doi.org/10.1007/s12325-025-03259-8",
@@ -811,10 +835,10 @@
   "issuer": "Adv Ther",
   "doc_date": "2025-06-21",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
    "pmid": "40542959",
@@ -825,45 +849,129 @@
   }
  },
  {
-  "source_id": "src_ea2b560343d9",
+  "source_id": "src_944e1b047068",
   "type": "publication",
-  "url": "https://doi.org/10.21037/tcr-23-1629",
-  "title": "<i>KRAS</i> G12C inhibitors: also a new promising new targeted therapy in advanced pancreatic adenocarcinoma?",
-  "issuer": "Transl Cancer Res",
-  "doc_date": "2023-11-13",
+  "url": "https://doi.org/10.1038/s41416-025-03216-w",
+  "title": "Modeling response to the KRAS-G12C inhibitor AZD4625 in KRAS&lt;sup&gt;G12C&lt;/sup&gt; NSCLC patient-derived xenografts reveals insights into primary resistance mechanisms.",
+  "issuer": "Br J Cancer",
+  "doc_date": "2025-10-11",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
-   "pmid": "38197074",
-   "pmcid": "PMC10774060",
-   "doi": "10.21037/tcr-23-1629",
+   "pmid": "41076489",
+   "pmcid": "PMC12765001",
+   "doi": "10.1038/s41416-025-03216-w",
    "is_oa": true,
-   "authors": "Muller M, Tougeron D."
+   "authors": "Rosen JC, Cao P, Pham NA, Waas M, Li Q, Hueniken K, Wang M, Navab R, Wybenga-Groot L, Radulovich N, Niedbala M, Koers A, Ross S, Moran MF, Sacher A, Tsao MS."
   }
  },
  {
-  "source_id": "src_62b223c6a6db",
+  "source_id": "src_b7e939af5c81",
   "type": "publication",
-  "url": "https://doi.org/10.1038/s41417-026-01003-0",
-  "title": "Therapeutic advances with KRAS&lt;sup&gt;G12C&lt;/sup&gt; inhibitors and combination strategies in non-small cell lung cancer brain metastases.",
-  "issuer": "Cancer Gene Ther",
-  "doc_date": "2026-02-09",
+  "url": "https://doi.org/10.3892/mco.2025.2873",
+  "title": "Targeting KRAS in colorectal cancer (Review).",
+  "issuer": "Mol Clin Oncol",
+  "doc_date": "2025-07-03",
   "version": null,
-  "fetched_at": "2026-09-11T10:55:40.379912Z",
-  "content_hash": "fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74",
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
   "media_type": "application/json",
-  "local_path": "data/snapshots/fad16959b2187a97c5fad1665b2466e852818b0b746ee21b444e18ca79ddfb74.json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
   "attribution_default": "author",
   "meta": {
-   "pmid": "41663526",
-   "pmcid": "PMC13109049",
-   "doi": "10.1038/s41417-026-01003-0",
+   "pmid": "40692745",
+   "pmcid": "PMC12278713",
+   "doi": "10.3892/mco.2025.2873",
+   "is_oa": false,
+   "authors": "Zhang M, Wu D, Tang Y, Zhang L, Zhang S, Li W, Li N, Yan X."
+  }
+ },
+ {
+  "source_id": "src_6c3aeda9750e",
+  "type": "publication",
+  "url": "https://doi.org/10.1093/oncolo/oyae356",
+  "title": "Pooled safety analysis and management of sotorasib-related adverse events in KRAS G12C-mutated advanced non-small cell lung cancer.",
+  "issuer": "Oncologist",
+  "doc_date": "2025-01-01",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "39846981",
+   "pmcid": "PMC11756274",
+   "doi": "10.1093/oncolo/oyae356",
    "is_oa": true,
-   "authors": "Bhattacharya D, Roman B, Reddy S."
+   "authors": "Skoulidis F, Li BT, Hochmair M, Govindan R, Vincent M, van der Wekken AJ, Reguart Aransay N, O'Byrne KJ, Girard N, Griesinger F, Nishio M, Häfliger S, Lindsay C, Reinmuth N, Paulus A, Papakotoulas P, Kim SW, Ferreira CG, Pasello G, Duruisseaux M, Gennatas S, Dimou A, Mehta B, Kormany W, Nduka C, Sylvester BE, Ardito-Abraham C, Wang Y, de Langen AJ."
+  }
+ },
+ {
+  "source_id": "src_fb514db1ac20",
+  "type": "publication",
+  "url": "https://doi.org/10.3389/fphar.2025.1635449",
+  "title": "Synergistic anticancer effects of camptothecin and sotorasib in &lt;i&gt;KRAS&lt;/i&gt;-mutated pancreatic ductal adenocarcinoma.",
+  "issuer": "Front Pharmacol",
+  "doc_date": "2025-07-18",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "40756996",
+   "pmcid": "PMC12314289",
+   "doi": "10.3389/fphar.2025.1635449",
+   "is_oa": true,
+   "authors": "Ramalingam PS, Chellasamy G, Hussain MS, Kodiveri Muthukaliannan G, Hussain T, Alrokayan S, Yun K, Mekala JR, Arumugam S."
+  }
+ },
+ {
+  "source_id": "src_729a19c1dd6e",
+  "type": "publication",
+  "url": "https://doi.org/10.1002/cpt.3658",
+  "title": "Oncology Dose Optimization: Tailored Approaches to Different Molecular Classes.",
+  "issuer": "Clin Pharmacol Ther",
+  "doc_date": "2025-04-18",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "40248986",
+   "pmcid": "PMC12166266",
+   "doi": "10.1002/cpt.3658",
+   "is_oa": true,
+   "authors": "Zhu J, Schroeder A, Frank S, Boetsch C, Jamois C, Kassir N, Korfi K, Punnoose E, Vaze A, Trask P, Gosai P, Fridlyand J, Li C."
+  }
+ },
+ {
+  "source_id": "src_da08c9d99e19",
+  "type": "publication",
+  "url": "https://doi.org/10.21037/tgh-24-48",
+  "title": "&lt;i&gt;KRAS&lt;/i&gt; G12C inhibitors in metastatic colorectal cancer: a tale of two targets.",
+  "issuer": "Transl Gastroenterol Hepatol",
+  "doc_date": "2024-08-29",
+  "version": null,
+  "fetched_at": "2026-09-11T11:00:19.352547Z",
+  "content_hash": "a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5",
+  "media_type": "application/json",
+  "local_path": "data/snapshots/a0e5947504a64579951d681a3b33308893c44ff000fea03fc56bbb175c1f9ec5.json",
+  "attribution_default": "author",
+  "meta": {
+   "pmid": "39503027",
+   "pmcid": "PMC11535810",
+   "doi": "10.21037/tgh-24-48",
+   "is_oa": true,
+   "authors": "Martínez-Pérez J, Valladares-Ayerbes M."
   }
  }
 ]

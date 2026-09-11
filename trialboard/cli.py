@@ -9,92 +9,69 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from trialboard.corpus.ctgov import CTGovClient
-from trialboard.corpus.epmc import EuropePMCClient, publication_source
-from trialboard.corpus.fda import FDAClient
-from trialboard.corpus.pdf import PDFDocument
-from trialboard.corpus.pubchem import PubChemClient, rdkit_check
+from trialboard.agents.evidence_scout import collect as run_collect
+from trialboard.corpus.pdf import PDFDocument, render_with_highlights
 from trialboard.corpus.snapshot import SnapshotStore
+from trialboard.graph.store import GraphStore
 
 app = typer.Typer(no_args_is_help=True, help="Trial Board — evidence-linked trial design agents")
 console = Console()
 
 
 @app.command()
-def fetch(
+def collect(
     drug: str = typer.Argument(..., help="generic name, e.g. sotorasib"),
     nct: str = typer.Option(..., "--nct", help="ClinicalTrials.gov ID"),
     mode: str = typer.Option("auto", help="snapshot|live|auto"),
     pdfs: bool = typer.Option(True, help="download FDA review/letter/label PDFs"),
-    out: Path = typer.Option(Path("data/manifests"), help="where to write the source list"),
+    db: Path = typer.Option(Path("data/db/trialboard.sqlite")),
+    out: Path = typer.Option(Path("data/manifests")),
 ):
-    """COLLECT stage, corpus only: pull registry, history, Drugs@FDA docs, label, PubChem, papers."""
-    store = SnapshotStore(mode=mode)  # type: ignore[arg-type]
-    sources = []
+    """COLLECT: pull registry, history, Drugs@FDA docs, seeds, PubChem, papers → graph + lineage."""
+    snapshots = SnapshotStore(mode=mode)  # type: ignore[arg-type]
+    graph = GraphStore(db)
+    r = run_collect(drug, nct, snapshots=snapshots, graph=graph, pdfs=pdfs, log=console.print)
 
-    ct = CTGovClient(store)
-    study, s = ct.study(nct)
-    sources.append(s)
-    hist, s = ct.history(nct)
-    sources.append(s)
-    console.print(f"[bold]{nct}[/] {s.title}: {len(hist)} registry versions")
-
-    fda = FDAClient(store)
-    appn, s = fda.drugsfda(drug)
-    sources.append(s)
-    docs = fda.application_docs(appn)
-    t = Table(title=f"Drugs@FDA {appn['application_number']} documents")
-    for col in ("date", "sub", "type", "url"):
+    t = Table(title=f"Trial lineage {nct} ({len(r.lineage_nodes)} nodes, collapsed registry)")
+    for col in ("date", "kind", "title"):
         t.add_column(col)
-    for d in docs:
-        t.add_row(d["submission_status_date"], f"{d['submission_type']}-{d['submission_number']}",
-                  d["doc_type"], d["url"][-60:])
+    for n in sorted(r.lineage_nodes, key=lambda n: (n.date or "9999-99-99").__str__()):
+        if n.kind.value == "registry_version":
+            continue
+        t.add_row(str(n.date), n.kind.value, n.title[:90])
     console.print(t)
-    if pdfs:
-        for d in docs:
-            if not d["url"].lower().endswith(".pdf"):
-                continue
-            src = fda.fetch_pdf(
-                d["url"],
-                title=f"{appn['application_number']} {d['submission_type']}-{d['submission_number']} {d['doc_type']}",
-                doc_type=d["doc_type"],
-                date_yyyymmdd=d["submission_status_date"],
-                version=f"{d['submission_type']}-{d['submission_number']}",
-            )
-            sources.append(src)
-            console.print(f"  pdf {src.type.value:11} {src.doc_date} {src.content_hash[:10]} {Path(src.local_path).stat().st_size // 1024} KB")
-
-    _, s = fda.label(drug)
-    sources.append(s)
-
-    pc = PubChemClient(store)
-    props, s = pc.compound(drug)
-    sources.append(s)
-    chk = rdkit_check(props.get("IsomericSMILES") or props["ConnectivitySMILES"], props["InChIKey"])
-    console.print(f"PubChem CID {props['CID']} MW {props['MolecularWeight']} RDKit InChIKey match: {chk['ok']} (full={chk['full_match']})")
-
-    ep = EuropePMCClient(store)
-    hits, s = ep.search(f'"{drug}" AND ({nct} OR "CodeBreaK 100" OR "dose")', page_size=25)
-    sources.append(s)
-    for h in hits:
-        sources.append(publication_source(h, s))
-    console.print(f"Europe PMC: {len(hits)} hits")
 
     out.mkdir(parents=True, exist_ok=True)
     path = out / f"sources_{drug}_{nct}.json"
-    path.write_text(json.dumps([x.model_dump(mode="json") for x in sources], ensure_ascii=False, indent=1))
-    console.print(f"[green]{len(sources)} sources → {path}[/]  (external calls this run: {store.api_calls})")
+    path.write_text(
+        json.dumps([x.model_dump(mode="json") for x in r.sources], ensure_ascii=False, indent=1)
+    )
+    console.print(f"[green]{len(r.sources)} sources → {path}[/] · external calls: {r.api_calls}")
 
 
 @app.command()
-def pdfinfo(path: Path, quote: str = typer.Option(None, help="quote to locate")):
-    """Inspect a snapshot PDF: page count, first-page preview, optional quote search."""
+def pdfinfo(
+    path: Path,
+    quote: str = typer.Option(None, help="quote to locate"),
+    png: Path = typer.Option(None, help="render first hit with highlight to this PNG"),
+):
+    """Inspect a snapshot PDF: page count, first-page preview, optional quote search + render."""
     doc = PDFDocument(path)
     console.print(f"{path.name}: {doc.n_pages} pages")
     console.print(doc.page_text(1)[:600])
     if quote:
-        for h in doc.find_quote(quote):
+        hits = doc.find_quote(quote)
+        for h in hits:
             console.print(f"  p.{h.page} exact={h.exact} bboxes={h.bboxes[:2]}")
+        if hits and png:
+            render_with_highlights(path, hits[0].page, hits[0].bboxes, png)
+            console.print(f"  rendered → {png}")
+
+
+@app.command()
+def stats(db: Path = typer.Option(Path("data/db/trialboard.sqlite"))):
+    """Row counts in the evidence graph."""
+    console.print(GraphStore(db).counts())
 
 
 if __name__ == "__main__":

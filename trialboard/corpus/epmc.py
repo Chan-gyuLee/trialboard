@@ -61,7 +61,11 @@ class EuropePMCClient:
 def publication_source(rec: dict[str, Any], search_src: Source) -> Source:
     """Wrap one search hit as a metadata-only Source (no full text yet)."""
     doi = rec.get("doi")
-    url = f"https://doi.org/{doi}" if doi else f"https://europepmc.org/article/{rec.get('source')}/{rec.get('id')}"
+    url = (
+        f"https://doi.org/{doi}"
+        if doi
+        else f"https://europepmc.org/article/{rec.get('source')}/{rec.get('id')}"
+    )
     d = rec.get("firstPublicationDate")
     return Source(
         source_id=short_id("src", url),
