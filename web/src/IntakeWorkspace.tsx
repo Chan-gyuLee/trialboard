@@ -31,7 +31,7 @@ export function Intake({ onEvidence }: { onEvidence: () => void }) {
   }
   async function openFile(file?: File) {
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".csv")) { setError("현재는 양식에 맞춘 UTF-8 CSV만 지원합니다. PDF·HWPX 문서 읽기는 아직 지원하지 않습니다."); return; }
+    if (!file.name.toLowerCase().endsWith(".csv")) { setError("이 입력은 UTF-8 CSV용입니다. PDF는 위쪽 ‘PDF 원문 확인’에서 열어 주세요. HWPX는 아직 지원하지 않습니다."); return; }
     if (file.size > MAX_BYTES) { setError("256 KB 이하의 CSV를 선택해 주세요."); return; }
     const ticket = ++sequence.current; setBusy(true); setError("");
     try {
@@ -62,7 +62,7 @@ export function Intake({ onEvidence }: { onEvidence: () => void }) {
       <div className={`file-drop ${dragging ? "dragging" : ""}`} onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={e => { e.preventDefault(); setDragging(false); if (e.dataTransfer.files.length !== 1) { setError("CSV 파일 한 개를 선택해 주세요."); return; } void openFile(e.dataTransfer.files[0]); }}>
         {table ? <div className="loaded-file"><FileSpreadsheet size={26} strokeWidth={1.5} /><div><strong>{table.name}</strong><p>{table.rows.length}개 행 · {new Set(table.rows.map(r => r.dose)).size}개 용량 · {table.origin === "synthetic_example" ? "합성 예제" : "사용자 파일 / 진위 미검증"}</p></div><Button aria-label="현재 자료 제거" onClick={clear} disabled={busy}><X size={17} /></Button></div> : <><span className="upload-symbol"><Upload size={25} strokeWidth={1.5} /></span><h3>용량별 요약표를 가져오세요</h3><p>파일을 여기에 놓거나 선택하세요.</p></>}
         <div className="file-actions"><Button variant={table ? "outlined" : "contained"} component="label" disabled={busy} startIcon={busy ? <CircularProgress size={15} /> : <FolderOpen size={16} />}>{table ? "파일 바꾸기" : "CSV 선택"}<input className="file-input" type="file" accept=".csv,text/csv" onChange={e => { void openFile(e.target.files?.[0]); e.target.value = ""; }} /></Button>{!table && <Button variant="outlined" onClick={() => void accept(EXAMPLE, "합성_용량비교_예제.csv", "synthetic_example")} disabled={busy}>예제로 시작</Button>}</div>
-        <span className="file-format">UTF-8 CSV · 최대 256 KB / 500행 · PDF·HWPX 미지원</span>
+        <span className="file-format">UTF-8 CSV · 최대 256 KB / 500행 · PDF는 위쪽 ‘PDF 원문 확인’에서 별도 검토</span>
       </div>
       <div aria-live="polite">{error && <Alert severity="error" className="intake-error">{error}{table && " 기존에 읽은 자료는 유지됩니다."}</Alert>}</div>
       <div className="privacy-note"><span>파일은 이 탭 안에서만 처리하며 서버에 보내거나 저장하지 않습니다.</span><span>새로고침하면 사라집니다. 환자별 정보·식별정보는 넣지 마세요.</span></div>

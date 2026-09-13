@@ -5,7 +5,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Alert, Button, Checkbox,
 import { ArrowDownToLine, ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronDown, ChevronRight, FileCheck2, FlaskConical, History, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { Evidence, type Packet } from "./Evidence";
 import { theme } from "./theme";
-import { Intake } from "./IntakeWorkspace";
+import { SourceWorkspace as Intake } from "./SourceWorkspace";
 import { delta, downloadText, draftFrom, executeReview, makeInput, modes, percent, validateDraft, type Draft, type Execution, type Mode, type Report, type Simulation } from "./review";
 import { installEvidenceTools, type ModelContext } from "./webmcp";
 import "./style.css";

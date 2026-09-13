@@ -1,0 +1,27 @@
+.field-review { padding: 18px; display: grid; gap: 18px; min-width: 0; font-size: 16px; line-height: 1.65; }
+.field-title, .field-toolbar, .field-add { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.field-title { justify-content: space-between; align-items: start; }
+.field-title h2 { margin: 0; font-size: 20px; letter-spacing: -.03em; }
+.field-title p { margin: 5px 0 0; font-size: 14px; color: #596779; }
+.field-help, .field-origin, .field-selected, .field-original-value { font-size: 14px; color: #526276; overflow-wrap: anywhere; }
+.field-help summary, .field-editor summary { cursor: pointer; color: #245ab4; padding: 6px 0; }
+.field-help li { margin: 8px 0; overflow-wrap: anywhere; }
+.field-add .MuiTextField-root { flex: 1; min-width: 205px; }
+.field-empty { padding: 18px; background: #f4f7fb; border-left: 3px solid #9cbbeb; }
+.field-empty h3 { font-size: 17px; margin-top: 0; }
+.field-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid #dbe2e8; border-radius: 8px; overflow: hidden; }
+.field-list button { border: 0; border-bottom: 1px solid #e4e9ef; border-right: 1px solid #e4e9ef; background: white; color: #243244; text-align: left; padding: 12px; font: inherit; font-size: 14px; cursor: pointer; min-width: 0; }
+.field-list button[aria-pressed=true] { background: #eef4ff; box-shadow: inset 3px 0 #245ab4; }
+.field-list button:focus-visible { outline: 2px solid #245ab4; outline-offset: -3px; }
+.field-list button > span { display: flex; justify-content: space-between; gap: 8px; }
+.field-list small { font-size: 12px; color: #617080; }
+.field-list strong { display: block; margin-top: 6px; font-weight: 500; overflow-wrap: anywhere; }
+.field-editor { display: grid; gap: 14px; border-top: 2px solid #dbe2e8; padding-top: 18px; }
+.field-editor h3, .field-editor p { margin: 0; }
+.field-editor .MuiFormControlLabel-label { font-size: 14px; line-height: 1.6; }
+.field-citation { background: #f6f8fb; padding: 14px; border-radius: 6px; }
+.field-citation p { font-size: 14px; color: #596779; }
+.field-citation blockquote { margin: 8px 0; font-size: 16px; overflow-wrap: anywhere; }
+.field-editor li { font-size: 14px; margin: 10px 0; overflow-wrap: anywhere; }
+.field-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+@media (max-width: 600px) { .field-review { padding: 14px; } .field-list { grid-template-columns: 1fr; } }

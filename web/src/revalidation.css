@@ -1,0 +1,12 @@
+.revalidation { display: grid; gap: 1rem; border-top: 2px solid #dbe2e8; padding-top: 1.25rem; min-width: 0; }
+.revalidation-context, .revalidation-empty { margin: 0; font-size: 1rem; overflow-wrap: anywhere; }
+.revalidation-counts { display: flex; flex-wrap: wrap; gap: .5rem; }
+.revalidation-meta { font-size: .875rem; color: #526276; overflow-wrap: anywhere; }
+.revalidation .MuiTab-root { font-size: .875rem; min-width: 5rem; }
+.revalidation-findings { max-height: 30rem; overflow: auto; border: 1px solid #dbe2e8; border-radius: .5rem; padding: 0 1rem; }
+.revalidation-findings:focus-visible { outline: 2px solid #245ab4; outline-offset: 2px; }
+.revalidation-findings article { padding: 1rem 0; border-bottom: 1px solid #e4e9ef; overflow-wrap: anywhere; }
+.revalidation-findings article:last-child { border-bottom: 0; }
+.revalidation-findings h3 { font-size: 1rem; margin: 0 0 .5rem; font-weight: 600; }
+.revalidation-findings p { font-size: .875rem; margin: .5rem 0; }
+.revalidation-findings small { color: #617080; font-size: .75rem; }
