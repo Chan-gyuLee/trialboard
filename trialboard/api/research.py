@@ -44,6 +44,25 @@ def research_router(path: Path, model_slot: BoundedSemaphore, provider_factory=C
             raise HTTPException(404, "RESEARCH_NOT_FOUND")
         return store.search_sources(run_id, q)
 
+    @router.post("/runs/{run_id}/recover")
+    async def recover(run_id: str, request: Request):
+        if request.headers.get("origin") not in DEV_ORIGINS:
+            raise HTTPException(403, "LOCAL_BROWSER_ORIGIN_REQUIRED")
+        if running:
+            raise HTTPException(409, "RESEARCH_BUSY")
+        try:
+            body = await request.json()
+        except (ValueError, UnicodeDecodeError):
+            raise HTTPException(422, "RECOVERY_CONSENT_REQUIRED") from None
+        if not isinstance(body, dict) or body != {"consent": True} or body["consent"] is not True:
+            raise HTTPException(422, "RECOVERY_CONSENT_REQUIRED")
+        try:
+            run = store.recover_run(run_id)
+        except ValueError as error:
+            code = str(error)
+            raise HTTPException(404 if code == "RESEARCH_NOT_FOUND" else 409, code) from None
+        return {"collection": run.model_dump(), "changes": store.previous_changes(run)}
+
     @router.get("/runs/{run_id}/curation")
     async def notes(run_id: str, source_id: str | None = None):
         if not store.get_run(run_id):

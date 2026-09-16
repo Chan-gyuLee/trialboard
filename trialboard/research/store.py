@@ -132,6 +132,14 @@ class ResearchStore(EvidenceStore):
         con = self.connect()
         try:
             with con:
+                con.execute("BEGIN IMMEDIATE")
+                previous = con.execute(
+                    "SELECT data FROM research_runs WHERE id=?", (run.id,)
+                ).fetchone()
+                if previous and any(
+                    e.get("stage") == "RECOVERED" for e in json.loads(previous[0])["events"]
+                ):
+                    raise ValueError("RECOVERED_RUN_IS_CLOSED")
                 con.execute(
                     """INSERT INTO research_runs VALUES (?, ?, ?, ?)
                     ON CONFLICT(id) DO UPDATE SET data=excluded.data""",
@@ -169,6 +177,53 @@ class ResearchStore(EvidenceStore):
         try:
             row = con.execute("SELECT data FROM research_runs WHERE id=?", (run_id,)).fetchone()
             return Collection.model_validate_json(row[0]) if row else None
+        finally:
+            con.close()
+
+    def recover_run(self, run_id: str, *, now: datetime | None = None) -> Collection:
+        """Explicitly close an expired run; preserve partial data and fence late writers.
+
+        Not process termination/resumption. The API job budget is 240 s. Require
+        300 s without a stored event as well as 300 s since creation, so another
+        local worker with recent activity cannot be labelled interrupted.
+        """
+        now = now or datetime.now(UTC)
+        con = self.connect()
+        try:
+            with con:
+                con.execute("BEGIN IMMEDIATE")
+                row = con.execute("SELECT data FROM research_runs WHERE id=?", (run_id,)).fetchone()
+                if not row:
+                    raise ValueError("RESEARCH_NOT_FOUND")
+                run = Collection.model_validate_json(row[0])
+                if any(e.get("stage") == "RECOVERED" for e in run.events):
+                    return run
+                if run.status != "RUNNING":
+                    raise ValueError("RUN_NOT_RECOVERABLE")
+                elapsed = (now - datetime.fromisoformat(run.created_at)).total_seconds()
+                last_ms = max((e.get("elapsed_ms", 0) for e in run.events), default=0)
+                if elapsed < 300 or elapsed - last_ms / 1000 < 300:
+                    raise ValueError("RUN_MAY_BE_ACTIVE")
+                run.status = "CANCELLED"
+                message = (
+                    "갱신이 멈춘 실행을 중단 기록으로 정리했습니다. "
+                    "부분 자료는 보존했고 새 검색·모델 호출은 하지 않았습니다."
+                )
+                run.notices.append(message)
+                run.events.append(
+                    {
+                        "run_id": run.id,
+                        "sequence": len(run.events) + 1,
+                        "stage": "RECOVERED",
+                        "elapsed_ms": round(elapsed * 1000),
+                        "message": message,
+                        "recovered_at": now.isoformat(),
+                    }
+                )
+                con.execute(
+                    "UPDATE research_runs SET data=? WHERE id=?", (run.model_dump_json(), run.id)
+                )
+                return run
         finally:
             con.close()
 
