@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Tab, Tabs, TextField } from "@mui/material";
 import { ArrowDownToLine, FileInput, Plus, Trash2 } from "lucide-react";
-import { canonical, type FieldReview } from "./field-review";
+import { canonical, type FieldReview, type FieldName } from "./field-review";
+import type {ScoutContext} from "./evidence-scout";
+import EvidenceScopePanel from "./EvidenceScopePanel";
+import {evidenceScope,scopeMarkdown} from "./evidence-scope";
 import type { PdfSource } from "./pdf-contract";
 import { downloadText } from "./review";
 import { readResult, reviewKey, RESULT_BYTES } from "./revalidation-result";
@@ -21,8 +24,9 @@ import type {Capture,DesignCheckpoint} from "./project-checkpoint";
 const pct = (p: number) => `${(100 * p).toFixed(1)}%`;
 const delta = (p: number) => `${p >= 0 ? "+" : ""}${(100 * p).toFixed(1)}%p`;
 type FileKind = "brief" | "result" | "packet" | "rules";
-export default function DesignPanel({ review, source, pdf, disabled, hasDraft, onSelectRow, initialSession, originalAgentRaw, initialDraft, checkpoint, onCheckpointBusy }: {
-  review: FieldReview; source: PdfSource; disabled: boolean; hasDraft: boolean; onSelectRow: (id: string) => void;
+export default function DesignPanel({ review, source, pdf, disabled, hasDraft, onSelectRow, initialSession, originalAgentRaw, initialDraft, checkpoint, onCheckpointBusy, context }: {
+  review: FieldReview; source: PdfSource; disabled: boolean; hasDraft: boolean; onSelectRow: (id: string,field?:FieldName) => void;
+  context?:ScoutContext;
   pdf: File | null;
   initialSession?: MeetingSession | null;
   originalAgentRaw?: string|null;
@@ -125,7 +129,7 @@ export default function DesignPanel({ review, source, pdf, disabled, hasDraft, o
   }
   function downloadMeeting(json: boolean) {
     if (!current || !result || !notes || noteDirty || locked) return;
-    try { downloadText(json ? "trialboard-meeting.json" : "trialboard-meeting.md", json ? packetJson(result, notes) : packetMarkdown(result, notes), json ? "application/json" : "text/markdown;charset=utf-8"); }
+    try { downloadText(json ? "trialboard-meeting.json" : "trialboard-meeting.md", json ? packetJson(result, notes) : packetMarkdown(result, notes)+"\n\n"+scopeMarkdown(evidenceScope(review,source,context,result.brief.arms.flatMap(a=>a.observation_ids))), json ? "application/json" : "text/markdown;charset=utf-8"); }
     catch (e) { setError(e instanceof Error ? e.message : "내보내지 못했습니다."); }
   }
   const fileButton = (kind: FileKind, label: string) => <Button component="label" variant="outlined" startIcon={<FileInput size={16} />} disabled={locked}>{label}<input className="file-input" type="file" accept=".json,application/json" onChange={e => { void load(e.target.files?.[0], kind); e.target.value = ""; }} /></Button>;
@@ -144,6 +148,7 @@ export default function DesignPanel({ review, source, pdf, disabled, hasDraft, o
     {result && !current && <Alert severity="warning">입력 또는 검토 이력이 바뀌었습니다. 이전 계산·회의 메모는 보관 중이지만 현재 결과로 표시하거나 내보내지 않습니다. 입력을 되돌리거나 새로 계산하세요.</Alert>}
     <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" aria-label="설계 검토 단계"><Tab value="input" label="설계 입력" /><Tab value="comparison" label="결과 비교" /><Tab value="meeting" label="KOL 회의" /></Tabs>
     <div hidden={tab !== "input"}>
+      <EvidenceScopePanel review={review} source={source} context={context} selectedIds={draft.arms.flatMap(a=>a.observation_ids)} disabled={locked} onSelect={onSelectRow}/>
       <section className="design-section"><div className="design-section-heading"><h3>01 · 비교할 질문과 원문 근거</h3>{fileButton("rules", "재검증 결과에서 질문 연결")}</div>
         {!draft.arms.length && originalAgentRaw && <div className="design-toolbar"><Button variant="contained" disabled={locked} onClick={()=>void prepareHandoff()}>이 검토의 질문·용량군 연결</Button>{isMocSource(source)&&<Button variant="outlined" disabled={locked} onClick={()=>void prepareHandoff(true)}>이 검토로 MOC 설계 가정 준비</Button>}</div>}
         {input("원래 추출·재검증 때 지정한 질문과 동일하게 입력", draft.question, question => change({ ...draft, question }))}

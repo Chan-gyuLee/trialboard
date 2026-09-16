@@ -8,13 +8,15 @@ export const FIELD_LABELS = {
 export type FieldName = keyof typeof FIELD_LABELS;
 export const FIELD_NAMES = Object.keys(FIELD_LABELS) as FieldName[];
 export type Citation = { spanId: string; page: number; quote: string };
-export type Value = { value: string | null; citation: Citation | null };
+export const SUPPORT_ROLES = {header:'표 머리글',unit:'단위',footnote:'각주',context:'주변 문맥'} as const;
+export type SupportingCitation = Citation & {role:keyof typeof SUPPORT_ROLES};
+export type Value = { value: string | null; citation: Citation | null; supporting?:SupportingCitation[] };
 export type Decision = "unreviewed" | "confirmed" | "corrected" | "held";
 export type Revision = { revision: number; decision: Exclude<Decision, "unreviewed">; before: Value; after: Value; reason: string; at: string };
 export type ReviewField = { original: Value; current: Value; decision: Decision; history: Revision[] };
 export type ReviewRow = { id: string; origin: "manual" | "imported_agent_report"; valueKind: "event_count" | "reported_percentage"; fields: Record<FieldName, ReviewField> };
 export type FieldReview = {
-  schemaVersion: "pdf-field-review/1"; sourceDigest: string;
+  schemaVersion: "pdf-field-review/1" | "pdf-field-review/2"; sourceDigest: string;
   origin: { kind: "manual" | "imported_agent_report"; runId: string | null; reportDigest: string | null; mode: string | null };
   rows: ReviewRow[]; modelFindings: string[];
   /** Preserve historical export identity (including a renamed PDF) for result matching. Not an authentication claim. */
@@ -88,6 +90,20 @@ export function locate(source: PdfSource, citation: Citation | null): PdfSpan | 
   const span = source.pages[citation.page - 1]?.spans.find(s => s.id === citation.spanId);
   return span && span.page === citation.page && span.text.includes(citation.quote) ? span : null;
 }
+/** Same-page contextual links only. They never authorize a new value or unit. */
+export function validateSupporting(source:PdfSource,value:Value):void {
+  if(value.supporting===undefined)return;
+  if(!Array.isArray(value.supporting)||!value.supporting.length||value.supporting.length>4||!value.value||!value.citation)fail('보조 근거는 기본 근거와 함께 1–4개 연결하세요.');
+  const seen=new Set([value.citation.spanId]);
+  for(const c of value.supporting){
+    if(!Object.hasOwn(SUPPORT_ROLES,c.role)||seen.has(c.spanId)||c.page!==value.citation.page||c.quote.length>2000||!locate(source,c)?.box)fail('보조 근거는 같은 페이지의 서로 다른 원문 문구여야 합니다.');
+    seen.add(c.spanId);
+  }
+}
+export function attachSupporting(source:PdfSource,value:Value,span:PdfSpan,role:SupportingCitation['role']):Value {
+  const next={...clone(value),supporting:[...(value.supporting??[]),{spanId:span.id,page:span.page,quote:span.text,role}]};
+  validateSupporting(source,next);return next;
+}
 export async function importAgentReport(raw: string, source: PdfSource): Promise<FieldReview> {
   const report = object(strictJson(raw)), input = object(report.input);
   if (report.engine_version !== "bounded-evidence-agent/3.2" || input.provenance !== "user_pdf_export_unverified") fail("현재 PDF와 연결된 에이전트 3.2 결과만 지원합니다. 웹 발췌·가상자료 결과는 연결할 수 없습니다.");
@@ -148,10 +164,12 @@ export function decide(review: FieldReview, source: PdfSource, rowId: string, na
   }
   field.history.push({ revision: field.history.length + 1, decision: action, before: clone(field.current), after: clone(after), reason: reason.trim(), at: now.toISOString() });
   field.current = after; field.decision = action;
+  if(after.supporting?.length)next.schemaVersion='pdf-field-review/2';
   return next;
 }
 /** Literal source and numeric-shape checks, not clinical interpretation or reviewer authentication. */
 export function validateCheckedValue(source: PdfSource, kind: ReviewRow["valueKind"], name: FieldName, after: Value): void {
+  validateSupporting(source,after);
   if (!locate(source, after.citation)?.box || !after.value?.trim() || after.value.length > 2000 || !after.citation?.quote.includes(after.value)) fail("기록된 확인값과 현재 PDF 근거가 일치하지 않습니다.");
   if (after.citation.quote.length > 2000) fail("근거 인용문은 2,000자 이내만 지원합니다.");
   if (name === "events" && kind === "reported_percentage") fail("비율 자료에서 사건 수를 채우거나 역산할 수 없습니다. 미보고로 두세요.");
@@ -162,6 +180,7 @@ export function validateCheckedValue(source: PdfSource, kind: ReviewRow["valueKi
 export function exportReview(review: FieldReview, source: PdfSource) {
   if (review.sourceDigest !== source.sha256) fail();
   for (const row of review.rows) for (const field of Object.values(row.fields)) {
+    validateSupporting(source,field.current);
     if (field.current.citation && !locate(source, field.current.citation)) fail("현재 PDF와 맞지 않는 근거가 있습니다.");
   }
   const { exportMetadata, ...content } = clone(review);
@@ -178,6 +197,7 @@ export function reviewMarkdown(review: FieldReview, source: PdfSource): string {
       const f = row.fields[name]; return [`- ${FIELD_LABELS[name]}: ${escape(f.current.value ?? "미보고")} · ${f.decision}`,
         `  원래 값: ${escape(f.original.value ?? "미보고")}`,
         `  근거: ${f.current.citation ? `PDF p.${f.current.citation.page} · ${escape(f.current.citation.spanId)} · ${escape(f.current.citation.quote)}` : "없음"}`,
+        ...(f.current.supporting??[]).map(c=>`  보조 근거 (${SUPPORT_ROLES[c.role]}): PDF p.${c.page} · ${escape(c.spanId)} · ${escape(c.quote)} · 의미 관계 미인증`),
         ...f.history.map(h => `  이력 ${h.revision}: ${h.decision} · ${escape(h.reason)} · ${h.at}`)]; }), ""]),
     "## 한계", "", ...packet.limitations.map(l => `- ${l}`), ""].join("\n");
 }

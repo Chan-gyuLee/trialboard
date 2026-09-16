@@ -25,7 +25,7 @@ function integer(v: unknown, low: number, high: number): number {
 
 export async function readRecritique(raw: string, review: FieldReview, source: PdfSource): Promise<RecritiqueResult> {
   const r = obj(strictJson(raw, RESULT_BYTES, 500000));
-  if (r.schema_version !== "field-recritique/1" || r.prompt_version !== "human-review-recritique/1"
+  if (r.schema_version !== "field-recritique/1" || !["human-review-recritique/1","human-review-recritique/2"].includes(String(r.prompt_version))
       || r.clinical_approval !== false || r.comparison_status !== "NOT_APPROVED"
       || r.reviewer_identity !== "UNAUTHENTICATED_USER" || r.user_values_modified !== false
       || (r.execution_mode !== "CODEX_CHATGPT" && r.execution_mode !== "SCRIPTED_TEST_DOUBLE")) fail();
@@ -33,8 +33,11 @@ export async function readRecritique(raw: string, review: FieldReview, source: P
   if (r.source_digest !== source.sha256 || r.review_digest !== nested.review_digest
       || hash(r.review_content_digest) !== await digest(canonical(nested.review))) fail("현재 PDF·검토 버전과 다른 AI 결과입니다. 현재 이력으로 다시 실행하세요.");
   hash(r.prompt_digest);
-  if (hash(r.request_digest) !== await digest(canonical({ source: nested.input,
-    extraction: { observations: nested.accepted }, deterministic_findings: nested.findings }))) fail("AI 요청 내용의 hash가 일치하지 않습니다.");
+  const payload:Record<string,unknown>={source:nested.input,extraction:{observations:nested.accepted},deterministic_findings:nested.findings};
+  const acceptedIds=new Set(arr(nested.accepted,12).map(v=>str(obj(v).id,80)));
+  const links=review.rows.filter(row=>acceptedIds.has(row.id)).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0).flatMap(row=>Object.entries(row.fields).sort(([a],[b])=>a<b?-1:a>b?1:0).filter(([,f])=>['confirmed','corrected'].includes(f.decision)&&f.current.supporting?.length).map(([field,f])=>({observation_id:row.id,field,citations:f.current.supporting})));
+  if(links.length){if(r.prompt_version!=='human-review-recritique/2')fail();payload.field_context_citations=links;}
+  if (hash(r.request_digest) !== await digest(canonical(payload))) fail("AI 요청 내용의 hash가 일치하지 않습니다.");
   const candidateSet = new Set(rules.acceptedIds);
   function ids(v: unknown, allowed: Set<string>, unique = true): string[] {
     const list = arr(v, 12).map(v => str(v, 80));

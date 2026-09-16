@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from "react";
-import {Alert,Button,Checkbox,Chip,CircularProgress,FormControlLabel,TextField} from "@mui/material";
+import {Alert,Button,Checkbox,Chip,CircularProgress,Dialog,DialogTitle,DialogContent,DialogActions,FormControlLabel,TextField} from "@mui/material";
 import {ArrowRight,BookOpen,Database,ExternalLink} from "lucide-react";
 import {downloadText} from "./review";
 import {basisLabel,researchFindingWarnings,readResearchResult,readResearchStream,researchMarkdown,type Collection,type ResearchContext,type ResearchEvent,type ResearchResult,type ResearchSource} from "./research";
@@ -7,18 +7,21 @@ import type {ScoutContext} from "./evidence-scout";
 import ResearchActivity from "./ResearchActivity";
 import ResearchCuration from "./ResearchCuration";
 import ResearchLinkage from "./ResearchLinkage";
+import type {ResumedResearch} from "./research-resume";
 import "./research.css";
 
-export default function ResearchPanel({context,onIntake,onBusy,locked,onRestoreContext}:{context:ResearchContext;onIntake:(c:ScoutContext)=>void;onBusy:(busy:boolean)=>void;locked:boolean;onRestoreContext:(c:ResearchContext)=>Promise<void>}){
+export default function ResearchPanel({context,onIntake,onBusy,locked,onRestoreContext,resumedSelection}:{context:ResearchContext;onIntake:(c:ScoutContext)=>void;onBusy:(busy:boolean)=>void;locked:boolean;onRestoreContext:(c:ResearchContext)=>Promise<void>;resumedSelection?:ResumedResearch}){
  const [consent,setConsent]=useState(false),[model,setModel]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState("");
  const [events,setEvents]=useState<ResearchEvent[]>([]),[result,setResult]=useState<ResearchResult|null>(null),[sourceId,setSourceId]=useState("");
  const [history,setHistory]=useState<Pick<Collection,"id"|"request"|"created_at"|"status">[]>([]),[filter,setFilter]=useState("ALL"),[seconds,setSeconds]=useState(0);
  const controller=useRef<AbortController|null>(null);
  const [view,setView]=useState("BRIEF");
+ const [recoverDialog,setRecoverDialog]=useState(false),[recoverBusy,setRecoverBusy]=useState(false);
  const detailRef=useRef<HTMLElement>(null);
  const pendingFocus=useRef(false);
  useEffect(()=>{if(pendingFocus.current){detailRef.current?.scrollIntoView({block:"center",behavior:"smooth"});pendingFocus.current=false;}},[view,sourceId]);
  function inspectSource(id:string){pendingFocus.current=true;setFilter("ALL");setView("LIBRARY");setSourceId(id);}
+ useEffect(()=>{if(resumedSelection){setResult(resumedSelection.result);inspectSource(resumedSelection.sourceId);setConsent(false);setModel(false);setError("");}},[resumedSelection]);
  const [dbQuery,setDbQuery]=useState(""),[dbHits,setDbHits]=useState<{source_id:string;title:string;snippet:string}[]|null>(null),[dbBusy,setDbBusy]=useState(false);
  const collectionId=result?.collection.id;
  useEffect(()=>{setDbQuery("");setDbHits(null);setFilter("ALL");},[collectionId]);
@@ -37,6 +40,7 @@ export default function ResearchPanel({context,onIntake,onBusy,locked,onRestoreC
  async function open(id:string,restoreContext=false){const r=await fetch(`/api/research/runs/${encodeURIComponent(id)}`,{signal:AbortSignal.timeout(5000)});if(!r.ok)throw Error("조사 기록을 열지 못했습니다.");const parsed=readResearchResult(await r.text());if(restoreContext)await onRestoreContext(parsed.collection.request);setResult(parsed);setView(parsed.collection.review?"BRIEF":"LIBRARY");setSourceId(parsed.collection.review?.findings[0]?.source_id??parsed.collection.sources[0]?.id??"");return parsed;}
  async function run(){if(controller.current || !consent || !context.asset.trim() || !context.indication)return;const c=new AbortController();controller.current=c;setBusy(true);setError("");setEvents([]);setResult(null);setSeconds(0);const start=performance.now(),timer=setInterval(()=>setSeconds(Math.floor((performance.now()-start)/1000)),500),timeout=setTimeout(()=>c.abort(),250000);try{const r=await fetch("/api/research/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...context,public_consent:true,model_consent:model}),signal:c.signal});const id=await readResearchStream(r,e=>setEvents(es=>[...es,e]));await open(id);}catch(e){setError(c.signal.aborted?"실행 대기를 중단했습니다. 최근 조사 기록에서 부분 수집을 다시 열 수 있습니다.":e instanceof Error?e.message:"조사 실패");}finally{clearInterval(timer);clearTimeout(timeout);controller.current=null;setBusy(false);void refresh();}}
  const collection=result?.collection,selected=collection?.sources.find(s=>s.id===sourceId);
+ async function recover(){if(!collection||busy||recoverBusy)return;setRecoverBusy(true);setError("");try{const response=await fetch(`/api/research/runs/${encodeURIComponent(collection.id)}/recover`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({consent:true}),signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error(response.status===409?"최근 5분 안에 갱신됐거나 다른 실행이 진행 중입니다. 기록을 새로 열어 확인하세요.":"중단 기록을 정리하지 못했습니다. 기존 자료는 유지됩니다.");const parsed=readResearchResult(await response.text());if(parsed.collection.id!==collection.id)throw Error("복구 대상 실행이 다릅니다.");setResult(parsed);setRecoverDialog(false);void refresh();}catch(e){setError(e instanceof Error?e.message:"중단 기록 정리 실패");}finally{setRecoverBusy(false);}}
  const plan=collection?.plan??events.find(e=>e.stage==="AI_PLAN_READY")?.plan;
  const visible=collection?.sources.filter(s=>filter==="ALL" || s.kind===filter || filter==="DOCUMENT"&&["PROTOCOL","SAP","REGULATORY"].includes(s.kind))??[];
  function intake(s:ResearchSource){if(!collection)return;onIntake({asset:collection.request.asset,study:collection.request.nct_id,indication:collection.request.indication,question:"용량별 반응과 이상반응을 같은 조건에서 비교할 수 있는가?",receiptId:collection.request.search_id,document:{runId:collection.id,sourceId:s.id,title:s.title}});}
@@ -48,6 +52,8 @@ export default function ResearchPanel({context,onIntake,onBusy,locked,onRestoreC
 
  {collection&&<><div className="research-summary"><div><strong>{collection.sources.length}</strong><span>연결된 근거</span></div><div><strong>{collection.sources.filter(s=>s.kind==="PAPER").length}</strong><span>논문 · 초록/서지</span></div><div><strong>{collection.sources.filter(s=>s.pdf_url).length}</strong><span>공개 PDF 연결</span></div><div><strong>{collection.calls.length}</strong><span>모델 요청 기록</span></div></div>
  <Alert severity={collection.status==="COMPLETE"?"info":"warning"}>{collection.status} · {new Date(collection.created_at).toLocaleString("ko-KR")} · {collection.request.asset}/{collection.request.nct_id}. 수집 완료는 임상 근거 검증 완료가 아닙니다.</Alert>
+ {collection.status==="RUNNING"&&!busy&&<Alert severity="warning" action={<Button disabled={recoverBusy||locked} onClick={()=>setRecoverDialog(true)}>중단 기록 정리</Button>}>저장 당시 실행 중이던 기록입니다. 현재도 실행 중이라는 뜻은 아닙니다. 서버 종료로 멈췄다면 마지막 갱신 5분 후 중단으로 정리할 수 있습니다.</Alert>}
+ <Dialog open={recoverDialog} onClose={()=>!recoverBusy&&setRecoverDialog(false)}><DialogTitle>갱신이 멈춘 실행을 정리할까요?</DialogTitle><DialogContent>이전 자료·인용·모델 요청 기록은 보존하고 상태만 중단으로 정리합니다. 실행을 재개하거나 프로세스를 종료하지 않으며 모델을 호출하지 않습니다. 다시 조사하려면 별도로 실행하세요.</DialogContent><DialogActions><Button disabled={recoverBusy} onClick={()=>setRecoverDialog(false)}>현재 기록 유지</Button><Button disabled={recoverBusy||busy} onClick={()=>void recover()}>확인하고 중단으로 정리</Button></DialogActions></Dialog>
  {collection.execution_mode==="SCRIPTED_TEST_DOUBLE"&&<Alert severity="warning">MOC · 합성 테스트 모델 결과입니다. 실제 AI 검토가 아닙니다.</Alert>}
  <div className="research-tabs" role="group" aria-label="조사 결과 보기">{[["BRIEF","검토 브리핑"],["LINKAGE","시험·코호트 연결"],["LIBRARY","근거 DB"],["TRACE","조사 기록"]].map(([id,label])=><Button key={id} variant={view===id?"contained":"text"} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</Button>)}</div>
  {view==="LINKAGE"&&<ResearchLinkage key={collection.id} collection={collection} onInspect={inspectSource}/>}

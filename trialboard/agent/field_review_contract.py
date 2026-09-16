@@ -17,14 +17,29 @@ class Citation(Contract):
     quote: Text
 
 
+class SupportingCitation(Citation):
+    role: Literal["header", "unit", "footnote", "context"]
+
+
 class Value(Contract):
     value: Text | None
     citation: Citation | None
+    supporting: list[SupportingCitation] = Field(
+        default_factory=list, max_length=4, exclude_if=lambda v: not v
+    )
 
     @model_validator(mode="after")
     def missing(self):
         if self.value is None and self.citation is not None:
             raise ValueError("MISSING_VALUE_WITH_CITATION")
+        if "supporting" in self.model_fields_set:
+            if not self.supporting or not self.value or not self.citation:
+                raise ValueError("SUPPORT_WITHOUT_PRIMARY")
+            ids = [self.citation.spanId, *(c.spanId for c in self.supporting)]
+            if len(ids) != len(set(ids)) or any(
+                c.page != self.citation.page for c in self.supporting
+            ):
+                raise ValueError("SUPPORT_PAGE_OR_DUPLICATE")
         return self
 
 
@@ -106,7 +121,7 @@ class Origin(Contract):
 
 
 class ReviewPacket(Contract):
-    schemaVersion: Literal["pdf-field-review/1"]
+    schemaVersion: Literal["pdf-field-review/1", "pdf-field-review/2"]
     sourceDigest: Digest
     origin: Origin
     rows: list[ReviewRow] = Field(max_length=12)
@@ -122,6 +137,13 @@ class ReviewPacket(Contract):
     def consistent(self):
         if self.persisted or self.clinicalApproval:
             raise ValueError("UNSUPPORTED_TRUST_CLAIM")
+        if self.schemaVersion == "pdf-field-review/1":
+            for row in self.rows:
+                for field in row.fields.values():
+                    values = [field.original, field.current]
+                    values += [v for h in field.history for v in (h.before, h.after)]
+                    if any(v.supporting for v in values):
+                        raise ValueError("SUPPORT_REQUIRES_REVIEW_V2")
         if len({r.id for r in self.rows}) != len(self.rows):
             raise ValueError("DUPLICATE_REVIEW_ROW")
         if self.origin.kind == "manual" and any(r.origin != "manual" for r in self.rows):

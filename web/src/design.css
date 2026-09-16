@@ -1,10 +1,12 @@
 .design-workspace { color: #243244; max-width: 1160px; margin: auto; }
+.design-workspace > .MuiAlert-root {margin-block:16px;}
+.design-workspace > .MuiAlert-root + .MuiButton-root {margin-top:4px;}
 .design-heading, .design-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .design-heading { padding: 12px 0 18px; }
 .design-heading h2 { font-size: 25px; font-weight: 600; letter-spacing: -.7px; margin: 8px 0; }
 .design-heading p, .design-help { color: #617080; font-size: 13px; line-height: 1.8; }
 .design-steps { display: flex; gap: 10px 24px; flex-wrap: wrap; padding: 16px 0; margin-bottom: 16px; border-block: 1px solid #e4e9ef; color: #52677e; font-size: 12px; }
-.design-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0; }
+.design-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 16px 0; }
 .design-section { padding: 24px 0; border-bottom: 1px solid #e4e9ef; display: grid; gap: 18px; }
 .design-section h3 { font-size: 17px; font-weight: 600; margin: 0; }
 .design-section h4 { font-size: 14px; margin: 0; line-height: 1.6; overflow-wrap: anywhere; }

@@ -16,6 +16,7 @@ from trialboard.agent.clinical import metric_identity
 from trialboard.agent.models import AgentInput, Contract, Critique, Digest, Extraction, Id, Text
 from trialboard.agent.report import escaped
 from trialboard.agent.revalidate import JSON_LIMIT, PDF_LIMIT, file_bytes, read_json, revalidate
+from trialboard.agent.review_context import critique_payload
 from trialboard.agent.verify import critique_findings, verify
 from trialboard.review.engine import simulate
 from trialboard.review.models import Design, Scenario
@@ -123,11 +124,7 @@ def _ai_review(raw, checked):
     ):
         if nested.get(key) != checked[key]:
             raise ValueError("AI_REVIEW_INPUT_MISMATCH")
-    payload = {
-        "source": checked["input"],
-        "extraction": {"observations": checked["accepted"]},
-        "deterministic_findings": checked["findings"],
-    }
+    payload = critique_payload(checked)
     if r.get("request_digest") != sha256_json(payload):
         raise ValueError("AI_REQUEST_DIGEST_MISMATCH")
     critique = Critique.model_validate(r.get("critique"))

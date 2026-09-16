@@ -8,7 +8,7 @@ class PdfBoundary extends Component<{ children: ReactNode }, { failed: boolean }
   static getDerivedStateFromError() { return { failed: true }; }
   render() { return this.state.failed ? <Alert severity="error">PDF 도구를 열지 못했습니다. 내려받지 않은 메모는 새로고침 시 사라집니다. CSV 검토는 계속 사용할 수 있습니다.</Alert> : this.props.children; }
 }
-export function SourceWorkspace({ onEvidence,onAgentBusy,scoutContext }: { scoutContext?: import("./evidence-scout").ScoutContext; onEvidence: () => void;onAgentBusy?:(busy:boolean)=>void }) {
+export function SourceWorkspace({ onEvidence,onAgentBusy,scoutContext,onResearch }: { scoutContext?: import("./evidence-scout").ScoutContext; onEvidence: () => void;onAgentBusy?:(busy:boolean)=>void;onResearch?:(context:import("./evidence-scout").ScoutContext)=>void }) {
   const [mode, setMode] = useState<"csv" | "pdf">("pdf");
   const [pdfVisited, setPdfVisited] = useState(true);
   const [agentBusy,setAgentBusy]=useState(false);
@@ -17,6 +17,6 @@ export function SourceWorkspace({ onEvidence,onAgentBusy,scoutContext }: { scout
     <Button disabled={agentBusy} aria-pressed={mode === "csv"} variant={mode === "csv" ? "contained" : "outlined"} onClick={() => setMode("csv")}>CSV 집계 검토</Button>
     <Button aria-pressed={mode === "pdf"} variant={mode === "pdf" ? "contained" : "outlined"} onClick={() => { setMode("pdf"); setPdfVisited(true); }}>PDF 원문 확인</Button>
   </div><div hidden={mode !== "csv"}><Intake onEvidence={onEvidence} /></div>
-    {pdfVisited && <div hidden={mode !== "pdf"}><PdfBoundary><Suspense fallback={<p role="status"><CircularProgress size={16} /> PDF 도구 준비 중…</p>}><PdfWorkspace scoutContext={scoutContext} onAgentBusy={reportBusy}/></Suspense></PdfBoundary></div>}
+    {pdfVisited && <div hidden={mode !== "pdf"}><PdfBoundary><Suspense fallback={<p role="status"><CircularProgress size={16} /> PDF 도구 준비 중…</p>}><PdfWorkspace scoutContext={scoutContext} onResearch={onResearch} onAgentBusy={reportBusy}/></Suspense></PdfBoundary></div>}
   </>;
 }

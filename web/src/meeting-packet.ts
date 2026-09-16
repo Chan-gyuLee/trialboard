@@ -86,9 +86,10 @@ export function packetMarkdown(result: DesignResult, notes: MeetingNotes): strin
     for (const oid of arm.observation_ids) {
       const row = rows.find(r => r.id === oid)!, fields = obj(row.fields);
       lines.push(`관측값: ${escape(oid)}`, "");
-      for (const key of ["metric", "events", "denominator", "reported_rate", "cohort", "population", "window", "definition"]) {
+      for (const key of ["dose", "metric", "events", "denominator", "reported_rate", "cohort", "population", "window", "definition"]) {
         const field = obj(fields[key]), current = obj(field.current), citation = current.citation === null ? null : obj(current.citation);
         lines.push(`- ${key}: ${escape(String(current.value ?? "미보고"))} · ${escape(String(field.decision))}${citation ? ` · PDF p.${citation.page} / ${escape(String(citation.spanId))} · “${escape(String(citation.quote))}”` : " · 인용 없음"}`);
+        for(const item of arr(current.supporting??[],0,4)){const c=obj(item);lines.push(`  보조 근거 (${escape(String(c.role))}): PDF p.${c.page} / ${escape(String(c.spanId))} · “${escape(String(c.quote))}” · 의미 관계 미인증`);}
       }
       lines.push("");
     }

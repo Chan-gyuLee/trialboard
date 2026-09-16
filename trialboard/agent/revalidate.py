@@ -140,6 +140,17 @@ def revalidate(
             raise ValueError("CITATION_SOURCE_MISMATCH")
         if checked and not span.box:
             raise ValueError("UNSUPPORTED_REVIEW_LOCATION")
+        for support in value.supporting:
+            s = index.get(support.spanId)
+            if (
+                not s
+                or s.page != support.page
+                or not support.quote.strip()
+                or support.quote not in s.text
+            ):
+                raise ValueError("SUPPORT_SOURCE_MISMATCH")
+            if not s.box:
+                raise ValueError("UNSUPPORTED_SUPPORT_LOCATION")
 
     baseline_report = None
     if review.origin.kind == "imported_agent_report":
@@ -204,6 +215,7 @@ def revalidate(
             for value in (field.original, field.current):
                 if value.citation:
                     used.add(value.citation.spanId)
+                used.update(c.spanId for c in value.supporting)
             for revision in field.history:
                 check(revision.before)
                 check(revision.after, checked=revision.decision != "held")

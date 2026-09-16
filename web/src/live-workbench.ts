@@ -10,10 +10,14 @@ export function liveWorkbench(events: LiveProgress[],busy:boolean,error:string,c
   const last=events.at(-1),stage=last?.stage;
   const task=stage ? LIVE_TASKS[stage] : undefined;
   const failed=!!error || complete==='FAILED' || complete==='BUDGET_EXCEEDED';
+  const latestExtraction=events.filter(e=>['EXTRACT','REVISE'].includes(e.stage)&&e.state==='COMPLETED').at(-1);
   return {last,task,
+    latestObservations:(latestExtraction?.items??[]).filter(i=>i.kind==='observation').slice(-12),
     title:failed?"실행을 마치지 못했습니다":complete?"이번 실행을 검토자에게 인계합니다":!busy?"실행 전입니다":!last?"서버의 실행 시작 응답을 기다립니다":stage==='HANDOFF'?LIVE_TASKS.HANDOFF.title:last.state==="COMPLETED"?`${stage === "EXTRACT" ? "추출" : stage === "REVISE" ? "수정" : stage === "VERIFY" ? "규칙 검사" : "반론 검토"} 응답을 받았습니다`:task?.title??'서버의 다음 상태를 기다립니다',
     status:failed?"중단/오류":complete?"결과 수신":busy?"실행 중":"대기",
     outputs:events.flatMap(e=>(e.items??[]).filter(i=>i.kind!=="source").map(item=>({...item,stage:e.stage,attempt:e.attempt,elapsed_ms:e.elapsed_ms}))).slice(-24),
     sources:(events.find(e=>e.items?.some(i=>i.kind==="source"))?.items??[]).filter(i=>i.kind==="source"),
   };
 }
+const findingLabels:Record<string,string>={NO_OBSERVATIONS:'지원되는 관측값 미확보',SECOND_DOSE_MISSING:'비교할 두 번째 용량 근거 미확보',MISSING_FIELD:'필수 정보 미확보',REPORTED_RATE_ONLY:'보고 비율을 사건 수로 역산할 수 없음',CONTEXT_MISMATCH:'검토 맥락과 원문 표현 확인 필요',UNSUPPORTED_METRIC:'현재 계산이 지원하지 않는 지표'};
+export function findingLabel(text:string):string|null{return findingLabels[text.split(' · ')[0]]??null;}

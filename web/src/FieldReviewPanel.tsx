@@ -10,14 +10,17 @@ import RevalidationPanel from "./RevalidationPanel";
 import RecritiquePanel from "./RecritiquePanel";
 import { restoreReview, reviewBackup } from "./field-review-restore";
 import DesignPanel from "./DesignPanel";
+import EvidenceScopePanel from "./EvidenceScopePanel";
+import type {ScoutContext} from "./evidence-scout";
 import { MocFileButton } from "./MocDemo";
 import { isMocSource } from "./moc-data";
 import { PACKET_BYTES, restoreMeetingSession, type MeetingSession } from "./meeting-packet";
 import RowReview from "./RowReview";
+import SupportingCitations from './SupportingCitations';
 import type {Capture,DesignCheckpoint,ReviewCheckpoint,RestoredProject} from "./project-checkpoint";
 
 const STATUS = { unreviewed: "미확인", confirmed: "사용자 확인", corrected: "사용자 수정", held: "보류" } as const;
-export default function FieldReviewPanel({ source, pdf, selected, readyPage, disabled, onChoose, onText, view = "fields", onFields, onDesign, agentHandoff, initialProject, checkpoint, onCheckpointBusy }: {
+export default function FieldReviewPanel({ source, pdf, selected, readyPage, disabled, onChoose, onText, view = "fields", onFields, onDesign, agentHandoff, initialProject, checkpoint, onCheckpointBusy, context }: {
   source: PdfSource; selected: PdfSpan | null; readyPage: number | null; disabled: boolean;
   onChoose: (span: PdfSpan) => void; onText: () => void;
   view?: "fields" | "design"; onFields?: () => void; onDesign?: () => void;
@@ -26,6 +29,7 @@ export default function FieldReviewPanel({ source, pdf, selected, readyPage, dis
   initialProject?: RestoredProject|null;
   checkpoint?: Capture<ReviewCheckpoint>;
   onCheckpointBusy?:(busy:boolean)=>void;
+  context?:ScoutContext;
 }) {
   const [review, setReview] = useState<FieldReview>(() => newReview(source));
   const [rowId, setRowId] = useState("");
@@ -131,6 +135,7 @@ export default function FieldReviewPanel({ source, pdf, selected, readyPage, dis
     <div className="field-add"><TextField select size="small" label="새 관측값의 자료 유형" value={kind} disabled={locked} onChange={e => setKind(e.target.value as ReviewRow["valueKind"])}><MenuItem value="event_count">사건 수와 분모</MenuItem><MenuItem value="reported_percentage">보고된 비율 · 건수 미보고</MenuItem></TextField><Button onClick={create} disabled={locked || review.rows.length >= 12} startIcon={<Plus size={16} />}>관측값 추가</Button></div>
     {!review.rows.length && <div className="field-empty"><h3>검토할 관측값부터 만드세요</h3><p>예: 한 용량·한 환자군의 반응률. 서로 다른 환자군이나 시점은 별도의 관측값으로 남깁니다.</p><p>필드를 선택한 뒤 ‘원문 문구’에서 근거를 찾아 연결하거나, 같은 PDF의 추출 결과를 불러오세요.</p></div>}
     {review.rows.length > 0 && <>
+      <EvidenceScopePanel review={review} source={source} context={context} disabled={locked||Boolean(touched||reason.trim())} onSelect={(id,key)=>{if(selectField(id,key))requestAnimationFrame(()=>editor.current?.scrollIntoView({block:"center",behavior:"smooth"}));}}/>
       <TextField select fullWidth size="small" label="검토할 관측값" value={rowId} disabled={locked} onChange={e => selectField(e.target.value, name)}>{review.rows.map((r, i) => <MenuItem key={r.id} value={r.id}>{i + 1}. {r.fields.dose.current.value ?? "용량 미보고"} · {r.fields.metric.current.value ?? "지표 미입력"} · {r.fields.population.current.value ?? "집단 미입력"}</MenuItem>)}</TextField>
       {row && <p className="field-origin">이 관측값: {row.origin === "manual" ? "사용자 직접 추가" : "에이전트 결과에서 가져옴"}</p>}
       {row && <RowReview key={JSON.stringify({row,readyPage})} review={review} source={source} rowId={row.id} readyPage={readyPage} disabled={locked || Boolean(touched || reason.trim())} onReview={next=>{setReview(next);setNotice("보고된 필드에 사용자 확인 이력을 기록했습니다. 미보고는 유지하며 계산 전 재검증이 필요합니다.");}}/>}
@@ -138,10 +143,11 @@ export default function FieldReviewPanel({ source, pdf, selected, readyPage, dis
       {field && <div className="field-editor" ref={editor} tabIndex={-1}><h3>{FIELD_LABELS[name]} 확인</h3><p className="field-original-value">원래 값: {field.original.value ?? "미보고"}</p>
         <TextField fullWidth multiline maxRows={4} label="검토할 원문 값" value={proposed.value ?? ""} disabled={locked} onChange={e => { setProposed({ ...proposed, value: e.target.value || null }); setChecked(false); }} slotProps={{ htmlInput: { maxLength: 2000 } }} />
         <div className="field-citation">{proposed.citation ? <><p>연결 근거 · PDF p.{proposed.citation.page}</p><blockquote>{proposed.citation.quote}</blockquote><Button disabled={!targetSpan || locked} onClick={() => { if (targetSpan) onChoose(targetSpan); }}>원문 위치 열기</Button></> : <p>연결된 근거가 없습니다. 원문 문구에서 이 값을 뒷받침하는 문구를 선택하세요.</p>}</div>
-        <div className="field-toolbar"><Button onClick={onText} disabled={locked}>원문 문구 찾기</Button><Button startIcon={<Link2 size={16} />} disabled={!selected?.box || locked} onClick={() => { if (selected) { setProposed({ value: proposed.value ?? selected.text, citation: { spanId: selected.id, page: selected.page, quote: selected.text } }); setChecked(false); } }}>선택 문구를 근거로 연결</Button></div>
+        <div className="field-toolbar"><Button onClick={onText} disabled={locked}>원문 문구 찾기</Button><Button startIcon={<Link2 size={16} />} disabled={!selected?.box || locked} onClick={() => { if (proposed.supporting?.length) {setError('기본 근거를 바꾸려면 보조 근거 연결을 먼저 제거하세요.');return;} if (selected) { setProposed({ value: proposed.value ?? selected.text, citation: { spanId: selected.id, page: selected.page, quote: selected.text } }); setChecked(false); } }}>선택 문구를 근거로 연결</Button></div>
+        <SupportingCitations key={`${rowId}-${name}`} source={source} value={proposed} selected={selected} disabled={locked} onChange={value=>{setProposed(value);setChecked(false);}} onChoose={onChoose} onText={onText}/>
         <p className="field-selected">현재 선택: {selected?.text ?? "없음"}</p>
         <TextField fullWidth multiline minRows={2} label="확인·수정·보류 사유" value={reason} disabled={locked} onChange={e => setReason(e.target.value)} slotProps={{ htmlInput: { maxLength: 2000 } }} />
-        <FormControlLabel control={<Checkbox checked={checked} disabled={!shown || locked} onChange={e => setChecked(e.target.checked)} />} label="원문에서 이 값과 필드의 관계를 직접 대조했습니다." />
+        <FormControlLabel control={<Checkbox checked={checked} disabled={!shown || locked} onChange={e => setChecked(e.target.checked)} />} label={proposed.supporting?.length ? "원문에서 값·필드와 모든 보조 근거의 관계를 직접 대조했습니다." : "원문에서 이 값과 필드의 관계를 직접 대조했습니다."} />
         <div className="field-toolbar"><Button variant="contained" startIcon={<Check size={16} />} disabled={!shown || !checked || !reason.trim() || locked} onClick={() => save()}>{touched ? "수정값 기록" : "확인 기록"}</Button><Button color="warning" disabled={!reason.trim() || locked} onClick={() => save(true)}>보류 기록</Button></div>
         {(touched || reason.trim()) && <><p role="status">아직 기록하지 않은 변경이 있습니다. 기록하거나 편집을 취소해야 내보낼 수 있습니다.</p><Button onClick={() => { setProposed(structuredClone(field.current)); setReason(""); setChecked(false); }} disabled={locked}>편집 취소</Button></>}
         {field.history.length > 0 && <details><summary>이 필드의 검토 이력 {field.history.length}개</summary><ol>{field.history.map(h => <li key={h.revision}><strong>{STATUS[h.decision]}</strong> · {h.before.value ?? "미보고"} → {h.after.value ?? "미보고"}<p>{h.reason}</p></li>)}</ol></details>}
@@ -156,8 +162,8 @@ export default function FieldReviewPanel({ source, pdf, selected, readyPage, dis
       <Alert severity="warning">이 기록은 사용자 확인 초안입니다. 결과 가져오기는 AI 실행·설계 계산·임상 승인이 아닙니다.</Alert>
     </>}
     </div>
-    <div hidden={view !== "design"}><DesignPanel key={sessionVersion} initialSession={meetingSession} initialDraft={useProjectDraft?initialProject?.draft:undefined} checkpoint={designCheckpoint} onCheckpointBusy={setDesignBusy} originalAgentRaw={originalAgentRaw} review={review} source={source} pdf={pdf} disabled={locked} hasDraft={Boolean(touched || reason.trim())} onSelectRow={id => {
-      if (selectField(id, "dose", true)) { onFields?.(); requestAnimationFrame(() => { editor.current?.focus(); editor.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }); }
+    <div hidden={view !== "design"}><DesignPanel context={context} key={sessionVersion} initialSession={meetingSession} initialDraft={useProjectDraft?initialProject?.draft:undefined} checkpoint={designCheckpoint} onCheckpointBusy={setDesignBusy} originalAgentRaw={originalAgentRaw} review={review} source={source} pdf={pdf} disabled={locked} hasDraft={Boolean(touched || reason.trim())} onSelectRow={(id,key="dose") => {
+      if (selectField(id, key, true)) { onFields?.(); requestAnimationFrame(() => { editor.current?.focus(); editor.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }); }
     }} /></div>
   </section>;
 }

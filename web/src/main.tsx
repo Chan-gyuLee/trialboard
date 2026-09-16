@@ -38,6 +38,7 @@ function App() {
   const [tab, setTab] = useState<Tab>("start");
   const [researchBusy,setResearchBusy]=useState(false);
   const [scoutContext, setScoutContext] = useState<ScoutContext | undefined>();
+  const [researchResume,setResearchResume]=useState<import("./research-resume").ResearchResume>();
   const [selected, setSelected] = useState("dose_comparison");
   const [mode, setMode] = useState<Mode>("normal");
   const [scenario, setScenario] = useState("plateau");
@@ -110,12 +111,11 @@ function App() {
         {researchBusy&&<Alert severity="info" action={<Button onClick={()=>setTab("start")}>조사 화면 열기</Button>}>공개 근거 조사 진행 중입니다. AI 실행을 선택했다면 로그인 계정 사용량을 소비합니다. 조사 화면에서 상태 확인·중단할 수 있습니다.</Alert>}
         {(pdfAgentBusy || fixedAgentBusy)&&<Alert severity="info" className="global-agent-status" action={<Button onClick={()=>setTab(pdfAgentBusy?'intake':'agent')}>작업 화면 열기</Button>}>{pdfAgentBusy?'PDF 문구':'고정 사례'} 에이전트가 실행 중입니다. 다른 메뉴를 보더라도 계정 사용량을 소비할 수 있습니다. 작업 화면에서 상태를 확인하거나 중단하세요.</Alert>}
         {import.meta.env.DEV && <details className="recording-tools"><summary>녹화 도구</summary><DemoRecorder /></details>}
-        <div hidden={tab !== "start"}><EvidenceScout onResearchBusy={setResearchBusy} locked={pdfAgentBusy || fixedAgentBusy} onIntake={context=>{setScoutContext(context);setTab("intake");}} /></div>
-        {tab === "intake" && scoutContext && <Alert severity="info">수집에서 선택한 시험: {scoutContext.asset} · {scoutContext.study} · {scoutContext.indication}. 같은 시험의 PDF를 추가하세요. 등록자료를 PDF 관측값으로 자동 전환하지 않습니다.</Alert>}
+        <div hidden={tab !== "start"}><EvidenceScout resume={researchResume} onResearchBusy={setResearchBusy} locked={pdfAgentBusy || fixedAgentBusy} onIntake={context=>{setScoutContext(context);setTab("intake");}} /></div>
         <div hidden={tab !== "decision"}><DecisionBriefing active={tab === "decision"} onAgent={() => setTab("agent")} onIntake={() => setTab("intake")} /></div>
         {(tab === "simulation" || tab === "report") && <MocBadge detail="합성 가정 · 실제 임상 근거 아님 · 저장 결과와 새 계산을 구분합니다" />}
         <div hidden={tab !== "agent"}><AgentBriefing onAgentBusy={setFixedAgentBusy} onIntake={() => setTab("intake")} onSimulation={() => setTab("simulation")} /></div>
-        <div hidden={tab !== "intake"}><Intake scoutContext={scoutContext} onAgentBusy={setPdfAgentBusy} onEvidence={() => setTab("evidence")} /></div><div hidden={tab === "start" || tab === "intake" || tab === "agent" || tab === "decision"}><div className="page-heading"><div><div className="heading-meta"><span>용량 최적화</span><span className="meta-divider" /><span>합성 사례</span></div><h1>{tab === "simulation" ? "용량 비교 검토" : tab === "evidence" ? "공개 근거 라이브러리" : "검토 보고서"}</h1><p>{tab === "simulation" ? "두 용량을 어떻게 비교할지, 가정을 바꾸며 확인하세요." : tab === "evidence" ? "판단에 앞서, 원문과 적용 범위를 확인하세요." : "확인한 항목과 아직 판단할 수 없는 항목을 구분합니다."}</p></div><Button variant="outlined" startIcon={<ArrowDownToLine size={16} />} onClick={exportReport}>보고서 내려받기</Button></div>
+        <div hidden={tab !== "intake"}><Intake scoutContext={scoutContext} onResearch={researchBusy?undefined:context=>{setResearchResume({token:crypto.randomUUID(),context});setTab("start");}} onAgentBusy={setPdfAgentBusy} onEvidence={() => setTab("evidence")} /></div><div hidden={tab === "start" || tab === "intake" || tab === "agent" || tab === "decision"}><div className="page-heading"><div><div className="heading-meta"><span>용량 최적화</span><span className="meta-divider" /><span>합성 사례</span></div><h1>{tab === "simulation" ? "용량 비교 검토" : tab === "evidence" ? "공개 근거 라이브러리" : "검토 보고서"}</h1><p>{tab === "simulation" ? "두 용량을 어떻게 비교할지, 가정을 바꾸며 확인하세요." : tab === "evidence" ? "판단에 앞서, 원문과 적용 범위를 확인하세요." : "확인한 항목과 아직 판단할 수 없는 항목을 구분합니다."}</p></div><Button variant="outlined" startIcon={<ArrowDownToLine size={16} />} onClick={exportReport}>보고서 내려받기</Button></div>
         {tab === "evidence" ? <Evidence packet={packet} selected={selected} onSelect={setSelected} /> : <>
           <div className="notice-line"><FlaskConical size={16} /><span>합성 데이터로 검토합니다. 실제 약물 추정치·임상 권고가 아닙니다.</span><Button size="small" onClick={() => setTab("evidence")} endIcon={<ArrowUpRight size={14} />}>공개 근거 보기</Button></div>
           {tab === "simulation" ? <div className="comparison-layout"><section className="editor-panel" aria-label="계산 조건 편집"><div className="panel-title"><div><span className="step">01</span><h2>비교 조건</h2></div><span className="meta">용량 A · B</span></div>

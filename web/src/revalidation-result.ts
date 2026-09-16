@@ -59,6 +59,7 @@ export function readResult(raw: string, review: FieldReview, source: PdfSource):
   for (const row of review.rows) for (const f of Object.values(row.fields)) {
     for (const value of [f.original, f.current]) {
       if (value.citation && (!seenSpans.has(value.citation.spanId) || !locate(source, value.citation))) fail();
+      for(const c of value.supporting??[])if(!seenSpans.has(c.spanId)||!locate(source,c))fail();
     }
   }
   const expected = review.rows.filter(row => !heldIds.includes(row.id)).map(row => ({
