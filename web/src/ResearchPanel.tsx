@@ -4,6 +4,7 @@ import {ArrowRight,BookOpen,Database,ExternalLink} from "lucide-react";
 import {downloadText} from "./review";
 import {basisLabel,researchFindingWarnings,readResearchResult,readResearchStream,researchMarkdown,type Collection,type ResearchContext,type ResearchEvent,type ResearchResult,type ResearchSource} from "./research";
 import type {ScoutContext} from "./evidence-scout";
+import RuntimeNotice from "./RuntimeNotice";
 import ResearchActivity from "./ResearchActivity";
 import ResearchCuration from "./ResearchCuration";
 import ResearchLinkage from "./ResearchLinkage";
@@ -45,7 +46,8 @@ export default function ResearchPanel({context,onIntake,onBusy,locked,onRestoreC
  const visible=collection?.sources.filter(s=>filter==="ALL" || s.kind===filter || filter==="DOCUMENT"&&["PROTOCOL","SAP","REGULATORY"].includes(s.kind))??[];
  function intake(s:ResearchSource){if(!collection)return;onIntake({asset:collection.request.asset,study:collection.request.nct_id,indication:collection.request.indication,question:"용량별 반응과 이상반응을 같은 조건에서 비교할 수 있는가?",receiptId:collection.request.search_id,document:{runId:collection.id,sourceId:s.id,title:s.title}});}
  return <section className="research-panel" aria-label="다중 출처 근거 조사"><div className="research-heading"><div><span className="scout-eyebrow">DEEPER EVIDENCE · {context.nct_id}</span><h2>논문과 규제 문서까지 연결하세요</h2><p>{context.asset || "약물명 확인 필요"} · {context.indication || "적응증 선택 필요"}</p></div><Database size={26}/></div>
- <div className="research-consent"><FormControlLabel control={<Checkbox checked={consent} disabled={busy} onChange={e=>setConsent(e.target.checked)}/>} label="공개 약물명·NCT로 ClinicalTrials.gov, Europe PMC/PubMed, Drugs@FDA를 검색하고 원문 응답·연결 기록을 로컬 DB에 저장합니다."/><FormControlLabel control={<Checkbox checked={model} disabled={busy} onChange={e=>setModel(e.target.checked)}/>} label="AI 추가 조사도 실행: 수집 문구를 현재 Codex 로그인 모델에 보내 검색 계획·후속 검색·인용 연결 검토를 수행합니다. 최대 2회 모델 요청과 계정 사용량 소비에 동의합니다."/>
+ <RuntimeNotice/>
+ <div className="research-consent"><FormControlLabel control={<Checkbox checked={consent} disabled={busy} onChange={e=>setConsent(e.target.checked)}/>} label="공개 약물명·NCT로 ClinicalTrials.gov, Europe PMC/PubMed, Drugs@FDA를 검색하고 원문 응답·연결 기록을 로컬 DB에 저장합니다."/><FormControlLabel control={<Checkbox checked={model} disabled={busy} onChange={e=>setModel(e.target.checked)}/>} label="AI 추가 조사도 실행: 수집 문구를 위에 표시된 실행 모델로 보내 검색 계획·후속 검색·인용 연결 검토를 수행합니다. 최대 2회 모델 요청과 선택된 모델의 사용량 소비에 동의합니다."/>
  <div className="research-actions"><Button variant="contained" disabled={busy || locked || !consent || !context.asset.trim() || !context.indication} onClick={()=>void run()} endIcon={busy?<CircularProgress size={16} color="inherit"/>:<ArrowRight size={18}/>}>{busy?"근거 조사 진행 중":model?"AI 근거 조사 시작":"공개 자료 수집 시작"}</Button>{busy&&<Button onClick={()=>controller.current?.abort()}>실행 중단</Button>}<span>최대 100개 근거 · 부분 수집 · PDF는 열기 전까지 미검토</span></div></div>
  {error&&<Alert severity="error">{error}</Alert>}
  {!collection&&<ResearchActivity busy={busy} events={events} seconds={seconds} plan={plan}/>}

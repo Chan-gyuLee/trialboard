@@ -296,7 +296,7 @@ def test_public_cli_persists_evaluation_and_exits_nonzero_when_checks_fail(
                 return Reply({"observations": []}, "empty-test", 0, 0)
             return await super().complete(**kwargs)
 
-    monkeypatch.setattr(cli, "CodexChatGPT", lambda model: TestProvider())
+    monkeypatch.setattr(cli, "runtime_provider", lambda name: TestProvider())
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(
         sys,

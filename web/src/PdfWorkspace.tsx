@@ -195,7 +195,7 @@ return <div className="pdf-workspace">
       <MocFileButton name="SYNTHETIC-DEMO-NOT-CLINICAL.pdf" disabled={busy} onFile={accept}>MOC 예제 PDF 열기</MocFileButton>
       {busy ? <Button onClick={cancel}>읽기 취소</Button> : source && <Button onClick={clear} aria-label="PDF와 메모·필드 검토 제거"><Trash2 size={17} /></Button>}
     </div>
-    <p className="pdf-privacy">PDF 열기·원문 확인은 브라우저에서 처리합니다. ‘에이전트 검토’는 별도 동의 후 선택 문구·주변 문맥·질문을 로그인한 Codex 모델에 전송합니다. 로컬 계산과 프로젝트 저장도 각각 동의 후 처리합니다. 자동 저장하지 않으므로 종료 전 프로젝트를 저장하거나 JSON을 보관하세요. 환자 식별정보나 기업 기밀자료는 넣지 마세요.</p>
+    <p className="pdf-privacy">PDF 열기·원문 확인은 브라우저에서 처리합니다. ‘에이전트 검토’는 별도 동의 후 선택 문구·주변 문맥·질문을 설정된 실행 모델(대회 API 또는 명시적으로 선택한 Codex)에 전송합니다. 로컬 계산과 프로젝트 저장도 각각 동의 후 처리합니다. 자동 저장하지 않으므로 종료 전 프로젝트를 저장하거나 JSON을 보관하세요. 환자 식별정보나 기업 기밀자료는 넣지 마세요.</p>
     <div aria-live="polite">{busy && <p role="status">PDF 읽는 중 · {progress}페이지 추출 완료</p>}{error && <Alert severity="error">{error}{source && " 기존 자료는 유지됩니다."}</Alert>}{notice && <Alert severity="info">{notice}</Alert>}</div>
     {!source && <div className="pdf-start"><h2>이번 단계에서 할 수 있는 것</h2><ol><li>공개 문서 PDF를 선택합니다.</li><li>페이지별 추출 문구를 눌러 원문 강조 위치를 확인합니다.</li><li>‘필드 검토’에서 관측값을 만들거나 같은 PDF의 에이전트 결과를 불러옵니다.</li><li>용량·분모·집단 등의 값을 원문에 연결하고 확인·수정·보류 사유를 기록합니다.</li><li>‘설계 비교·KOL’에서 검토한 관측값에 용량군을 연결하고, 복수 설계와 가정을 입력합니다.</li><li>계산 결과를 비교하고 KOL 질문에 답변·담당자·다음 행동을 기록합니다. 계산은 별도 로컬 서비스와 전송 동의가 필요합니다.</li><li>필드 검토 JSON과 회의 JSON을 각각 내려받아 다음 검토를 이어갑니다.</li></ol><p>표의 열·분모·관찰기간은 자동 연결하지 않습니다. 글자가 추출되지 않은 페이지는 “텍스트 없음”으로 남깁니다.</p><a href="https://www.accessdata.fda.gov/drugsatfda_docs/appletter/2021/214665Orig1s000ltr.pdf" target="_blank" rel="noreferrer">FDA 공개 승인서한 열기 → 내려받은 파일로 시작</a></div>}
     {source && loaded && <>

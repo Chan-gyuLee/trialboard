@@ -113,6 +113,6 @@ class Collection(Contract):
     review: ResearchReview | None = None
     calls: list[dict] = Field(default_factory=list)
     notices: list[str] = Field(default_factory=list)
-    execution_mode: Literal["COLLECTORS_ONLY", "CODEX_CHATGPT", "SCRIPTED_TEST_DOUBLE"] = (
-        "COLLECTORS_ONLY"
-    )
+    execution_mode: Literal[
+        "COLLECTORS_ONLY", "CODEX_CHATGPT", "DACON_RESPONSES", "SCRIPTED_TEST_DOUBLE"
+    ] = "COLLECTORS_ONLY"

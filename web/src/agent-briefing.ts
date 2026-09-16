@@ -46,7 +46,7 @@ const unique = (ids: string[]) => { if (new Set(ids).size !== ids.length) fail()
 export async function readAgentRecord(raw: string): Promise<AgentRecord> {
   const r = obj(strictJson(raw)), input = obj(r.input);
   if (r.engine_version !== "bounded-evidence-agent/3.2" || !terminal.includes(String(r.status))) fail();
-  if (!["CODEX_CHATGPT", "OPENAI_RESPONSES", "SCRIPTED_TEST_DOUBLE"].includes(String(r.execution_mode))) fail();
+  if (!["CODEX_CHATGPT", "DACON_RESPONSES", "OPENAI_RESPONSES", "SCRIPTED_TEST_DOUBLE"].includes(String(r.execution_mode))) fail();
   if (!["synthetic_fixture", "curated_public_excerpt", "user_pdf_export_unverified"].includes(String(input.provenance))) fail();
   text(r.run_id, 200); text(r.model, 200); text(r.started_at, 100);
   if (!Number.isFinite(Date.parse(String(r.started_at)))) fail();

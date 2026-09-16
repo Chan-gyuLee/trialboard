@@ -46,7 +46,7 @@ export default function RecritiquePanel({ review, source, disabled, hasDraft, on
     {result && !current && <Alert severity="warning">검토 이력이 달라졌거나 미기록 편집이 있어 이전 AI 의견을 숨겼습니다. 현재 이력으로 다시 실행한 결과를 불러오세요.</Alert>}
     {!result && !loading && <p className="revalidation-empty">아직 불러온 새 AI 의견이 없습니다. 이전 모델 의견은 아래 별도 기록으로 남아 있습니다.</p>}
     {result && current && <>
-      <Alert severity={result.mode === "SCRIPTED_TEST_DOUBLE" ? "warning" : "info"}>{result.mode === "SCRIPTED_TEST_DOUBLE" ? "스크립트 테스트 결과 · 실제 AI 실행 아님." : "파일에 기록된 Codex 재검토 결과 · 실행 진위 미인증."} 현재 PDF·검토와 파일 내부 일관성을 대조했으며, 임상적 정확성·전문가 승인을 인증하지 않습니다.</Alert>
+      <Alert severity={result.mode === "SCRIPTED_TEST_DOUBLE" ? "warning" : "info"}>{result.mode === "SCRIPTED_TEST_DOUBLE" ? "스크립트 테스트 결과 · 실제 AI 실행 아님." : "파일에 기록된 모델 재검토 결과 · 실행 진위 미인증."} 현재 PDF·검토와 파일 내부 일관성을 대조했으며, 임상적 정확성·전문가 승인을 인증하지 않습니다.</Alert>
       <p className="revalidation-context"><strong>시험:</strong> {result.rules.study}<br /><strong>질문:</strong> {result.rules.question}</p>
       <Chip label={STATUS[result.status]} />
       {result.status !== "COMPLETED" ? <Alert severity="warning">완료된 새 AI 의견이 없습니다. {result.status === "NO_CANDIDATES" ? "사용자 보류·미확인·규칙 쟁점을 먼저 살펴보세요." : result.errors.map(e => ERRORS[e] ?? e).join(" · ")}</Alert> : <>

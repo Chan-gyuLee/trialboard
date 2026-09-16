@@ -60,7 +60,12 @@ async def run_agent(
     on_progress: Callable[[dict], None] | None = None,
 ) -> AgentReport:
     limits = limits or Limits()
-    if provider.mode not in ("OPENAI_RESPONSES", "CODEX_CHATGPT", "SCRIPTED_TEST_DOUBLE"):
+    if provider.mode not in (
+        "OPENAI_RESPONSES",
+        "DACON_RESPONSES",
+        "CODEX_CHATGPT",
+        "SCRIPTED_TEST_DOUBLE",
+    ):
         raise ValueError("UNSUPPORTED_EXECUTION_MODE")
     started = datetime.now(UTC).isoformat()
     attempts, calls, events = [], [], []

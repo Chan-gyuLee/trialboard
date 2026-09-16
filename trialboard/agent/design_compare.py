@@ -107,7 +107,8 @@ def _ai_review(raw, checked):
         or r.get("user_values_modified") is not False
         or r.get("comparison_status") != "NOT_APPROVED"
         or r.get("reviewer_identity") != "UNAUTHENTICATED_USER"
-        or r.get("execution_mode") not in ("CODEX_CHATGPT", "SCRIPTED_TEST_DOUBLE")
+        or r.get("execution_mode")
+        not in ("CODEX_CHATGPT", "DACON_RESPONSES", "SCRIPTED_TEST_DOUBLE")
         or r.get("source_digest") != checked["source_digest"]
         or r.get("review_content_digest") != sha256_json(checked["review"])
     ):

@@ -276,7 +276,7 @@ def test_cli_live_example_requires_explicit_outbound_consent(monkeypatch, capsys
     assert "--allow-external" in capsys.readouterr().err
 
 
-def test_cli_defaults_to_codex_not_api_billing(monkeypatch, tmp_path):
+def test_product_cli_defaults_to_competition_not_personal_codex(monkeypatch, tmp_path):
     from trialboard.agent import __main__ as cli
 
     selected = []
@@ -285,7 +285,7 @@ def test_cli_defaults_to_codex_not_api_billing(monkeypatch, tmp_path):
         selected.append(model)
         return ScriptedProvider()
 
-    monkeypatch.setattr(cli, "CodexChatGPT", fake_codex)
+    monkeypatch.setattr(cli, "runtime_provider", fake_codex)
     monkeypatch.delenv("TRIALBOARD_CODEX_MODEL", raising=False)
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(
@@ -303,7 +303,7 @@ def test_cli_defaults_to_codex_not_api_billing(monkeypatch, tmp_path):
         ],
     )
     cli.main()
-    assert selected == [None]
+    assert selected == ["dacon"]
     files = list((tmp_path / "output" / "agent").iterdir())
     assert len(files) == 2
     assert all(path.stat().st_mode & 0o777 == 0o600 for path in files)

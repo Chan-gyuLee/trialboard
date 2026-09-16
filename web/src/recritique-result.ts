@@ -5,7 +5,7 @@ import { readResult, reviewKey, RESULT_BYTES, type Finding, type RevalidationRes
 
 export type Concern = { scope: "observation_error" | "comparison_limitation"; observation_ids: string[]; span_ids: string[]; reason: string };
 export type RecritiqueResult = {
-  runId: string; reviewKey: string; mode: "CODEX_CHATGPT" | "SCRIPTED_TEST_DOUBLE"; model: string;
+  runId: string; reviewKey: string; mode: "CODEX_CHATGPT" | "DACON_RESPONSES" | "SCRIPTED_TEST_DOUBLE"; model: string;
   status: "COMPLETED" | "NO_CANDIDATES" | "FAILED" | "BUDGET_EXCEEDED";
   rules: RevalidationResult; candidateIds: string[]; remainingIds: string[]; withheldIds: string[];
   concerns: Concern[]; questions: string[]; errors: string[];
@@ -28,7 +28,7 @@ export async function readRecritique(raw: string, review: FieldReview, source: P
   if (r.schema_version !== "field-recritique/1" || !["human-review-recritique/1","human-review-recritique/2"].includes(String(r.prompt_version))
       || r.clinical_approval !== false || r.comparison_status !== "NOT_APPROVED"
       || r.reviewer_identity !== "UNAUTHENTICATED_USER" || r.user_values_modified !== false
-      || (r.execution_mode !== "CODEX_CHATGPT" && r.execution_mode !== "SCRIPTED_TEST_DOUBLE")) fail();
+      || (r.execution_mode !== "CODEX_CHATGPT" && r.execution_mode !== "DACON_RESPONSES" && r.execution_mode !== "SCRIPTED_TEST_DOUBLE")) fail();
   const nested = obj(r.revalidation), rules = readResult(JSON.stringify(nested), review, source);
   if (r.source_digest !== source.sha256 || r.review_digest !== nested.review_digest
       || hash(r.review_content_digest) !== await digest(canonical(nested.review))) fail("현재 PDF·검토 버전과 다른 AI 결과입니다. 현재 이력으로 다시 실행하세요.");

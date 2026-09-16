@@ -8,6 +8,7 @@ import {pdfAgentInput,pdfCandidateInput,executePdfAgent,type PdfAgentContext} fr
 import {pdfCandidates,candidateCategories} from "./pdf-candidates";
 import type {LiveProgress} from "./agent-live";
 import {LiveWorkbench} from "./LiveWorkbench";
+import RuntimeNotice from "./RuntimeNotice";
 import PdfInputCheck from './PdfInputCheck';
 import "./agent-briefing.css";
 export default function PdfAgentRunner({source,notes,active,onHandoff,onBusy,scoutContext,onReveal}:{scoutContext?:import("./evidence-scout").ScoutContext;source:PdfSource;notes:EvidenceNote[];active:boolean;onHandoff:(raw:string)=>void;onBusy?:(busy:boolean)=>void;onReveal?:(span:PdfSpan)=>void}) {
@@ -49,7 +50,8 @@ export default function PdfAgentRunner({source,notes,active,onHandoff,onBusy,sco
  </section>}
  {inputError?<Alert severity="info">{inputError}</Alert>:<details><summary>모델에 전송할 문구 {input!.spans.length}개 확인</summary>{input!.spans.map(s=><blockquote key={s.id}><strong>p.{s.page} · {s.id}</strong><p>{s.text}</p></blockquote>)}</details>}
  {input&&<PdfInputCheck input={input} disabled={busy||!onReveal} onReveal={id=>{const span=source.pages.flatMap(p=>p.spans).find(s=>s.id===id);if(span)onReveal?.(span);}}/>}
- <FormControlLabel control={<Checkbox checked={consent} disabled={busy || !input} onChange={e=>setConsent(e.target.checked)}/>} label="공개·사용 허가된 비민감 자료임을 확인했고, 위 문구·문맥·질문을 Codex 모델에 전송하여 로그인 계정 사용량을 소비하는 데 동의합니다."/>
+ <RuntimeNotice/>
+ <FormControlLabel control={<Checkbox checked={consent} disabled={busy || !input} onChange={e=>setConsent(e.target.checked)}/>} label="공개·사용 허가된 비민감 자료임을 확인했고, 위 문구·문맥·질문을 위에 표시된 실행 모델에 전송하여 해당 모델 사용량을 소비하는 데 동의합니다."/>
  <div className="design-toolbar"><Button variant="contained" disabled={busy || !input || !consent || !import.meta.env.DEV} onClick={()=>void run()}>{busy?'에이전트 검토 중':'이 원문으로 에이전트 실행'}</Button>{busy&&<Button onClick={()=>controller.current?.abort()}>실행 중단</Button>}{raw&&<Button onClick={()=>downloadText('trialboard-pdf-agent.json',raw,'application/json')}>원본 실행 JSON 저장</Button>}</div>
  {(busy || events.length>0 || error)&&<><Button onClick={()=>setFocus(true)}>작업 보드 크게 보기</Button>{!focus&&board}</>}
  <Dialog fullScreen open={focus} onClose={()=>setFocus(false)} aria-labelledby="live-focus-title"><DialogTitle id="live-focus-title">TrialBoard · 실시간 에이전트 작업</DialogTitle><DialogContent className="live-focus-content"><p>{context.asset} / {context.study} · {context.question}</p>{board}</DialogContent><DialogActions className="live-focus-actions"><span>{isMocSource(source)?'MOC · 합성 PDF / 실제 모델 실행 / 전문가 승인 아님':'선택 원문 기반 · 임상 승인 아님'}</span>{busy&&<Button onClick={()=>controller.current?.abort()}>실행 중단</Button>}{raw&&<Button onClick={()=>downloadText('trialboard-pdf-agent.json',raw,'application/json')}>원본 실행 JSON 저장</Button>}<Button variant="outlined" onClick={()=>setFocus(false)}>작업 화면으로 돌아가기</Button></DialogActions></Dialog>

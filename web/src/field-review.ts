@@ -108,7 +108,7 @@ export async function importAgentReport(raw: string, source: PdfSource): Promise
   const report = object(strictJson(raw)), input = object(report.input);
   if (report.engine_version !== "bounded-evidence-agent/3.2" || input.provenance !== "user_pdf_export_unverified") fail("현재 PDF와 연결된 에이전트 3.2 결과만 지원합니다. 웹 발췌·가상자료 결과는 연결할 수 없습니다.");
   if (!["DRAFT_FOR_EXPERT_REVIEW", "PARTIAL_ABSTENTION"].includes(String(report.status))) fail("실패·예산 초과 결과는 검토 초안으로 불러올 수 없습니다.");
-  if (!["CODEX_CHATGPT", "OPENAI_RESPONSES", "SCRIPTED_TEST_DOUBLE"].includes(String(report.execution_mode))) fail();
+  if (!["CODEX_CHATGPT", "DACON_RESPONSES", "OPENAI_RESPONSES", "SCRIPTED_TEST_DOUBLE"].includes(String(report.execution_mode))) fail();
   if (await digest(canonical(input)) !== report.input_digest) fail("결과의 입력 hash가 일치하지 않습니다.");
   const spans = array(input.spans, 40); if (!spans.length) fail();
   const seen = new Set<string>();

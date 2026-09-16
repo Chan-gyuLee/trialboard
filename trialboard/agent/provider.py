@@ -47,13 +47,30 @@ def parse_json(raw: bytes | str):
 
 class OpenAIResponses:
     mode = "OPENAI_RESPONSES"
+    endpoint = "https://api.openai.com/v1/responses"
+    timeout_seconds = 30
+
+    def headers(self):
+        return {
+            "Authorization": f"Bearer {self._key.get_secret_value()}",
+            "Content-Type": "application/json",
+        }
+
+    def http_error(self, status):
+        return "MODEL_HTTP_ERROR"
+
+    def response_notices(self, headers):
+        return ()
+
+    def output_schema(self, schema):
+        return schema
 
     def __init__(self, key: SecretStr, model: str, transport=None):
         if not key.get_secret_value() or not model.strip() or len(model) > 100:
             raise ValueError("MODEL_CONFIGURATION_REQUIRED")
         self._key = key
         self.model = model
-        # Tests supply an in-memory transport. Live calls use only the fixed official endpoint.
+        # Tests supply an in-memory transport. Each provider pins its own endpoint.
         self._transport = transport
 
     async def complete(self, *, instructions, payload, schema, max_output_tokens):
@@ -77,7 +94,7 @@ class OpenAIResponses:
                     "type": "json_schema",
                     "name": "trialboard_result",
                     "strict": True,
-                    "schema": schema,
+                    "schema": self.output_schema(schema),
                 }
             },
             "max_output_tokens": max_output_tokens,
@@ -90,19 +107,17 @@ class OpenAIResponses:
                 transport=self._transport,
                 trust_env=False,
                 follow_redirects=False,
-                timeout=httpx.Timeout(30),
+                timeout=httpx.Timeout(self.timeout_seconds),
             ) as client:
                 async with client.stream(
                     "POST",
-                    "https://api.openai.com/v1/responses",
+                    self.endpoint,
                     content=encoded,
-                    headers={
-                        "Authorization": f"Bearer {self._key.get_secret_value()}",
-                        "Content-Type": "application/json",
-                    },
+                    headers=self.headers(),
                 ) as response:
                     if response.status_code != 200:
-                        raise ModelError("MODEL_HTTP_ERROR")
+                        raise ModelError(self.http_error(response.status_code))
+                    notices = self.response_notices(response.headers)
                     raw = bytearray()
                     async for chunk in response.aiter_bytes():
                         raw.extend(chunk)
@@ -130,7 +145,7 @@ class OpenAIResponses:
             rid = data["id"]
             if not isinstance(rid, str) or len(rid) > 200:
                 raise ModelError("MODEL_OUTPUT_INVALID")
-            return Reply(value, rid, *counts)
+            return Reply(value, rid, *counts, notices=notices)
         except ModelError:
             raise
         except httpx.TimeoutException:

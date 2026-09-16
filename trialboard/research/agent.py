@@ -34,7 +34,7 @@ If the source text does not explicitly contain that NCT, call the trial linkage 
 
 async def run_research(run: Collection, store, emit, provider: Provider | None = None):
     if provider:
-        if provider.mode not in ("CODEX_CHATGPT", "SCRIPTED_TEST_DOUBLE"):
+        if provider.mode not in ("CODEX_CHATGPT", "DACON_RESPONSES", "SCRIPTED_TEST_DOUBLE"):
             raise ValueError("UNSUPPORTED_RESEARCH_PROVIDER")
         run.execution_mode = provider.mode
 
@@ -109,7 +109,7 @@ async def run_research(run: Collection, store, emit, provider: Provider | None =
     if provider:
 
         async def call(stage, instructions, payload, contract):
-            run.calls.append({"stage": stage, "status": "STARTED"})
+            run.calls.append({"stage": stage, "status": "STARTED", "model": provider.model})
             record = run.calls[-1]
             await checkpoint(stage, "AI가 수집 자료를 확인하고 있습니다.")
             try:
@@ -125,6 +125,7 @@ async def run_research(run: Collection, store, emit, provider: Provider | None =
                     response_id=reply.response_id,
                     input_tokens=reply.input_tokens,
                     output_tokens=reply.output_tokens,
+                    notices=list(reply.notices),
                 )
                 return contract.model_validate(reply.value)
             except BaseException:

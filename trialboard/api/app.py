@@ -38,15 +38,20 @@ def create_app(
     enable_agent_demo: bool = False,
     enable_pdf_agent: bool = False,
     enable_evidence_scout: bool = False,
+    agent_provider: str = "dacon",
     evidence_db: Path = Path("output/evidence/trialboard.sqlite3"),
 ) -> FastAPI:
+    from trialboard.agent.runtime import runtime_metadata, runtime_provider
+
+    metadata = runtime_metadata(agent_provider)
+    provider_factory = lambda: runtime_provider(agent_provider)  # noqa: E731
     app = FastAPI(
         title="TrialBoard local review API",
         version="0.1.0",
         description=(
             "로컬 개발 API. 기본값은 합성 자료 전용. 명시적으로 활성화한 설계 경로만 "
             "공개·사용 허가된 PDF를 메모리에서 처리. 기본 경로는 LLM·영구 저장 없음. "
-            "별도 opt-in 에이전트 데모는 고정 공개/합성 자료만 로컬 Codex로 실행. "
+            "별도 opt-in 에이전트는 설정된 대회 API 또는 명시적으로 선택한 Codex로 실행. "
             "입력 확률은 근거에서 추정하지 않은 사용자의 가정입니다."
         ),
     )
@@ -69,7 +74,7 @@ def create_app(
         from trialboard.api.scout import scout_router
 
         app.include_router(scout_router(evidence_db))
-        app.include_router(research_router(evidence_db, model_slot))
+        app.include_router(research_router(evidence_db, model_slot, provider_factory))
         app.include_router(project_router(evidence_db))
 
     @app.get("/api/agent-demo/capabilities")
@@ -84,7 +89,7 @@ def create_app(
             "max_calls": 4,
             "max_seconds": 120,
             "concurrent_runs": 1,
-            "provider": "CODEX_CHATGPT",
+            **metadata,
             "clinical_approval": False,
             "case_limits": CASE_LIMITS,
             "pdf_enabled": enable_pdf_agent,
@@ -95,7 +100,10 @@ def create_app(
 
         app.include_router(
             demo_router(
-                enable_pdf=enable_pdf_agent, enable_fixed=enable_agent_demo, model_slot=model_slot
+                enable_pdf=enable_pdf_agent,
+                enable_fixed=enable_agent_demo,
+                model_slot=model_slot,
+                provider_factory=provider_factory,
             )
         )
 

@@ -7,7 +7,6 @@ from pathlib import Path
 
 from pydantic import SecretStr, ValidationError
 
-from trialboard.agent.codex_provider import CodexChatGPT
 from trialboard.agent.engine import Limits, run_agent
 from trialboard.agent.example import ScriptedProvider, demo_input
 from trialboard.agent.models import AgentInput
@@ -15,6 +14,7 @@ from trialboard.agent.pdf_input import from_pdf_export
 from trialboard.agent.provider import OpenAIResponses, parse_json
 from trialboard.agent.public_case import public_input, score_public_report
 from trialboard.agent.report import markdown
+from trialboard.agent.runtime import runtime_provider
 
 
 def read_input(path: Path):
@@ -45,7 +45,7 @@ def main():
     parser.add_argument("--indication")
     parser.add_argument("--study")
     parser.add_argument("--question")
-    parser.add_argument("--provider", choices=["codex", "openai"], default="codex")
+    parser.add_argument("--provider", choices=["dacon", "codex", "openai"], default="dacon")
     parser.add_argument(
         "--allow-external",
         action="store_true",
@@ -81,8 +81,8 @@ def main():
                 )
             else:
                 data = AgentInput.model_validate(read_input(args.input))
-            if args.provider == "codex":
-                provider = CodexChatGPT(os.environ.get("TRIALBOARD_CODEX_MODEL") or None)
+            if args.provider in ("dacon", "codex"):
+                provider = runtime_provider(args.provider)
             else:
                 key = os.environ.get("TRIALBOARD_OPENAI_API_KEY", "")
                 model = os.environ.get("TRIALBOARD_OPENAI_MODEL", "")

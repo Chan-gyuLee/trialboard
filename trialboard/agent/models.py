@@ -129,7 +129,9 @@ class AgentReport(Contract):
     prompt_digest: Digest
     engine_version: str
     runtime: dict[str, str]
-    execution_mode: Literal["OPENAI_RESPONSES", "CODEX_CHATGPT", "SCRIPTED_TEST_DOUBLE"]
+    execution_mode: Literal[
+        "OPENAI_RESPONSES", "DACON_RESPONSES", "CODEX_CHATGPT", "SCRIPTED_TEST_DOUBLE"
+    ]
     model: str
     budgets: dict[str, int | float]
     status: Literal["DRAFT_FOR_EXPERT_REVIEW", "PARTIAL_ABSTENTION", "FAILED", "BUDGET_EXCEEDED"]

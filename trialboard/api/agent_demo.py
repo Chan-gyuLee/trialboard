@@ -18,13 +18,13 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from trialboard.agent.codex_provider import CodexChatGPT
 from trialboard.agent.engine import Limits, run_agent
 from trialboard.agent.example import demo_input
 from trialboard.agent.models import AgentInput
 from trialboard.agent.provider import Provider
 from trialboard.agent.public_case import public_input
 from trialboard.agent.revalidate import read_json
+from trialboard.agent.runtime import runtime_provider
 from trialboard.api.boundary import DEV_ORIGINS
 from trialboard.api.models import MAX_BODY_BYTES
 
@@ -73,7 +73,7 @@ class PdfAgentRequest(BaseModel):
 
 
 def demo_router(
-    provider_factory: Callable[[], Provider] = CodexChatGPT,
+    provider_factory: Callable[[], Provider] = runtime_provider,
     *,
     enable_pdf: bool = False,
     enable_fixed: bool = True,

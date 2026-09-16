@@ -38,7 +38,7 @@ export function restoreReview(raw: string, source: PdfSource): FieldReview {
     if (origin.runId !== null || origin.reportDigest !== null || origin.mode !== null) fail();
   } else if (origin.kind === "imported_agent_report") {
     str(origin.runId, 100); hash(origin.reportDigest);
-    if (typeof origin.mode !== "string" || !["CODEX_CHATGPT", "OPENAI_RESPONSES", "SCRIPTED_TEST_DOUBLE"].includes(origin.mode)) fail();
+    if (typeof origin.mode !== "string" || !["CODEX_CHATGPT", "DACON_RESPONSES", "OPENAI_RESPONSES", "SCRIPTED_TEST_DOUBLE"].includes(origin.mode)) fail();
   } else fail();
   function value(v: unknown): Value {
     const hasSupport=!!v && typeof v==='object' && Object.hasOwn(v,'supporting');

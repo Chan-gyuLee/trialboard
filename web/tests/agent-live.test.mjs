@@ -41,3 +41,12 @@ test("only exact local dev origin may execute; remote rejection occurs before fe
     await assert.rejects(runLiveAgent("public", new AbortController().signal, () => {}, location));
   }
 });
+
+test("competition stream preserves provider identity without personal-account fallback", async () => {
+  const daconStart = {...start, execution_mode:"DACON_RESPONSES"};
+  const daconReport = {...report, execution_mode:"DACON_RESPONSES", model:"gpt-5.6-terra"};
+  const r = await consumeAgentStream(response([daconStart, progress, {...result, report:daconReport}]), "public", () => {}, "DACON_RESPONSES");
+  assert.equal(r.execution_mode, "DACON_RESPONSES");
+  await assert.rejects(consumeAgentStream(response([start, progress, result]), "public", () => {}, "DACON_RESPONSES"));
+  await assert.rejects(consumeAgentStream(response([daconStart, progress, result]), "public", () => {}));
+});

@@ -108,7 +108,10 @@ class Origin(Contract):
     kind: Literal["manual", "imported_agent_report"]
     runId: Annotated[str, Field(min_length=1, max_length=100)] | None
     reportDigest: Digest | None
-    mode: Literal["CODEX_CHATGPT", "OPENAI_RESPONSES", "SCRIPTED_TEST_DOUBLE"] | None
+    mode: (
+        Literal["CODEX_CHATGPT", "DACON_RESPONSES", "OPENAI_RESPONSES", "SCRIPTED_TEST_DOUBLE"]
+        | None
+    )
 
     @model_validator(mode="after")
     def consistent(self):

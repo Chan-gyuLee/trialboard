@@ -30,6 +30,8 @@ def markdown(report: AgentReport) -> str:
             "개인 API 키·대회 API를 사용하지 않습니다.",
             "",
         ]
+    if report.execution_mode == "DACON_RESPONSES":
+        lines += ["대회 API로 실행했습니다. 개인 Codex 구독 대신 팀 공용 토큰을 소비합니다.", ""]
     received = [c for c in report.calls if c.input_tokens is not None]
     lines += [
         f"호출 기록 {len(report.calls)}개 / 사용량 확인 {len(received)}개 · "

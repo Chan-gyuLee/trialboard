@@ -11,7 +11,6 @@ from uuid import UUID, uuid4
 
 from pydantic import ValidationError
 
-from trialboard.agent.codex_provider import CodexChatGPT
 from trialboard.agent.engine import Limits
 from trialboard.agent.example import ScriptedProvider
 from trialboard.agent.models import AgentInput, Critique, Extraction
@@ -20,6 +19,7 @@ from trialboard.agent.provider import ModelError, Provider
 from trialboard.agent.report import escaped
 from trialboard.agent.revalidate import JSON_LIMIT, PDF_LIMIT, file_bytes, revalidate
 from trialboard.agent.review_context import critique_payload
+from trialboard.agent.runtime import runtime_provider
 from trialboard.agent.verify import critique_findings
 from trialboard.serialization import sha256_json
 
@@ -55,7 +55,7 @@ async def recritique(
     limits = limits or Limits(max_calls=1, max_repairs=0)
     if limits.max_calls != 1 or limits.max_repairs != 0:
         raise ValueError("RECRITIQUE_IS_ONE_CALL_WITHOUT_REPAIR")
-    if provider.mode not in ("CODEX_CHATGPT", "SCRIPTED_TEST_DOUBLE"):
+    if provider.mode not in ("CODEX_CHATGPT", "DACON_RESPONSES", "SCRIPTED_TEST_DOUBLE"):
         raise ValueError("RECRITIQUE_PROVIDER_NOT_ENABLED")
     # Recompute locally from source bytes, NOT an externally supplied verifier report.
     checked = revalidate(review_raw, source_raw, pdf_raw, agent_raw=agent_raw, context=context)
@@ -96,8 +96,8 @@ async def recritique(
             "사용자 값·이력과 과거 모델 의견은 보존되며 AI가 덮어쓰지 않습니다.",
             "검토 이력이 바뀌면 이 결과는 이전 버전 결과입니다. 다시 실행해야 합니다.",
             "PDF hash를 대조하지만 추출 문구·좌표를 PDF에서 독립 재추출하지 않습니다.",
-            "한 번의 CLI turn만 요청하며 자동 재시도·다른 provider 전환을 하지 않습니다.",
-            "Codex 출력 토큰 목표는 강제 상한이 아닙니다. "
+            "한 번의 모델 호출만 요청하며 자동 재시도·다른 provider 전환을 하지 않습니다.",
+            "Codex 경로의 출력 토큰 목표는 강제 상한이 아닙니다. "
             "실패한 호출의 사용량은 미확인일 수 있습니다.",
             "보고된 사용량은 구독 잔여량이 아니며 CLI 내부 HTTP 재시도 횟수와 다릅니다.",
         ],
@@ -224,7 +224,10 @@ def main():
     for name in ("asset", "indication", "study", "question"):
         parser.add_argument(f"--{name}")
     mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--allow-external", action="store_true", help="Send selected text to Codex")
+    parser.add_argument("--provider", choices=["dacon", "codex"], default="dacon")
+    mode.add_argument(
+        "--allow-external", action="store_true", help="Send selected text to the selected provider"
+    )
     mode.add_argument(
         "--scripted-test", action="store_true", help="No real model; contract test only"
     )
@@ -236,11 +239,7 @@ def main():
         limits = Limits(
             max_calls=1, max_repairs=0, seconds=args.seconds, max_total_tokens=args.max_total_tokens
         )
-        provider = (
-            ScriptedProvider()
-            if args.scripted_test
-            else CodexChatGPT(os.environ.get("TRIALBOARD_CODEX_MODEL") or None)
-        )
+        provider = ScriptedProvider() if args.scripted_test else runtime_provider(args.provider)
         result = asyncio.run(
             recritique(
                 file_bytes(args.review, JSON_LIMIT),

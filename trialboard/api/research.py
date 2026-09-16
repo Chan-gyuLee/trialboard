@@ -11,7 +11,7 @@ from anyio import CancelScope
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response, StreamingResponse
 
-from trialboard.agent.codex_provider import CodexChatGPT
+from trialboard.agent.runtime import runtime_provider
 from trialboard.api.boundary import DEV_ORIGINS
 from trialboard.research.agent import run_research
 from trialboard.research.collect import download_pdf
@@ -19,7 +19,11 @@ from trialboard.research.models import CurationInput, ResearchRequest
 from trialboard.research.store import ResearchStore
 
 
-def research_router(path: Path, model_slot: BoundedSemaphore, provider_factory=CodexChatGPT):
+def research_router(
+    path: Path,
+    model_slot: BoundedSemaphore,
+    provider_factory=runtime_provider,
+):
     router = APIRouter(prefix="/api/research")
     store = ResearchStore(path)
     running = False

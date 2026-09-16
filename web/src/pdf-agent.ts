@@ -36,9 +36,9 @@ export async function executePdfAgent(input:ReturnType<typeof pdfAgentInput>,con
  const expected=await digest(canonical(input));
  const caps=await fetcher('/api/agent-demo/capabilities',{signal,cache:'no-store',credentials:'omit',redirect:'error'});
  if(!caps.ok) throw new Error("로컬 실행 설정을 확인하지 못했습니다.");
- const c=await caps.json();if(c.pdf_enabled!==true || c.provider!=="CODEX_CHATGPT" || c.persisted!==false || c.transport!=="LOOPBACK_ONLY") throw new Error("PDF 에이전트는 --enable-pdf-agent 옵션으로 별도 활성화해야 합니다. 아직 자료를 전송하지 않았습니다.");
+ const c=await caps.json();if(c.pdf_enabled!==true || !["CODEX_CHATGPT","DACON_RESPONSES"].includes(c.provider) || c.configured===false || c.persisted!==false || c.transport!=="LOOPBACK_ONLY") throw new Error("PDF 에이전트는 --enable-pdf-agent 옵션으로 별도 활성화해야 합니다. 아직 자료를 전송하지 않았습니다.");
  const response=await fetcher('/api/pdf-agent/run',{method:'POST',headers:{'Content-Type':'application/json'},body,signal,credentials:'omit',redirect:'error'});
- const report=await consumeAgentStream(response,'pdf',onProgress);
+ const report=await consumeAgentStream(response,'pdf',onProgress,c.provider);
  if(report.input_digest!==expected) throw new Error("요청한 PDF 문구·질문과 실행 결과가 다릅니다.");
  return JSON.stringify(report,null,2);
 }
