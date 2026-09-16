@@ -1,0 +1,42 @@
+.design-workspace { color: #243244; max-width: 1160px; margin: auto; }
+.design-heading, .design-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.design-heading { padding: 12px 0 18px; }
+.design-heading h2 { font-size: 25px; font-weight: 600; letter-spacing: -.7px; margin: 8px 0; }
+.design-heading p, .design-help { color: #617080; font-size: 13px; line-height: 1.8; }
+.design-steps { display: flex; gap: 10px 24px; flex-wrap: wrap; padding: 16px 0; margin-bottom: 16px; border-block: 1px solid #e4e9ef; color: #52677e; font-size: 12px; }
+.design-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0; }
+.design-section { padding: 24px 0; border-bottom: 1px solid #e4e9ef; display: grid; gap: 18px; }
+.design-section h3 { font-size: 17px; font-weight: 600; margin: 0; }
+.design-section h4 { font-size: 14px; margin: 0; line-height: 1.6; overflow-wrap: anywhere; }
+.design-section p { margin: 0; line-height: 1.8; }
+.design-card-grid, .design-rate-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.design-card { display: grid; gap: 16px; padding: 20px; border: 1px solid #dce3eb; border-radius: 10px; background: #fcfdff; min-width: 0; overflow-wrap: anywhere; }
+.design-total { font-size: 25px; font-variant-numeric: tabular-nums; }
+.design-total small { display: block; color: #718091; font-size: 12px; }
+.design-rate-grid > div { display: grid; gap: 14px; padding: 16px; background: #f2f5fa; border-radius: 6px; }
+.design-empty { padding: 45px 16px; text-align: center; color: #617080; }
+.design-workspace pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; padding: 12px; background: #f1f4f8; }
+.design-table-scroll { overflow-x: auto; border: 1px solid #dce3eb; border-radius: 8px; }
+.design-workspace table { width: 100%; min-width: 630px; border-collapse: collapse; text-align: left; font-size: 13px; font-variant-numeric: tabular-nums; }
+.design-workspace caption { text-align: left; padding: 15px; color: #617080; font-size: 12px; }
+.design-workspace th, .design-workspace td { border-top: 1px solid #e4e9ef; padding: 16px; vertical-align: top; }
+.design-workspace thead th { background: #f4f7fa; color: #52677e; font-weight: 500; }
+.design-workspace td { font-size: 21px; }
+.design-workspace td small, .design-workspace th small { display: block; color: #718091; font-size: 12px; font-weight: 400; margin-top: 8px; }
+.design-meeting-grid { display: grid; grid-template-columns: minmax(260px, .9fr) minmax(300px, 1.1fr); gap: 24px; align-items: start; }
+.design-question-list { max-height: 680px; overflow: auto; display: grid; gap: 8px; padding: 3px; }
+.design-question-list button { font: inherit; text-align: left; padding: 16px; border: 1px solid #dce3eb; border-radius: 8px; background: #fff; color: #243244; cursor: pointer; }
+.design-question-list button small { display: block; margin-bottom: 7px; color: #617080; font-size: 11px; }
+.design-question-list button span { display: block; font-size: 13px; line-height: 1.8; }
+.design-question-list button[aria-pressed="true"] { background: #eff5ff; border-color: #709bd8; }
+.design-question-list button:focus-visible { outline: 2px solid #245ab4; outline-offset: 1px; }
+.design-note-editor { display: grid; gap: 18px; min-width: 0; }
+.pdf-review-grid.pdf-design-view { grid-template-columns: minmax(0, 1fr); }
+.pdf-design-view .field-review { padding: 26px; }
+@media (max-width: 720px) { .design-card-grid, .design-rate-grid, .design-meeting-grid { grid-template-columns: minmax(0, 1fr); } .design-question-list { max-height: 350px; } .pdf-design-view .field-review { padding: 16px; } .design-heading h2 { font-size: 22px; } }
+.evidence-assumption-dialog { display: grid; gap: 20px; padding-top: 12px !important; }
+.evidence-assumption-dialog .assumption-source { padding: 20px; background: #f4f7fb; border-left: 3px solid #355ec9; overflow-wrap: anywhere; }
+.assumption-source h3 { margin-top: 0; font-size: 1rem; }
+.assumption-source dl { display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 10px; font-size: 1rem; }
+.assumption-source dd { margin: 0; }
+.assumption-source blockquote { margin: 16px 0 0; font-size: 1rem; }

@@ -1,0 +1,1026 @@
+{
+  "run_id": "517e68f4-30a3-4c14-a470-828334a6e51a",
+  "started_at": "2026-09-14T07:24:56.516064+00:00",
+  "input_digest": "6a93aa5adb763c61e18d91f6089e701653d8e0f5d53e41264b4f861ffecd42e2",
+  "input": {
+    "question": "두 용량의 반응과 이상반응을 비교하기 전에 무엇을 확인해야 하는가?",
+    "asset": "DEMO-01",
+    "indication": "demo-tumor",
+    "study": "DEMO-STUDY",
+    "spans": [
+      {
+        "id": "span-0",
+        "source_digest": "3517d09cd694e67fa0df35f95ce3b53de0a8e18182076b8440548e9c33610412",
+        "page": 1,
+        "text": "asset DEMO-01; indication demo-tumor; study DEMO-STUDY; cohort expansion; dose dose-A; metric response; events 6; denominator 20; population evaluable; window week-12; definition response-definition.",
+        "locator": null
+      },
+      {
+        "id": "span-1",
+        "source_digest": "3517d09cd694e67fa0df35f95ce3b53de0a8e18182076b8440548e9c33610412",
+        "page": 1,
+        "text": "asset DEMO-01; indication demo-tumor; study DEMO-STUDY; cohort expansion; dose dose-B; metric response; events 7; denominator 20; population evaluable; window week-12; definition response-definition.",
+        "locator": null
+      },
+      {
+        "id": "span-2",
+        "source_digest": "3517d09cd694e67fa0df35f95ce3b53de0a8e18182076b8440548e9c33610412",
+        "page": 1,
+        "text": "asset DEMO-01; indication demo-tumor; study DEMO-STUDY; cohort expansion; dose dose-A; metric adverse_event; events 2; denominator 20; population evaluable; window week-12; definition adverse_event-definition.",
+        "locator": null
+      },
+      {
+        "id": "span-3",
+        "source_digest": "3517d09cd694e67fa0df35f95ce3b53de0a8e18182076b8440548e9c33610412",
+        "page": 1,
+        "text": "asset DEMO-01; indication demo-tumor; study DEMO-STUDY; cohort expansion; dose dose-B; metric adverse_event; events 5; denominator 20; population evaluable; window week-12; definition adverse_event-definition.",
+        "locator": null
+      }
+    ],
+    "provenance": "synthetic_fixture"
+  },
+  "prompt_version": "dose-evidence-review/3",
+  "prompt_digest": "d35f36913ce4ac2979fe9cdab4812afd2bd5a0fbea05dc1e8cc8d29023695593",
+  "engine_version": "bounded-evidence-agent/3.2",
+  "runtime": {
+    "python": "3.12.14",
+    "pydantic": "2.13.5",
+    "httpx": "0.28.1",
+    "clinical_labels": "clinical-labels/1.1"
+  },
+  "execution_mode": "SCRIPTED_TEST_DOUBLE",
+  "model": "scripted-fixture-not-a-model",
+  "budgets": {
+    "max_calls": 6,
+    "max_repairs": 2,
+    "max_output_tokens": 4000,
+    "max_total_tokens": 200000,
+    "seconds": 120
+  },
+  "status": "DRAFT_FOR_EXPERT_REVIEW",
+  "accepted": [
+    {
+      "id": "obs-0",
+      "value_kind": "event_count",
+      "fields": {
+        "asset": {
+          "value": "DEMO-01",
+          "span_id": "span-0",
+          "quote": "asset DEMO-01"
+        },
+        "indication": {
+          "value": "demo-tumor",
+          "span_id": "span-0",
+          "quote": "indication demo-tumor"
+        },
+        "study": {
+          "value": "DEMO-STUDY",
+          "span_id": "span-0",
+          "quote": "study DEMO-STUDY"
+        },
+        "cohort": {
+          "value": "expansion",
+          "span_id": "span-0",
+          "quote": "cohort expansion"
+        },
+        "dose": {
+          "value": "dose-A",
+          "span_id": "span-0",
+          "quote": "dose dose-A"
+        },
+        "metric": {
+          "value": "response",
+          "span_id": "span-0",
+          "quote": "metric response"
+        },
+        "events": {
+          "value": "6",
+          "span_id": "span-0",
+          "quote": "events 6"
+        },
+        "denominator": {
+          "value": "20",
+          "span_id": "span-0",
+          "quote": "denominator 20"
+        },
+        "population": {
+          "value": "evaluable",
+          "span_id": "span-0",
+          "quote": "population evaluable"
+        },
+        "window": {
+          "value": "week-12",
+          "span_id": "span-0",
+          "quote": "window week-12"
+        },
+        "definition": {
+          "value": "response-definition",
+          "span_id": "span-0",
+          "quote": "definition response-definition"
+        },
+        "reported_rate": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        }
+      }
+    },
+    {
+      "id": "obs-1",
+      "value_kind": "event_count",
+      "fields": {
+        "asset": {
+          "value": "DEMO-01",
+          "span_id": "span-1",
+          "quote": "asset DEMO-01"
+        },
+        "indication": {
+          "value": "demo-tumor",
+          "span_id": "span-1",
+          "quote": "indication demo-tumor"
+        },
+        "study": {
+          "value": "DEMO-STUDY",
+          "span_id": "span-1",
+          "quote": "study DEMO-STUDY"
+        },
+        "cohort": {
+          "value": "expansion",
+          "span_id": "span-1",
+          "quote": "cohort expansion"
+        },
+        "dose": {
+          "value": "dose-B",
+          "span_id": "span-1",
+          "quote": "dose dose-B"
+        },
+        "metric": {
+          "value": "response",
+          "span_id": "span-1",
+          "quote": "metric response"
+        },
+        "events": {
+          "value": "7",
+          "span_id": "span-1",
+          "quote": "events 7"
+        },
+        "denominator": {
+          "value": "20",
+          "span_id": "span-1",
+          "quote": "denominator 20"
+        },
+        "population": {
+          "value": "evaluable",
+          "span_id": "span-1",
+          "quote": "population evaluable"
+        },
+        "window": {
+          "value": "week-12",
+          "span_id": "span-1",
+          "quote": "window week-12"
+        },
+        "definition": {
+          "value": "response-definition",
+          "span_id": "span-1",
+          "quote": "definition response-definition"
+        },
+        "reported_rate": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        }
+      }
+    },
+    {
+      "id": "obs-2",
+      "value_kind": "event_count",
+      "fields": {
+        "asset": {
+          "value": "DEMO-01",
+          "span_id": "span-2",
+          "quote": "asset DEMO-01"
+        },
+        "indication": {
+          "value": "demo-tumor",
+          "span_id": "span-2",
+          "quote": "indication demo-tumor"
+        },
+        "study": {
+          "value": "DEMO-STUDY",
+          "span_id": "span-2",
+          "quote": "study DEMO-STUDY"
+        },
+        "cohort": {
+          "value": "expansion",
+          "span_id": "span-2",
+          "quote": "cohort expansion"
+        },
+        "dose": {
+          "value": "dose-A",
+          "span_id": "span-2",
+          "quote": "dose dose-A"
+        },
+        "metric": {
+          "value": "adverse_event",
+          "span_id": "span-2",
+          "quote": "metric adverse_event"
+        },
+        "events": {
+          "value": "2",
+          "span_id": "span-2",
+          "quote": "events 2"
+        },
+        "denominator": {
+          "value": "20",
+          "span_id": "span-2",
+          "quote": "denominator 20"
+        },
+        "population": {
+          "value": "evaluable",
+          "span_id": "span-2",
+          "quote": "population evaluable"
+        },
+        "window": {
+          "value": "week-12",
+          "span_id": "span-2",
+          "quote": "window week-12"
+        },
+        "definition": {
+          "value": "adverse_event-definition",
+          "span_id": "span-2",
+          "quote": "definition adverse_event-definition"
+        },
+        "reported_rate": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        }
+      }
+    },
+    {
+      "id": "obs-3",
+      "value_kind": "event_count",
+      "fields": {
+        "asset": {
+          "value": "DEMO-01",
+          "span_id": "span-3",
+          "quote": "asset DEMO-01"
+        },
+        "indication": {
+          "value": "demo-tumor",
+          "span_id": "span-3",
+          "quote": "indication demo-tumor"
+        },
+        "study": {
+          "value": "DEMO-STUDY",
+          "span_id": "span-3",
+          "quote": "study DEMO-STUDY"
+        },
+        "cohort": {
+          "value": "expansion",
+          "span_id": "span-3",
+          "quote": "cohort expansion"
+        },
+        "dose": {
+          "value": "dose-B",
+          "span_id": "span-3",
+          "quote": "dose dose-B"
+        },
+        "metric": {
+          "value": "adverse_event",
+          "span_id": "span-3",
+          "quote": "metric adverse_event"
+        },
+        "events": {
+          "value": "5",
+          "span_id": "span-3",
+          "quote": "events 5"
+        },
+        "denominator": {
+          "value": "20",
+          "span_id": "span-3",
+          "quote": "denominator 20"
+        },
+        "population": {
+          "value": "evaluable",
+          "span_id": "span-3",
+          "quote": "population evaluable"
+        },
+        "window": {
+          "value": "week-12",
+          "span_id": "span-3",
+          "quote": "window week-12"
+        },
+        "definition": {
+          "value": "adverse_event-definition",
+          "span_id": "span-3",
+          "quote": "definition adverse_event-definition"
+        },
+        "reported_rate": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        }
+      }
+    }
+  ],
+  "metric_mappings": [
+    {
+      "observation_id": "obs-0",
+      "source_label": "response",
+      "family": "response",
+      "code": "synthetic_response",
+      "mapping_version": "clinical-labels/1.1"
+    },
+    {
+      "observation_id": "obs-1",
+      "source_label": "response",
+      "family": "response",
+      "code": "synthetic_response",
+      "mapping_version": "clinical-labels/1.1"
+    },
+    {
+      "observation_id": "obs-2",
+      "source_label": "adverse_event",
+      "family": "adverse_event",
+      "code": "synthetic_adverse_event",
+      "mapping_version": "clinical-labels/1.1"
+    },
+    {
+      "observation_id": "obs-3",
+      "source_label": "adverse_event",
+      "family": "adverse_event",
+      "code": "synthetic_adverse_event",
+      "mapping_version": "clinical-labels/1.1"
+    }
+  ],
+  "attempts": [
+    {
+      "number": 0,
+      "extraction": {
+        "observations": [
+          {
+            "id": "obs-0",
+            "value_kind": "event_count",
+            "fields": {
+              "asset": {
+                "value": "DEMO-01",
+                "span_id": "span-0",
+                "quote": "asset DEMO-01"
+              },
+              "indication": {
+                "value": "demo-tumor",
+                "span_id": "span-0",
+                "quote": "indication demo-tumor"
+              },
+              "study": {
+                "value": "DEMO-STUDY",
+                "span_id": "span-0",
+                "quote": "study DEMO-STUDY"
+              },
+              "cohort": {
+                "value": "expansion",
+                "span_id": "span-0",
+                "quote": "cohort expansion"
+              },
+              "dose": {
+                "value": "dose-A",
+                "span_id": "span-0",
+                "quote": "dose dose-A"
+              },
+              "metric": {
+                "value": "response",
+                "span_id": "span-0",
+                "quote": "metric response"
+              },
+              "events": {
+                "value": "6",
+                "span_id": "span-0",
+                "quote": "events 6"
+              },
+              "denominator": {
+                "value": "20",
+                "span_id": "span-0",
+                "quote": "denominator 20"
+              },
+              "population": {
+                "value": "evaluable",
+                "span_id": "span-0",
+                "quote": "population evaluable"
+              },
+              "window": {
+                "value": "week-12",
+                "span_id": "span-0",
+                "quote": "window week-12"
+              },
+              "definition": {
+                "value": "response-definition",
+                "span_id": "span-0",
+                "quote": "definition response-definition"
+              },
+              "reported_rate": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              }
+            }
+          },
+          {
+            "id": "obs-1",
+            "value_kind": "event_count",
+            "fields": {
+              "asset": {
+                "value": "DEMO-01",
+                "span_id": "span-1",
+                "quote": "asset DEMO-01"
+              },
+              "indication": {
+                "value": "demo-tumor",
+                "span_id": "span-1",
+                "quote": "indication demo-tumor"
+              },
+              "study": {
+                "value": "DEMO-STUDY",
+                "span_id": "span-1",
+                "quote": "study DEMO-STUDY"
+              },
+              "cohort": {
+                "value": "expansion",
+                "span_id": "span-1",
+                "quote": "cohort expansion"
+              },
+              "dose": {
+                "value": "dose-B",
+                "span_id": "span-1",
+                "quote": "dose dose-B"
+              },
+              "metric": {
+                "value": "response",
+                "span_id": "span-1",
+                "quote": "metric response"
+              },
+              "events": {
+                "value": "7",
+                "span_id": "span-1",
+                "quote": "events 7"
+              },
+              "denominator": {
+                "value": "200",
+                "span_id": "span-1",
+                "quote": "denominator 20"
+              },
+              "population": {
+                "value": "evaluable",
+                "span_id": "span-1",
+                "quote": "population evaluable"
+              },
+              "window": {
+                "value": "week-12",
+                "span_id": "span-1",
+                "quote": "window week-12"
+              },
+              "definition": {
+                "value": "response-definition",
+                "span_id": "span-1",
+                "quote": "definition response-definition"
+              },
+              "reported_rate": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              }
+            }
+          },
+          {
+            "id": "obs-2",
+            "value_kind": "event_count",
+            "fields": {
+              "asset": {
+                "value": "DEMO-01",
+                "span_id": "span-2",
+                "quote": "asset DEMO-01"
+              },
+              "indication": {
+                "value": "demo-tumor",
+                "span_id": "span-2",
+                "quote": "indication demo-tumor"
+              },
+              "study": {
+                "value": "DEMO-STUDY",
+                "span_id": "span-2",
+                "quote": "study DEMO-STUDY"
+              },
+              "cohort": {
+                "value": "expansion",
+                "span_id": "span-2",
+                "quote": "cohort expansion"
+              },
+              "dose": {
+                "value": "dose-A",
+                "span_id": "span-2",
+                "quote": "dose dose-A"
+              },
+              "metric": {
+                "value": "adverse_event",
+                "span_id": "span-2",
+                "quote": "metric adverse_event"
+              },
+              "events": {
+                "value": "2",
+                "span_id": "span-2",
+                "quote": "events 2"
+              },
+              "denominator": {
+                "value": "20",
+                "span_id": "span-2",
+                "quote": "denominator 20"
+              },
+              "population": {
+                "value": "evaluable",
+                "span_id": "span-2",
+                "quote": "population evaluable"
+              },
+              "window": {
+                "value": "week-12",
+                "span_id": "span-2",
+                "quote": "window week-12"
+              },
+              "definition": {
+                "value": "adverse_event-definition",
+                "span_id": "span-2",
+                "quote": "definition adverse_event-definition"
+              },
+              "reported_rate": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              }
+            }
+          },
+          {
+            "id": "obs-3",
+            "value_kind": "event_count",
+            "fields": {
+              "asset": {
+                "value": "DEMO-01",
+                "span_id": "span-3",
+                "quote": "asset DEMO-01"
+              },
+              "indication": {
+                "value": "demo-tumor",
+                "span_id": "span-3",
+                "quote": "indication demo-tumor"
+              },
+              "study": {
+                "value": "DEMO-STUDY",
+                "span_id": "span-3",
+                "quote": "study DEMO-STUDY"
+              },
+              "cohort": {
+                "value": "expansion",
+                "span_id": "span-3",
+                "quote": "cohort expansion"
+              },
+              "dose": {
+                "value": "dose-B",
+                "span_id": "span-3",
+                "quote": "dose dose-B"
+              },
+              "metric": {
+                "value": "adverse_event",
+                "span_id": "span-3",
+                "quote": "metric adverse_event"
+              },
+              "events": {
+                "value": "5",
+                "span_id": "span-3",
+                "quote": "events 5"
+              },
+              "denominator": {
+                "value": "20",
+                "span_id": "span-3",
+                "quote": "denominator 20"
+              },
+              "population": {
+                "value": "evaluable",
+                "span_id": "span-3",
+                "quote": "population evaluable"
+              },
+              "window": {
+                "value": "week-12",
+                "span_id": "span-3",
+                "quote": "window week-12"
+              },
+              "definition": {
+                "value": "adverse_event-definition",
+                "span_id": "span-3",
+                "quote": "definition adverse_event-definition"
+              },
+              "reported_rate": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              }
+            }
+          }
+        ]
+      },
+      "findings": [
+        {
+          "code": "VALUE_NOT_IN_QUOTE",
+          "observation_id": "obs-1",
+          "field": "denominator",
+          "detail": ""
+        },
+        {
+          "code": "COUNT_ROLE_UNSUPPORTED",
+          "observation_id": "obs-1",
+          "field": null,
+          "detail": ""
+        },
+        {
+          "code": "ENDPOINT_MISSING",
+          "observation_id": null,
+          "field": null,
+          "detail": "dose-B: response"
+        }
+      ],
+      "critique": {
+        "concerns": [],
+        "next_questions": [
+          "실제 원문과 집단 정의를 전문가가 확인했는가?"
+        ]
+      }
+    },
+    {
+      "number": 1,
+      "extraction": {
+        "observations": [
+          {
+            "id": "obs-0",
+            "value_kind": "event_count",
+            "fields": {
+              "asset": {
+                "value": "DEMO-01",
+                "span_id": "span-0",
+                "quote": "asset DEMO-01"
+              },
+              "indication": {
+                "value": "demo-tumor",
+                "span_id": "span-0",
+                "quote": "indication demo-tumor"
+              },
+              "study": {
+                "value": "DEMO-STUDY",
+                "span_id": "span-0",
+                "quote": "study DEMO-STUDY"
+              },
+              "cohort": {
+                "value": "expansion",
+                "span_id": "span-0",
+                "quote": "cohort expansion"
+              },
+              "dose": {
+                "value": "dose-A",
+                "span_id": "span-0",
+                "quote": "dose dose-A"
+              },
+              "metric": {
+                "value": "response",
+                "span_id": "span-0",
+                "quote": "metric response"
+              },
+              "events": {
+                "value": "6",
+                "span_id": "span-0",
+                "quote": "events 6"
+              },
+              "denominator": {
+                "value": "20",
+                "span_id": "span-0",
+                "quote": "denominator 20"
+              },
+              "population": {
+                "value": "evaluable",
+                "span_id": "span-0",
+                "quote": "population evaluable"
+              },
+              "window": {
+                "value": "week-12",
+                "span_id": "span-0",
+                "quote": "window week-12"
+              },
+              "definition": {
+                "value": "response-definition",
+                "span_id": "span-0",
+                "quote": "definition response-definition"
+              },
+              "reported_rate": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              }
+            }
+          },
+          {
+            "id": "obs-1",
+            "value_kind": "event_count",
+            "fields": {
+              "asset": {
+                "value": "DEMO-01",
+                "span_id": "span-1",
+                "quote": "asset DEMO-01"
+              },
+              "indication": {
+                "value": "demo-tumor",
+                "span_id": "span-1",
+                "quote": "indication demo-tumor"
+              },
+              "study": {
+                "value": "DEMO-STUDY",
+                "span_id": "span-1",
+                "quote": "study DEMO-STUDY"
+              },
+              "cohort": {
+                "value": "expansion",
+                "span_id": "span-1",
+                "quote": "cohort expansion"
+              },
+              "dose": {
+                "value": "dose-B",
+                "span_id": "span-1",
+                "quote": "dose dose-B"
+              },
+              "metric": {
+                "value": "response",
+                "span_id": "span-1",
+                "quote": "metric response"
+              },
+              "events": {
+                "value": "7",
+                "span_id": "span-1",
+                "quote": "events 7"
+              },
+              "denominator": {
+                "value": "20",
+                "span_id": "span-1",
+                "quote": "denominator 20"
+              },
+              "population": {
+                "value": "evaluable",
+                "span_id": "span-1",
+                "quote": "population evaluable"
+              },
+              "window": {
+                "value": "week-12",
+                "span_id": "span-1",
+                "quote": "window week-12"
+              },
+              "definition": {
+                "value": "response-definition",
+                "span_id": "span-1",
+                "quote": "definition response-definition"
+              },
+              "reported_rate": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              }
+            }
+          },
+          {
+            "id": "obs-2",
+            "value_kind": "event_count",
+            "fields": {
+              "asset": {
+                "value": "DEMO-01",
+                "span_id": "span-2",
+                "quote": "asset DEMO-01"
+              },
+              "indication": {
+                "value": "demo-tumor",
+                "span_id": "span-2",
+                "quote": "indication demo-tumor"
+              },
+              "study": {
+                "value": "DEMO-STUDY",
+                "span_id": "span-2",
+                "quote": "study DEMO-STUDY"
+              },
+              "cohort": {
+                "value": "expansion",
+                "span_id": "span-2",
+                "quote": "cohort expansion"
+              },
+              "dose": {
+                "value": "dose-A",
+                "span_id": "span-2",
+                "quote": "dose dose-A"
+              },
+              "metric": {
+                "value": "adverse_event",
+                "span_id": "span-2",
+                "quote": "metric adverse_event"
+              },
+              "events": {
+                "value": "2",
+                "span_id": "span-2",
+                "quote": "events 2"
+              },
+              "denominator": {
+                "value": "20",
+                "span_id": "span-2",
+                "quote": "denominator 20"
+              },
+              "population": {
+                "value": "evaluable",
+                "span_id": "span-2",
+                "quote": "population evaluable"
+              },
+              "window": {
+                "value": "week-12",
+                "span_id": "span-2",
+                "quote": "window week-12"
+              },
+              "definition": {
+                "value": "adverse_event-definition",
+                "span_id": "span-2",
+                "quote": "definition adverse_event-definition"
+              },
+              "reported_rate": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              }
+            }
+          },
+          {
+            "id": "obs-3",
+            "value_kind": "event_count",
+            "fields": {
+              "asset": {
+                "value": "DEMO-01",
+                "span_id": "span-3",
+                "quote": "asset DEMO-01"
+              },
+              "indication": {
+                "value": "demo-tumor",
+                "span_id": "span-3",
+                "quote": "indication demo-tumor"
+              },
+              "study": {
+                "value": "DEMO-STUDY",
+                "span_id": "span-3",
+                "quote": "study DEMO-STUDY"
+              },
+              "cohort": {
+                "value": "expansion",
+                "span_id": "span-3",
+                "quote": "cohort expansion"
+              },
+              "dose": {
+                "value": "dose-B",
+                "span_id": "span-3",
+                "quote": "dose dose-B"
+              },
+              "metric": {
+                "value": "adverse_event",
+                "span_id": "span-3",
+                "quote": "metric adverse_event"
+              },
+              "events": {
+                "value": "5",
+                "span_id": "span-3",
+                "quote": "events 5"
+              },
+              "denominator": {
+                "value": "20",
+                "span_id": "span-3",
+                "quote": "denominator 20"
+              },
+              "population": {
+                "value": "evaluable",
+                "span_id": "span-3",
+                "quote": "population evaluable"
+              },
+              "window": {
+                "value": "week-12",
+                "span_id": "span-3",
+                "quote": "window week-12"
+              },
+              "definition": {
+                "value": "adverse_event-definition",
+                "span_id": "span-3",
+                "quote": "definition adverse_event-definition"
+              },
+              "reported_rate": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              }
+            }
+          }
+        ]
+      },
+      "findings": [],
+      "critique": {
+        "concerns": [],
+        "next_questions": [
+          "실제 원문과 집단 정의를 전문가가 확인했는가?"
+        ]
+      }
+    }
+  ],
+  "calls": [
+    {
+      "stage": "EXTRACT",
+      "attempt": 0,
+      "response_id": "scripted-1",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "outcome": "RECEIVED",
+      "notices": []
+    },
+    {
+      "stage": "CRITIQUE",
+      "attempt": 0,
+      "response_id": "scripted-2",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "outcome": "RECEIVED",
+      "notices": []
+    },
+    {
+      "stage": "REVISE",
+      "attempt": 1,
+      "response_id": "scripted-3",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "outcome": "RECEIVED",
+      "notices": []
+    },
+    {
+      "stage": "CRITIQUE",
+      "attempt": 1,
+      "response_id": "scripted-4",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "outcome": "RECEIVED",
+      "notices": []
+    }
+  ],
+  "events": [
+    {
+      "stage": "EXTRACT",
+      "attempt": 0,
+      "codes": []
+    },
+    {
+      "stage": "VERIFY",
+      "attempt": 0,
+      "codes": [
+        "COUNT_ROLE_UNSUPPORTED",
+        "ENDPOINT_MISSING",
+        "VALUE_NOT_IN_QUOTE"
+      ]
+    },
+    {
+      "stage": "CRITIQUE",
+      "attempt": 0,
+      "codes": []
+    },
+    {
+      "stage": "REVISE",
+      "attempt": 1,
+      "codes": []
+    },
+    {
+      "stage": "VERIFY",
+      "attempt": 1,
+      "codes": []
+    },
+    {
+      "stage": "CRITIQUE",
+      "attempt": 1,
+      "codes": []
+    },
+    {
+      "stage": "DRAFT_FOR_EXPERT_REVIEW",
+      "attempt": 1,
+      "codes": []
+    }
+  ],
+  "limitations": [
+    "Literal source/count checks and model critique are not clinical validation.",
+    "Same-model critique is not independent expert review; omissions may remain.",
+    "No autonomous search, trial design recommendation, PK/PD inference or simulation.",
+    "Source PDF hash is supplied by the export; PDF bytes are not rehashed here.",
+    "Only supplied spans were reviewed; conclusions do not cover the whole document.",
+    "Accepted observations remain unverified drafts, not clinical evidence approval.",
+    "Canonical label mapping is a small vocabulary, not endpoint equivalence validation.",
+    "Reported percentages remain rates, never reconstructed event counts.",
+    "Rate/population binding supports one prose pattern; other syntax stays unverified.",
+    "Curated public source digests cover excerpts, not original HTML/PDF bytes.",
+    "Usage caps do not guarantee monetary cost; failed calls may still be billed."
+  ]
+}

@@ -1,0 +1,1992 @@
+{
+  "schemaVersion": "pdf-field-review/1",
+  "sourceDigest": "a3d85c77f31193e04eef53b891d4e51a57e24ea23ba64bf4b342a7b9169d09a1",
+  "origin": {
+    "kind": "imported_agent_report",
+    "runId": "6d7b748d-0d14-4305-89d0-23cc7a975464",
+    "reportDigest": "1e33ee7fe9fd2f1fd66ccc23e7facfea7881ffca8ab1c57b272b9afa6a29703b",
+    "mode": "SCRIPTED_TEST_DOUBLE"
+  },
+  "rows": [
+    {
+      "id": "obs-0",
+      "origin": "imported_agent_report",
+      "valueKind": "event_count",
+      "fields": {
+        "asset": {
+          "original": {
+            "value": "DEMO-01",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "asset DEMO-01"
+            }
+          },
+          "current": {
+            "value": "DEMO-01",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "asset DEMO-01"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "DEMO-01",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "asset DEMO-01"
+                }
+              },
+              "after": {
+                "value": "DEMO-01",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "asset DEMO-01"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.832Z"
+            }
+          ]
+        },
+        "indication": {
+          "original": {
+            "value": "demo-tumor",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "indication demo-tumor"
+            }
+          },
+          "current": {
+            "value": "demo-tumor",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "indication demo-tumor"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "demo-tumor",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "indication demo-tumor"
+                }
+              },
+              "after": {
+                "value": "demo-tumor",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "indication demo-tumor"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.832Z"
+            }
+          ]
+        },
+        "study": {
+          "original": {
+            "value": "DEMO-STUDY",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "study DEMO-STUDY"
+            }
+          },
+          "current": {
+            "value": "DEMO-STUDY",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "study DEMO-STUDY"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "DEMO-STUDY",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "study DEMO-STUDY"
+                }
+              },
+              "after": {
+                "value": "DEMO-STUDY",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "study DEMO-STUDY"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.832Z"
+            }
+          ]
+        },
+        "cohort": {
+          "original": {
+            "value": "expansion",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "cohort expansion"
+            }
+          },
+          "current": {
+            "value": "expansion",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "cohort expansion"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "expansion",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "cohort expansion"
+                }
+              },
+              "after": {
+                "value": "expansion",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "cohort expansion"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.832Z"
+            }
+          ]
+        },
+        "dose": {
+          "original": {
+            "value": "dose-A",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "dose dose-A"
+            }
+          },
+          "current": {
+            "value": "dose-A",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "dose dose-A"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "dose-A",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "dose dose-A"
+                }
+              },
+              "after": {
+                "value": "dose-A",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "dose dose-A"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.832Z"
+            }
+          ]
+        },
+        "metric": {
+          "original": {
+            "value": "response",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "metric response"
+            }
+          },
+          "current": {
+            "value": "response",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "metric response"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "response",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "metric response"
+                }
+              },
+              "after": {
+                "value": "response",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "metric response"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.832Z"
+            }
+          ]
+        },
+        "events": {
+          "original": {
+            "value": "6",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "events 6"
+            }
+          },
+          "current": {
+            "value": "6",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "events 6"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "6",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "events 6"
+                }
+              },
+              "after": {
+                "value": "6",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "events 6"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.833Z"
+            }
+          ]
+        },
+        "denominator": {
+          "original": {
+            "value": "20",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "denominator 20"
+            }
+          },
+          "current": {
+            "value": "20",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "denominator 20"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "20",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "denominator 20"
+                }
+              },
+              "after": {
+                "value": "20",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "denominator 20"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.833Z"
+            }
+          ]
+        },
+        "population": {
+          "original": {
+            "value": "evaluable",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "population evaluable"
+            }
+          },
+          "current": {
+            "value": "evaluable",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "population evaluable"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "evaluable",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "population evaluable"
+                }
+              },
+              "after": {
+                "value": "evaluable",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "population evaluable"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.833Z"
+            }
+          ]
+        },
+        "window": {
+          "original": {
+            "value": "week-12",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "window week-12"
+            }
+          },
+          "current": {
+            "value": "week-12",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "window week-12"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "week-12",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "window week-12"
+                }
+              },
+              "after": {
+                "value": "week-12",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "window week-12"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.833Z"
+            }
+          ]
+        },
+        "definition": {
+          "original": {
+            "value": "response-definition",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "definition response-definition"
+            }
+          },
+          "current": {
+            "value": "response-definition",
+            "citation": {
+              "spanId": "p1-i9",
+              "page": 1,
+              "quote": "definition response-definition"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "response-definition",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "definition response-definition"
+                }
+              },
+              "after": {
+                "value": "response-definition",
+                "citation": {
+                  "spanId": "p1-i9",
+                  "page": 1,
+                  "quote": "definition response-definition"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.833Z"
+            }
+          ]
+        },
+        "reported_rate": {
+          "original": {
+            "value": null,
+            "citation": null
+          },
+          "current": {
+            "value": null,
+            "citation": null
+          },
+          "decision": "unreviewed",
+          "history": []
+        }
+      }
+    },
+    {
+      "id": "obs-1",
+      "origin": "imported_agent_report",
+      "valueKind": "event_count",
+      "fields": {
+        "asset": {
+          "original": {
+            "value": "DEMO-01",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "asset DEMO-01"
+            }
+          },
+          "current": {
+            "value": "DEMO-01",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "asset DEMO-01"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "DEMO-01",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "asset DEMO-01"
+                }
+              },
+              "after": {
+                "value": "DEMO-01",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "asset DEMO-01"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.833Z"
+            }
+          ]
+        },
+        "indication": {
+          "original": {
+            "value": "demo-tumor",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "indication demo-tumor"
+            }
+          },
+          "current": {
+            "value": "demo-tumor",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "indication demo-tumor"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "demo-tumor",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "indication demo-tumor"
+                }
+              },
+              "after": {
+                "value": "demo-tumor",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "indication demo-tumor"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.834Z"
+            }
+          ]
+        },
+        "study": {
+          "original": {
+            "value": "DEMO-STUDY",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "study DEMO-STUDY"
+            }
+          },
+          "current": {
+            "value": "DEMO-STUDY",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "study DEMO-STUDY"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "DEMO-STUDY",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "study DEMO-STUDY"
+                }
+              },
+              "after": {
+                "value": "DEMO-STUDY",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "study DEMO-STUDY"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.834Z"
+            }
+          ]
+        },
+        "cohort": {
+          "original": {
+            "value": "expansion",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "cohort expansion"
+            }
+          },
+          "current": {
+            "value": "expansion",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "cohort expansion"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "expansion",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "cohort expansion"
+                }
+              },
+              "after": {
+                "value": "expansion",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "cohort expansion"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.834Z"
+            }
+          ]
+        },
+        "dose": {
+          "original": {
+            "value": "dose-B",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "dose dose-B"
+            }
+          },
+          "current": {
+            "value": "dose-B",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "dose dose-B"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "dose-B",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "dose dose-B"
+                }
+              },
+              "after": {
+                "value": "dose-B",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "dose dose-B"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.834Z"
+            }
+          ]
+        },
+        "metric": {
+          "original": {
+            "value": "response",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "metric response"
+            }
+          },
+          "current": {
+            "value": "response",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "metric response"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "response",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "metric response"
+                }
+              },
+              "after": {
+                "value": "response",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "metric response"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.834Z"
+            }
+          ]
+        },
+        "events": {
+          "original": {
+            "value": "7",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "events 7"
+            }
+          },
+          "current": {
+            "value": "7",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "events 7"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "7",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "events 7"
+                }
+              },
+              "after": {
+                "value": "7",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "events 7"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.834Z"
+            }
+          ]
+        },
+        "denominator": {
+          "original": {
+            "value": "20",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "denominator 20"
+            }
+          },
+          "current": {
+            "value": "20",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "denominator 20"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "20",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "denominator 20"
+                }
+              },
+              "after": {
+                "value": "20",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "denominator 20"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.835Z"
+            }
+          ]
+        },
+        "population": {
+          "original": {
+            "value": "evaluable",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "population evaluable"
+            }
+          },
+          "current": {
+            "value": "evaluable",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "population evaluable"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "evaluable",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "population evaluable"
+                }
+              },
+              "after": {
+                "value": "evaluable",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "population evaluable"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.835Z"
+            }
+          ]
+        },
+        "window": {
+          "original": {
+            "value": "week-12",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "window week-12"
+            }
+          },
+          "current": {
+            "value": "week-12",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "window week-12"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "week-12",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "window week-12"
+                }
+              },
+              "after": {
+                "value": "week-12",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "window week-12"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.835Z"
+            }
+          ]
+        },
+        "definition": {
+          "original": {
+            "value": "response-definition",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "definition response-definition"
+            }
+          },
+          "current": {
+            "value": "response-definition",
+            "citation": {
+              "spanId": "p1-i13",
+              "page": 1,
+              "quote": "definition response-definition"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "response-definition",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "definition response-definition"
+                }
+              },
+              "after": {
+                "value": "response-definition",
+                "citation": {
+                  "spanId": "p1-i13",
+                  "page": 1,
+                  "quote": "definition response-definition"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.835Z"
+            }
+          ]
+        },
+        "reported_rate": {
+          "original": {
+            "value": null,
+            "citation": null
+          },
+          "current": {
+            "value": null,
+            "citation": null
+          },
+          "decision": "unreviewed",
+          "history": []
+        }
+      }
+    },
+    {
+      "id": "obs-2",
+      "origin": "imported_agent_report",
+      "valueKind": "event_count",
+      "fields": {
+        "asset": {
+          "original": {
+            "value": "DEMO-01",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "asset DEMO-01"
+            }
+          },
+          "current": {
+            "value": "DEMO-01",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "asset DEMO-01"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "DEMO-01",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "asset DEMO-01"
+                }
+              },
+              "after": {
+                "value": "DEMO-01",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "asset DEMO-01"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.835Z"
+            }
+          ]
+        },
+        "indication": {
+          "original": {
+            "value": "demo-tumor",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "indication demo-tumor"
+            }
+          },
+          "current": {
+            "value": "demo-tumor",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "indication demo-tumor"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "demo-tumor",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "indication demo-tumor"
+                }
+              },
+              "after": {
+                "value": "demo-tumor",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "indication demo-tumor"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.836Z"
+            }
+          ]
+        },
+        "study": {
+          "original": {
+            "value": "DEMO-STUDY",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "study DEMO-STUDY"
+            }
+          },
+          "current": {
+            "value": "DEMO-STUDY",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "study DEMO-STUDY"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "DEMO-STUDY",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "study DEMO-STUDY"
+                }
+              },
+              "after": {
+                "value": "DEMO-STUDY",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "study DEMO-STUDY"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.836Z"
+            }
+          ]
+        },
+        "cohort": {
+          "original": {
+            "value": "expansion",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "cohort expansion"
+            }
+          },
+          "current": {
+            "value": "expansion",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "cohort expansion"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "expansion",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "cohort expansion"
+                }
+              },
+              "after": {
+                "value": "expansion",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "cohort expansion"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.836Z"
+            }
+          ]
+        },
+        "dose": {
+          "original": {
+            "value": "dose-A",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "dose dose-A"
+            }
+          },
+          "current": {
+            "value": "dose-A",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "dose dose-A"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "dose-A",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "dose dose-A"
+                }
+              },
+              "after": {
+                "value": "dose-A",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "dose dose-A"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.836Z"
+            }
+          ]
+        },
+        "metric": {
+          "original": {
+            "value": "adverse_event",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "metric adverse_event"
+            }
+          },
+          "current": {
+            "value": "adverse_event",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "metric adverse_event"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "adverse_event",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "metric adverse_event"
+                }
+              },
+              "after": {
+                "value": "adverse_event",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "metric adverse_event"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.836Z"
+            }
+          ]
+        },
+        "events": {
+          "original": {
+            "value": "2",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "events 2"
+            }
+          },
+          "current": {
+            "value": "2",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "events 2"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "2",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "events 2"
+                }
+              },
+              "after": {
+                "value": "2",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "events 2"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.837Z"
+            }
+          ]
+        },
+        "denominator": {
+          "original": {
+            "value": "20",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "denominator 20"
+            }
+          },
+          "current": {
+            "value": "20",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "denominator 20"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "20",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "denominator 20"
+                }
+              },
+              "after": {
+                "value": "20",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "denominator 20"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.837Z"
+            }
+          ]
+        },
+        "population": {
+          "original": {
+            "value": "evaluable",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "population evaluable"
+            }
+          },
+          "current": {
+            "value": "evaluable",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "population evaluable"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "evaluable",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "population evaluable"
+                }
+              },
+              "after": {
+                "value": "evaluable",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "population evaluable"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.837Z"
+            }
+          ]
+        },
+        "window": {
+          "original": {
+            "value": "week-12",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "window week-12"
+            }
+          },
+          "current": {
+            "value": "week-12",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "window week-12"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "week-12",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "window week-12"
+                }
+              },
+              "after": {
+                "value": "week-12",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "window week-12"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.837Z"
+            }
+          ]
+        },
+        "definition": {
+          "original": {
+            "value": "adverse_event-definition",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "definition adverse_event-definition"
+            }
+          },
+          "current": {
+            "value": "adverse_event-definition",
+            "citation": {
+              "spanId": "p1-i17",
+              "page": 1,
+              "quote": "definition adverse_event-definition"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "adverse_event-definition",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "definition adverse_event-definition"
+                }
+              },
+              "after": {
+                "value": "adverse_event-definition",
+                "citation": {
+                  "spanId": "p1-i17",
+                  "page": 1,
+                  "quote": "definition adverse_event-definition"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.838Z"
+            }
+          ]
+        },
+        "reported_rate": {
+          "original": {
+            "value": null,
+            "citation": null
+          },
+          "current": {
+            "value": null,
+            "citation": null
+          },
+          "decision": "unreviewed",
+          "history": []
+        }
+      }
+    },
+    {
+      "id": "obs-3",
+      "origin": "imported_agent_report",
+      "valueKind": "event_count",
+      "fields": {
+        "asset": {
+          "original": {
+            "value": "DEMO-01",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "asset DEMO-01"
+            }
+          },
+          "current": {
+            "value": "DEMO-01",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "asset DEMO-01"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "DEMO-01",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "asset DEMO-01"
+                }
+              },
+              "after": {
+                "value": "DEMO-01",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "asset DEMO-01"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.838Z"
+            }
+          ]
+        },
+        "indication": {
+          "original": {
+            "value": "demo-tumor",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "indication demo-tumor"
+            }
+          },
+          "current": {
+            "value": "demo-tumor",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "indication demo-tumor"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "demo-tumor",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "indication demo-tumor"
+                }
+              },
+              "after": {
+                "value": "demo-tumor",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "indication demo-tumor"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.838Z"
+            }
+          ]
+        },
+        "study": {
+          "original": {
+            "value": "DEMO-STUDY",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "study DEMO-STUDY"
+            }
+          },
+          "current": {
+            "value": "DEMO-STUDY",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "study DEMO-STUDY"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "DEMO-STUDY",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "study DEMO-STUDY"
+                }
+              },
+              "after": {
+                "value": "DEMO-STUDY",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "study DEMO-STUDY"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.838Z"
+            }
+          ]
+        },
+        "cohort": {
+          "original": {
+            "value": "expansion",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "cohort expansion"
+            }
+          },
+          "current": {
+            "value": "expansion",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "cohort expansion"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "expansion",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "cohort expansion"
+                }
+              },
+              "after": {
+                "value": "expansion",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "cohort expansion"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.839Z"
+            }
+          ]
+        },
+        "dose": {
+          "original": {
+            "value": "dose-B",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "dose dose-B"
+            }
+          },
+          "current": {
+            "value": "dose-B",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "dose dose-B"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "dose-B",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "dose dose-B"
+                }
+              },
+              "after": {
+                "value": "dose-B",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "dose dose-B"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.839Z"
+            }
+          ]
+        },
+        "metric": {
+          "original": {
+            "value": "adverse_event",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "metric adverse_event"
+            }
+          },
+          "current": {
+            "value": "adverse_event",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "metric adverse_event"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "adverse_event",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "metric adverse_event"
+                }
+              },
+              "after": {
+                "value": "adverse_event",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "metric adverse_event"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.839Z"
+            }
+          ]
+        },
+        "events": {
+          "original": {
+            "value": "5",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "events 5"
+            }
+          },
+          "current": {
+            "value": "5",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "events 5"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "5",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "events 5"
+                }
+              },
+              "after": {
+                "value": "5",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "events 5"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.839Z"
+            }
+          ]
+        },
+        "denominator": {
+          "original": {
+            "value": "20",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "denominator 20"
+            }
+          },
+          "current": {
+            "value": "20",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "denominator 20"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "20",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "denominator 20"
+                }
+              },
+              "after": {
+                "value": "20",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "denominator 20"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.840Z"
+            }
+          ]
+        },
+        "population": {
+          "original": {
+            "value": "evaluable",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "population evaluable"
+            }
+          },
+          "current": {
+            "value": "evaluable",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "population evaluable"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "evaluable",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "population evaluable"
+                }
+              },
+              "after": {
+                "value": "evaluable",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "population evaluable"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.840Z"
+            }
+          ]
+        },
+        "window": {
+          "original": {
+            "value": "week-12",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "window week-12"
+            }
+          },
+          "current": {
+            "value": "week-12",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "window week-12"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "week-12",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "window week-12"
+                }
+              },
+              "after": {
+                "value": "week-12",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "window week-12"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.840Z"
+            }
+          ]
+        },
+        "definition": {
+          "original": {
+            "value": "adverse_event-definition",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "definition adverse_event-definition"
+            }
+          },
+          "current": {
+            "value": "adverse_event-definition",
+            "citation": {
+              "spanId": "p1-i21",
+              "page": 1,
+              "quote": "definition adverse_event-definition"
+            }
+          },
+          "decision": "confirmed",
+          "history": [
+            {
+              "revision": 1,
+              "decision": "confirmed",
+              "before": {
+                "value": "adverse_event-definition",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "definition adverse_event-definition"
+                }
+              },
+              "after": {
+                "value": "adverse_event-definition",
+                "citation": {
+                  "spanId": "p1-i21",
+                  "page": 1,
+                  "quote": "definition adverse_event-definition"
+                }
+              },
+              "reason": "SYNTHETIC AUTOMATED TEST RECORD - NOT HUMAN OR EXPERT REVIEW",
+              "at": "2026-09-14T02:38:41.840Z"
+            }
+          ]
+        },
+        "reported_rate": {
+          "original": {
+            "value": null,
+            "citation": null
+          },
+          "current": {
+            "value": null,
+            "citation": null
+          },
+          "decision": "unreviewed",
+          "history": []
+        }
+      }
+    }
+  ],
+  "modelFindings": [],
+  "sourceName": "SYNTHETIC-DEMO-NOT-CLINICAL.pdf",
+  "persisted": false,
+  "reviewerIdentity": "UNAUTHENTICATED_USER",
+  "clinicalApproval": false,
+  "downstreamStatus": "REQUIRES_REVALIDATION",
+  "limitations": [
+    "사용자 확인은 임상 승인이나 인증된 전문가 검증이 아닙니다.",
+    "수정값으로 AI 반론·비교·계산을 다시 실행하지 않았습니다.",
+    "단일 추출 문구의 근거만 연결합니다. 표 머리글·각주·문단 전체의 의미를 자동 검증하지 않습니다.",
+    "검토를 이어가려면 같은 원본 PDF와 이력 JSON을 다시 여세요. 원문 메모·모델 결과·재검증 결과 파일은 별도로 보관해야 합니다."
+  ]
+}

@@ -4,14 +4,22 @@ import { flushSync } from "react-dom";
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Button, Checkbox, Chip, CircularProgress, CssBaseline, FormControlLabel, InputAdornment, MenuItem, TextField, ThemeProvider } from "@mui/material";
 import { ArrowDownToLine, ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronDown, ChevronRight, FileCheck2, FlaskConical, History, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { Evidence, type Packet } from "./Evidence";
+import { AgentBriefing } from "./AgentBriefing";
 import { theme } from "./theme";
 import { SourceWorkspace as Intake } from "./SourceWorkspace";
 import { delta, downloadText, draftFrom, executeReview, makeInput, modes, percent, validateDraft, type Draft, type Execution, type Mode, type Report, type Simulation } from "./review";
 import { installEvidenceTools, type ModelContext } from "./webmcp";
 import "./style.css";
+import { MocBadge } from "./MocDemo";
+import { DemoRecorder } from "./DemoRecorder";
+import DecisionBriefing from "./DecisionBriefing";
+import EvidenceScout, {type ScoutContext} from "./EvidenceScout";
 
-type Tab = "intake" | "simulation" | "evidence" | "report";
+type Tab = "start" | "decision" | "agent" | "intake" | "simulation" | "evidence" | "report";
 const navigation = [
+  { id: "start" as const, label: "새 검토 · 근거 수집", icon: BookOpen },
+  { id: "decision" as const, label: "의사결정 브리핑", icon: FlaskConical },
+  { id: "agent" as const, label: "에이전트 브리핑", icon: History },
   { id: "intake" as const, label: "자료 검토", icon: FileCheck2 },
   { id: "simulation" as const, label: "가정 실험", icon: SlidersHorizontal },
   { id: "evidence" as const, label: "공개 근거", icon: BookOpen },
@@ -27,7 +35,9 @@ function App() {
   const [reports, setReports] = useState<Record<Mode, Report> | null>(null);
   const [loadError, setLoadError] = useState("");
   const [reload, setReload] = useState(0);
-  const [tab, setTab] = useState<Tab>("intake");
+  const [tab, setTab] = useState<Tab>("start");
+  const [researchBusy,setResearchBusy]=useState(false);
+  const [scoutContext, setScoutContext] = useState<ScoutContext | undefined>();
   const [selected, setSelected] = useState("dose_comparison");
   const [mode, setMode] = useState<Mode>("normal");
   const [scenario, setScenario] = useState("plateau");
@@ -37,6 +47,7 @@ function App() {
   const [previous, setPrevious] = useState<Simulation[] | null>(null);
   const [compare, setCompare] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [pdfAgentBusy,setPdfAgentBusy]=useState(false),[fixedAgentBusy,setFixedAgentBusy]=useState(false);
   const [runError, setRunError] = useState("");
   const [connection, setConnection] = useState<"checking" | "ready" | "offline" | "preview">(import.meta.env.DEV ? "checking" : "preview");
   const [probe, setProbe] = useState(0);
@@ -94,8 +105,17 @@ function App() {
     <aside className="sidebar"><a className="brand" href="/" aria-label="TrialBoard 홈"><span className="brand-mark"><FlaskConical size={21} /></span><span>TrialBoard</span></a><div className="workspace-label">검토 작업공간</div>
       <nav aria-label="검토 작업">{navigation.map(({ id, label, icon: Icon }) => <button key={id} aria-label={label} onClick={() => setTab(id)} className={`nav-item ${tab === id ? "active" : ""}`} aria-current={tab === id ? "page" : undefined}><Icon size={19} /><span>{label}</span>{id === "evidence" && <span className="nav-count">5</span>}</button>)}</nav>
       <div className="sidebar-bottom"><FlaskConical size={17} /><div><strong>Research preview</strong><p>임상 결정에 사용하지 마세요</p></div></div></aside>
-    <div className="workspace-shell"><header className="topbar"><div className="breadcrumbs">작업공간 <ChevronRight size={14} /><span>용량 비교 검토</span></div><span className={`connection ${connection === "ready" ? "connected" : ""}`}><i />{tab === "intake" ? "파일 전송 없이 · 이 탭에서 검토" : tab === "evidence" ? "공개 참고 자료" : connection === "ready" ? "로컬 계산 서버 연결됨" : connection === "checking" ? "서버 확인 중" : connection === "preview" ? "저장 결과 미리보기" : "계산 서버 연결 안 됨"}</span></header>
-      <main id="workspace" className="workspace"><div hidden={tab !== "intake"}><Intake onEvidence={() => setTab("evidence")} /></div><div hidden={tab === "intake"}><div className="page-heading"><div><div className="heading-meta"><span>용량 최적화</span><span className="meta-divider" /><span>합성 사례</span></div><h1>{tab === "simulation" ? "용량 비교 검토" : tab === "evidence" ? "공개 근거 라이브러리" : "검토 보고서"}</h1><p>{tab === "simulation" ? "두 용량을 어떻게 비교할지, 가정을 바꾸며 확인하세요." : tab === "evidence" ? "판단에 앞서, 원문과 적용 범위를 확인하세요." : "확인한 항목과 아직 판단할 수 없는 항목을 구분합니다."}</p></div><Button variant="outlined" startIcon={<ArrowDownToLine size={16} />} onClick={exportReport}>보고서 내려받기</Button></div>
+    <div className="workspace-shell"><header className="topbar"><div className="breadcrumbs">작업공간 <ChevronRight size={14} /><span>{tab === "start" ? "새 검토 · 근거 수집" : tab === "decision" ? "의사결정 브리핑" : tab === "agent" ? "에이전트 브리핑" : "용량 비교 검토"}</span></div><span className={`connection ${tab !== "agent" && connection === "ready" ? "connected" : ""}`}><i />{tab === "start" ? "공개 근거 수집 · 로컬 기록" : tab === "agent" ? "실제 실행과 저장 기록을 구분합니다" : tab === "intake" ? "이 탭에서 검토 · 로컬 전송은 별도 동의" : tab === "evidence" ? "공개 참고 자료" : connection === "ready" ? "로컬 계산 서버 연결됨" : connection === "checking" ? "서버 확인 중" : connection === "preview" ? "저장 결과 미리보기" : "계산 서버 연결 안 됨"}</span></header>
+      <main id="workspace" className="workspace">
+        {researchBusy&&<Alert severity="info" action={<Button onClick={()=>setTab("start")}>조사 화면 열기</Button>}>공개 근거 조사 진행 중입니다. AI 실행을 선택했다면 로그인 계정 사용량을 소비합니다. 조사 화면에서 상태 확인·중단할 수 있습니다.</Alert>}
+        {(pdfAgentBusy || fixedAgentBusy)&&<Alert severity="info" className="global-agent-status" action={<Button onClick={()=>setTab(pdfAgentBusy?'intake':'agent')}>작업 화면 열기</Button>}>{pdfAgentBusy?'PDF 문구':'고정 사례'} 에이전트가 실행 중입니다. 다른 메뉴를 보더라도 계정 사용량을 소비할 수 있습니다. 작업 화면에서 상태를 확인하거나 중단하세요.</Alert>}
+        {import.meta.env.DEV && <details className="recording-tools"><summary>녹화 도구</summary><DemoRecorder /></details>}
+        <div hidden={tab !== "start"}><EvidenceScout onResearchBusy={setResearchBusy} locked={pdfAgentBusy || fixedAgentBusy} onIntake={context=>{setScoutContext(context);setTab("intake");}} /></div>
+        {tab === "intake" && scoutContext && <Alert severity="info">수집에서 선택한 시험: {scoutContext.asset} · {scoutContext.study} · {scoutContext.indication}. 같은 시험의 PDF를 추가하세요. 등록자료를 PDF 관측값으로 자동 전환하지 않습니다.</Alert>}
+        <div hidden={tab !== "decision"}><DecisionBriefing active={tab === "decision"} onAgent={() => setTab("agent")} onIntake={() => setTab("intake")} /></div>
+        {(tab === "simulation" || tab === "report") && <MocBadge detail="합성 가정 · 실제 임상 근거 아님 · 저장 결과와 새 계산을 구분합니다" />}
+        <div hidden={tab !== "agent"}><AgentBriefing onAgentBusy={setFixedAgentBusy} onIntake={() => setTab("intake")} onSimulation={() => setTab("simulation")} /></div>
+        <div hidden={tab !== "intake"}><Intake scoutContext={scoutContext} onAgentBusy={setPdfAgentBusy} onEvidence={() => setTab("evidence")} /></div><div hidden={tab === "start" || tab === "intake" || tab === "agent" || tab === "decision"}><div className="page-heading"><div><div className="heading-meta"><span>용량 최적화</span><span className="meta-divider" /><span>합성 사례</span></div><h1>{tab === "simulation" ? "용량 비교 검토" : tab === "evidence" ? "공개 근거 라이브러리" : "검토 보고서"}</h1><p>{tab === "simulation" ? "두 용량을 어떻게 비교할지, 가정을 바꾸며 확인하세요." : tab === "evidence" ? "판단에 앞서, 원문과 적용 범위를 확인하세요." : "확인한 항목과 아직 판단할 수 없는 항목을 구분합니다."}</p></div><Button variant="outlined" startIcon={<ArrowDownToLine size={16} />} onClick={exportReport}>보고서 내려받기</Button></div>
         {tab === "evidence" ? <Evidence packet={packet} selected={selected} onSelect={setSelected} /> : <>
           <div className="notice-line"><FlaskConical size={16} /><span>합성 데이터로 검토합니다. 실제 약물 추정치·임상 권고가 아닙니다.</span><Button size="small" onClick={() => setTab("evidence")} endIcon={<ArrowUpRight size={14} />}>공개 근거 보기</Button></div>
           {tab === "simulation" ? <div className="comparison-layout"><section className="editor-panel" aria-label="계산 조건 편집"><div className="panel-title"><div><span className="step">01</span><h2>비교 조건</h2></div><span className="meta">용량 A · B</span></div>

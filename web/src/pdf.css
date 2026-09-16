@@ -35,3 +35,19 @@
 .pdf-notes article p { overflow-wrap: anywhere; line-height: 1.6; font-size: 13px; }
 @media (max-width: 1000px) { .pdf-review-grid { grid-template-columns: 1fr; } .pdf-original { position: static; } .pdf-span-list { max-height: 260px; } }
 @media (max-width: 600px) { .pdf-page-bar { flex-wrap: wrap; } .pdf-notes article { flex-wrap: wrap; } .pdf-notes article > div { flex-basis: 100%; } }
+.pdf-agent-runner { background:#fff; border:1px solid #d9e2ef; padding:24px; border-radius:10px; }
+.pdf-agent-runner > p {font-size:1rem;line-height:1.8;}.pdf-agent-runner > .design-card-grid {margin:20px 0;}.pdf-agent-runner > details {margin:16px 0;}.pdf-agent-runner blockquote {overflow-wrap:anywhere;font-size:1rem;line-height:1.8;}
+.pdf-review-grid[hidden] {display:none;}
+.row-review {padding:18px 0;border-bottom:1px solid #dae2ed;}.row-review summary {font-size:1rem;cursor:pointer;font-weight:600;}.row-review table {font-size:.875rem;width:100%;border-collapse:collapse;}.row-review th,.row-review td {padding:10px;border-bottom:1px solid #dbe3ed;text-align:left;vertical-align:top;}.row-review td:last-child{min-width:200px;overflow-wrap:anywhere;}.row-review > .MuiFormControl-root {margin-top:18px;}
+.row-review .design-table-scroll {max-height:440px;overflow:auto;}
+.row-review thead {position:sticky;top:0;background:#f4f7fb;}
+.project-shelf{padding:24px;border:1px solid #d7e2e0;border-radius:16px;background:linear-gradient(120deg,#f4faf7,#fff);margin-bottom:24px;display:grid;gap:12px}
+.project-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;color:#285c50}
+.project-heading h2{font-size:1.2rem;margin:6px 0 8px;color:#173d33}
+.project-heading p{margin:0;color:#51665e;font-size:.88rem;line-height:1.6}
+.project-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.project-actions .MuiTextField-root{flex:1;min-width:200px}
+.project-history{display:grid;gap:8px;margin-top:12px;max-height:260px;overflow:auto}
+.project-history .MuiButton-root{justify-content:flex-start;text-align:left;overflow-wrap:anywhere}
+.project-shelf summary{cursor:pointer;font-weight:600;color:#285c50}
+@media(max-width:600px){.project-shelf{padding:16px}.project-actions{align-items:stretch;flex-direction:column}}

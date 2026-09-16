@@ -1,0 +1,548 @@
+{
+  "run_id": "6317da69-adc3-4117-9fc5-c4dcbc890340",
+  "started_at": "2026-09-13T05:10:52.521119+00:00",
+  "input_digest": "5b81887d8c26c0e94793f0e805fe749c288e6c9cdc35841e8e755237322ed300",
+  "input": {
+    "question": "LIBRETTO-001의 코호트별 ORR, 보고된 분모와 결측을 분리해 검토하라. 이 발췌만으로 용량 간 비교가 가능한가?",
+    "asset": "selpercatinib",
+    "indication": "RET fusion-positive thyroid cancer",
+    "study": "LIBRETTO-001",
+    "spans": [
+      {
+        "id": "fda-0",
+        "source_digest": "89cb0ce158a97d4b70fb19e6a8c38211b61a2cecd2d51613e009f9d51244a383",
+        "page": null,
+        "text": "On June 12, 2024, the Food and Drug Administration granted traditional approval to selpercatinib (Retevmo, Eli Lilly and Company) for adult and pediatric patients 2 years of age and older with advanced or metastatic RET fusion-positive thyroid cancer who require systemic therapy and who are radioactive iodine-refractory (if radioactive iodine is appropriate).",
+        "locator": "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-selpercatinib-ret-fusion-positive-thyroid-cancer · selpercatinib-fda-2024/1 · selected paragraph 1"
+      },
+      {
+        "id": "fda-1",
+        "source_digest": "89cb0ce158a97d4b70fb19e6a8c38211b61a2cecd2d51613e009f9d51244a383",
+        "page": null,
+        "text": "Efficacy was evaluated in LIBRETTO-001 (NCT03157128), a multicenter, open-label, muti-cohort clinical trial in 65 patients with RET fusion-positive thyroid cancer who were radioactive iodine (RAI)-refractory (if RAI was an appropriate treatment option) and were systemic therapy naïve and patients who were previously treated, in separate cohorts.",
+        "locator": "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-selpercatinib-ret-fusion-positive-thyroid-cancer · selpercatinib-fda-2024/1 · selected paragraph 2"
+      },
+      {
+        "id": "fda-2",
+        "source_digest": "89cb0ce158a97d4b70fb19e6a8c38211b61a2cecd2d51613e009f9d51244a383",
+        "page": null,
+        "text": "The major efficacy outcome measures were overall response rate (ORR) and duration of response (DOR). The ORR was 85% (95% CI: 71%, 94%) in the 41 previously treated patients and 96% (95% CI: 79%, 100%) in the 24 systemic therapy naïve patients. Median DOR was 26.7 months (95% CI: 12.1, not evaluable [NE]) in the previously treated patients and NE (95% CI: 42.8, NE) in the systemic therapy naïve patients.",
+        "locator": "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-selpercatinib-ret-fusion-positive-thyroid-cancer · selpercatinib-fda-2024/1 · selected paragraph 3"
+      },
+      {
+        "id": "fda-3",
+        "source_digest": "89cb0ce158a97d4b70fb19e6a8c38211b61a2cecd2d51613e009f9d51244a383",
+        "page": null,
+        "text": "Supportive evidence included ORR and DOR data from 10 pediatric and young adult patients with RET fusion-positive thyroid cancer treated in Study LIBRETTO-121 (J2G-OX-JZJJ; NCT03899792), an international, single-arm, multi-cohort clinical trial of selpercatinib in pediatric and young adult patients with advanced RET-altered solid tumors. The ORR was 60% (95% CI: 26%, 88%), and 83% had an observed duration of response ≥ 12 months.",
+        "locator": "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-selpercatinib-ret-fusion-positive-thyroid-cancer · selpercatinib-fda-2024/1 · selected paragraph 4"
+      },
+      {
+        "id": "fda-4",
+        "source_digest": "89cb0ce158a97d4b70fb19e6a8c38211b61a2cecd2d51613e009f9d51244a383",
+        "page": null,
+        "text": "The recommended selpercatinib dose for pediatric patients 2 to less than 12 years of age is based on body surface area. It is based on weight for patients 12 years of age and older. See the prescribing information for specific dosing information.",
+        "locator": "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-selpercatinib-ret-fusion-positive-thyroid-cancer · selpercatinib-fda-2024/1 · selected paragraph 5"
+      }
+    ],
+    "provenance": "curated_public_excerpt"
+  },
+  "prompt_version": "dose-evidence-review/3",
+  "prompt_digest": "d35f36913ce4ac2979fe9cdab4812afd2bd5a0fbea05dc1e8cc8d29023695593",
+  "engine_version": "bounded-evidence-agent/3.2",
+  "runtime": {
+    "python": "3.12.14",
+    "pydantic": "2.13.5",
+    "httpx": "0.28.1",
+    "clinical_labels": "clinical-labels/1.1",
+    "codex_cli": "codex-cli 0.154.0"
+  },
+  "execution_mode": "CODEX_CHATGPT",
+  "model": "codex-cli-default-not-resolved",
+  "budgets": {
+    "max_calls": 2,
+    "max_repairs": 0,
+    "max_output_tokens": 4000,
+    "max_total_tokens": 200000,
+    "seconds": 120
+  },
+  "status": "PARTIAL_ABSTENTION",
+  "accepted": [
+    {
+      "id": "obs-1",
+      "value_kind": "reported_percentage",
+      "fields": {
+        "asset": {
+          "value": "selpercatinib",
+          "span_id": "fda-0",
+          "quote": "approval to selpercatinib"
+        },
+        "indication": {
+          "value": "RET fusion-positive thyroid cancer",
+          "span_id": "fda-1",
+          "quote": "patients with RET fusion-positive thyroid cancer"
+        },
+        "study": {
+          "value": "LIBRETTO-001",
+          "span_id": "fda-1",
+          "quote": "Efficacy was evaluated in LIBRETTO-001"
+        },
+        "cohort": {
+          "value": "previously treated",
+          "span_id": "fda-2",
+          "quote": "41 previously treated patients"
+        },
+        "dose": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        },
+        "metric": {
+          "value": "ORR",
+          "span_id": "fda-2",
+          "quote": "The ORR was 85%"
+        },
+        "events": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        },
+        "denominator": {
+          "value": "41",
+          "span_id": "fda-2",
+          "quote": "41 previously treated patients"
+        },
+        "population": {
+          "value": "previously treated patients",
+          "span_id": "fda-2",
+          "quote": "41 previously treated patients"
+        },
+        "window": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        },
+        "definition": {
+          "value": "overall response rate",
+          "span_id": "fda-2",
+          "quote": "overall response rate (ORR)"
+        },
+        "reported_rate": {
+          "value": "85%",
+          "span_id": "fda-2",
+          "quote": "The ORR was 85%"
+        }
+      }
+    },
+    {
+      "id": "obs-2",
+      "value_kind": "reported_percentage",
+      "fields": {
+        "asset": {
+          "value": "selpercatinib",
+          "span_id": "fda-0",
+          "quote": "approval to selpercatinib"
+        },
+        "indication": {
+          "value": "RET fusion-positive thyroid cancer",
+          "span_id": "fda-1",
+          "quote": "patients with RET fusion-positive thyroid cancer"
+        },
+        "study": {
+          "value": "LIBRETTO-001",
+          "span_id": "fda-1",
+          "quote": "Efficacy was evaluated in LIBRETTO-001"
+        },
+        "cohort": {
+          "value": "systemic therapy naïve",
+          "span_id": "fda-2",
+          "quote": "24 systemic therapy naïve patients"
+        },
+        "dose": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        },
+        "metric": {
+          "value": "ORR",
+          "span_id": "fda-2",
+          "quote": "overall response rate (ORR)"
+        },
+        "events": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        },
+        "denominator": {
+          "value": "24",
+          "span_id": "fda-2",
+          "quote": "24 systemic therapy naïve patients"
+        },
+        "population": {
+          "value": "systemic therapy naïve patients",
+          "span_id": "fda-2",
+          "quote": "24 systemic therapy naïve patients"
+        },
+        "window": {
+          "value": null,
+          "span_id": null,
+          "quote": null
+        },
+        "definition": {
+          "value": "overall response rate",
+          "span_id": "fda-2",
+          "quote": "overall response rate (ORR)"
+        },
+        "reported_rate": {
+          "value": "96%",
+          "span_id": "fda-2",
+          "quote": "96% (95% CI: 79%, 100%) in the 24 systemic therapy naïve patients"
+        }
+      }
+    }
+  ],
+  "metric_mappings": [
+    {
+      "observation_id": "obs-1",
+      "source_label": "ORR",
+      "family": "response",
+      "code": "overall_response_rate",
+      "mapping_version": "clinical-labels/1.1"
+    },
+    {
+      "observation_id": "obs-2",
+      "source_label": "ORR",
+      "family": "response",
+      "code": "overall_response_rate",
+      "mapping_version": "clinical-labels/1.1"
+    }
+  ],
+  "attempts": [
+    {
+      "number": 0,
+      "extraction": {
+        "observations": [
+          {
+            "id": "obs-1",
+            "value_kind": "reported_percentage",
+            "fields": {
+              "asset": {
+                "value": "selpercatinib",
+                "span_id": "fda-0",
+                "quote": "approval to selpercatinib"
+              },
+              "indication": {
+                "value": "RET fusion-positive thyroid cancer",
+                "span_id": "fda-1",
+                "quote": "patients with RET fusion-positive thyroid cancer"
+              },
+              "study": {
+                "value": "LIBRETTO-001",
+                "span_id": "fda-1",
+                "quote": "Efficacy was evaluated in LIBRETTO-001"
+              },
+              "cohort": {
+                "value": "previously treated",
+                "span_id": "fda-2",
+                "quote": "41 previously treated patients"
+              },
+              "dose": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              },
+              "metric": {
+                "value": "ORR",
+                "span_id": "fda-2",
+                "quote": "The ORR was 85%"
+              },
+              "events": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              },
+              "denominator": {
+                "value": "41",
+                "span_id": "fda-2",
+                "quote": "41 previously treated patients"
+              },
+              "population": {
+                "value": "previously treated patients",
+                "span_id": "fda-2",
+                "quote": "41 previously treated patients"
+              },
+              "window": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              },
+              "definition": {
+                "value": "overall response rate",
+                "span_id": "fda-2",
+                "quote": "overall response rate (ORR)"
+              },
+              "reported_rate": {
+                "value": "85%",
+                "span_id": "fda-2",
+                "quote": "The ORR was 85%"
+              }
+            }
+          },
+          {
+            "id": "obs-2",
+            "value_kind": "reported_percentage",
+            "fields": {
+              "asset": {
+                "value": "selpercatinib",
+                "span_id": "fda-0",
+                "quote": "approval to selpercatinib"
+              },
+              "indication": {
+                "value": "RET fusion-positive thyroid cancer",
+                "span_id": "fda-1",
+                "quote": "patients with RET fusion-positive thyroid cancer"
+              },
+              "study": {
+                "value": "LIBRETTO-001",
+                "span_id": "fda-1",
+                "quote": "Efficacy was evaluated in LIBRETTO-001"
+              },
+              "cohort": {
+                "value": "systemic therapy naïve",
+                "span_id": "fda-2",
+                "quote": "24 systemic therapy naïve patients"
+              },
+              "dose": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              },
+              "metric": {
+                "value": "ORR",
+                "span_id": "fda-2",
+                "quote": "overall response rate (ORR)"
+              },
+              "events": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              },
+              "denominator": {
+                "value": "24",
+                "span_id": "fda-2",
+                "quote": "24 systemic therapy naïve patients"
+              },
+              "population": {
+                "value": "systemic therapy naïve patients",
+                "span_id": "fda-2",
+                "quote": "24 systemic therapy naïve patients"
+              },
+              "window": {
+                "value": null,
+                "span_id": null,
+                "quote": null
+              },
+              "definition": {
+                "value": "overall response rate",
+                "span_id": "fda-2",
+                "quote": "overall response rate (ORR)"
+              },
+              "reported_rate": {
+                "value": "96%",
+                "span_id": "fda-2",
+                "quote": "96% (95% CI: 79%, 100%) in the 24 systemic therapy naïve patients"
+              }
+            }
+          }
+        ]
+      },
+      "findings": [
+        {
+          "code": "MISSING_FIELD",
+          "observation_id": "obs-1",
+          "field": "dose",
+          "detail": ""
+        },
+        {
+          "code": "MISSING_FIELD",
+          "observation_id": "obs-1",
+          "field": "window",
+          "detail": ""
+        },
+        {
+          "code": "REPORTED_RATE_ONLY",
+          "observation_id": "obs-1",
+          "field": null,
+          "detail": "No event count may be reconstructed from a reported rate."
+        },
+        {
+          "code": "MISSING_FIELD",
+          "observation_id": "obs-2",
+          "field": "dose",
+          "detail": ""
+        },
+        {
+          "code": "MISSING_FIELD",
+          "observation_id": "obs-2",
+          "field": "window",
+          "detail": ""
+        },
+        {
+          "code": "REPORTED_RATE_ONLY",
+          "observation_id": "obs-2",
+          "field": null,
+          "detail": "No event count may be reconstructed from a reported rate."
+        },
+        {
+          "code": "SECOND_DOSE_MISSING",
+          "observation_id": null,
+          "field": null,
+          "detail": ""
+        },
+        {
+          "code": "COMPARISON_CONTEXT_MISMATCH",
+          "observation_id": null,
+          "field": "cohort",
+          "detail": "response"
+        },
+        {
+          "code": "COMPARISON_CONTEXT_MISMATCH",
+          "observation_id": null,
+          "field": "population",
+          "detail": "response"
+        },
+        {
+          "code": "MODEL_COMPARISON_LIMITATION",
+          "observation_id": null,
+          "field": null,
+          "detail": "85%/보고 분모 41명과 96%/보고 분모 24명은 각각 이전 치료군과 전신치료 미경험군의 ORR로 출처에 부합한다. 두 관찰은 초안으로 유지한다. 이들은 용량군이 아니며 실제 투여량·일정과 용량별 ORR이 없다. fda-4의 연령별 용량 산정 원칙으로 실제 투여를 확인할 수 없으므로 용량 간 비교는 보류한다."
+        },
+        {
+          "code": "MODEL_COMPARISON_LIMITATION",
+          "observation_id": null,
+          "field": null,
+          "detail": "보고 분모 41명과 24명은 총 65명에 부합하지만 반응자 수, 평가불가·결측 인원 및 처리 방식은 명시되지 않았다. 반올림된 ORR로 반응자 수를 복원하거나 분모 합계로 결측이 없다고 단정할 수 없다. events의 null은 추출 오류가 아니다."
+        },
+        {
+          "code": "MODEL_COMPARISON_LIMITATION",
+          "observation_id": null,
+          "field": null,
+          "detail": "ORR의 명칭은 확인되지만 반응 판정 기준, 평가 주체, 평가 시점·기간은 없다. window의 null은 출처의 한계를 반영한다. 함께 보고된 DOR 중앙값과 신뢰구간은 ORR 평가 기간으로 사용할 수 없다."
+        }
+      ],
+      "critique": {
+        "concerns": [
+          {
+            "scope": "comparison_limitation",
+            "observation_ids": [
+              "obs-1",
+              "obs-2"
+            ],
+            "span_ids": [
+              "fda-1",
+              "fda-2",
+              "fda-4"
+            ],
+            "reason": "85%/보고 분모 41명과 96%/보고 분모 24명은 각각 이전 치료군과 전신치료 미경험군의 ORR로 출처에 부합한다. 두 관찰은 초안으로 유지한다. 이들은 용량군이 아니며 실제 투여량·일정과 용량별 ORR이 없다. fda-4의 연령별 용량 산정 원칙으로 실제 투여를 확인할 수 없으므로 용량 간 비교는 보류한다."
+          },
+          {
+            "scope": "comparison_limitation",
+            "observation_ids": [
+              "obs-1",
+              "obs-2"
+            ],
+            "span_ids": [
+              "fda-1",
+              "fda-2"
+            ],
+            "reason": "보고 분모 41명과 24명은 총 65명에 부합하지만 반응자 수, 평가불가·결측 인원 및 처리 방식은 명시되지 않았다. 반올림된 ORR로 반응자 수를 복원하거나 분모 합계로 결측이 없다고 단정할 수 없다. events의 null은 추출 오류가 아니다."
+          },
+          {
+            "scope": "comparison_limitation",
+            "observation_ids": [
+              "obs-1",
+              "obs-2"
+            ],
+            "span_ids": [
+              "fda-2"
+            ],
+            "reason": "ORR의 명칭은 확인되지만 반응 판정 기준, 평가 주체, 평가 시점·기간은 없다. window의 null은 출처의 한계를 반영한다. 함께 보고된 DOR 중앙값과 신뢰구간은 ORR 평가 기간으로 사용할 수 없다."
+          }
+        ],
+        "next_questions": [
+          "코호트별 실제 투여량·일정과 용량별 ORR 및 분모가 보고되어 있는가?",
+          "각 보고 분모의 분석집단 정의와 반응자 수, 평가불가·결측 인원 및 처리 방식은 무엇인가?",
+          "두 코호트의 ORR 판정 기준·평가 주체·평가 기간은 동일하며, 이전 치료 여부 차이를 용량 비교에서 어떻게 다룰 수 있는가?"
+        ]
+      }
+    }
+  ],
+  "calls": [
+    {
+      "stage": "EXTRACT",
+      "attempt": 0,
+      "response_id": "codex-thread:01a0992c-ebda-73a3-847f-5e488498b859",
+      "input_tokens": 10658,
+      "output_tokens": 649,
+      "outcome": "RECEIVED",
+      "notices": [
+        "CODEX_CODE_MODE_DISABLED"
+      ]
+    },
+    {
+      "stage": "CRITIQUE",
+      "attempt": 0,
+      "response_id": "codex-thread:01a0992d-4b93-7e31-870f-e971de912996",
+      "input_tokens": 11376,
+      "output_tokens": 484,
+      "outcome": "RECEIVED",
+      "notices": [
+        "CODEX_CODE_MODE_DISABLED"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "stage": "EXTRACT",
+      "attempt": 0,
+      "codes": []
+    },
+    {
+      "stage": "VERIFY",
+      "attempt": 0,
+      "codes": [
+        "COMPARISON_CONTEXT_MISMATCH",
+        "MISSING_FIELD",
+        "REPORTED_RATE_ONLY",
+        "SECOND_DOSE_MISSING"
+      ]
+    },
+    {
+      "stage": "CRITIQUE",
+      "attempt": 0,
+      "codes": []
+    },
+    {
+      "stage": "PARTIAL_ABSTENTION",
+      "attempt": 0,
+      "codes": []
+    }
+  ],
+  "limitations": [
+    "Literal source/count checks and model critique are not clinical validation.",
+    "Same-model critique is not independent expert review; omissions may remain.",
+    "No autonomous search, trial design recommendation, PK/PD inference or simulation.",
+    "Source PDF hash is supplied by the export; PDF bytes are not rehashed here.",
+    "Only supplied spans were reviewed; conclusions do not cover the whole document.",
+    "Accepted observations remain unverified drafts, not clinical evidence approval.",
+    "Canonical label mapping is a small vocabulary, not endpoint equivalence validation.",
+    "Reported percentages remain rates, never reconstructed event counts.",
+    "Rate/population binding supports one prose pattern; other syntax stays unverified.",
+    "Curated public source digests cover excerpts, not original HTML/PDF bytes.",
+    "Usage caps do not guarantee monetary cost; failed calls may still be billed.",
+    "Codex uses saved ChatGPT CLI login for local development, not an API key.",
+    "Codex output token target is a prompt hint, NOT a hard per-call token cap.",
+    "Codex CLI usage is not remaining subscription quota; failed usage may be unknown.",
+    "Call budget counts CLI turns, not internal HTTP retries or provider requests.",
+    "Ephemeral CLI mode is not a provider-side zero-retention guarantee."
+  ]
+}

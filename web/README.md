@@ -1,8 +1,91 @@
 # TrialBoard review workspace
 
+## Latest: multi-source research agent and evidence library
+
+See [Deep Research](../docs/DEEP_RESEARCH.md). Keep the existing Material UI design system.
+The same `--enable-evidence-scout` flag now enables registry/Europe PMC-PubMed/FDA retrieval,
+optional two-call Codex planning→follow-up search→quoted review, persisted source versions/links/FTS,
+public PDF download/cache→existing PDF viewer, and versioned source-curation notes.
+Model consent is separate from public retrieval consent. No competition key or provider fallback.
+Result views: review briefing / evidence DB / execution log. Stored research restores its original
+parent drug/trial/indication context; source inspection and390px briefing verified.
+Actual sotorasib:86sources,2model calls,8findings/6questions; osimertinib:67sources,0model calls.
+Web673/Python453/build/Ruff pass. Full proposal estimate74%, not yet80%; clinical evaluation is separate.
+The following milestones and their percentages/limitations are historical.
+
+## Earlier: drug-first public evidence discovery
+
+The app now starts with Evidence Scout (existing Material UI), not Decision Briefing.
+Enable `--enable-evidence-scout` alongside the existing flags. Drug/code/NCT → consent → live CT.gov
+search (max20) → source snapshot and receipt in local SQLite → select trial → PDF review context.
+Strict NDJSON/receipt readers, explicit partial results, saved-history reopen and JSON export.
+See [Evidence Scout](../docs/EVIDENCE_SCOUT.md). Web645/Python433/build/Ruff pass.
+Actual Chrome search/store/reopen/PDF entry and390px first-screen checks; no new model calls/deployment.
+Full proposal estimate corrected to60%: previous78% undercounted auto-collection/DB/lineage work.
+The milestones and progress numbers below are historical. Protocol/SAP/paper/FDA collection is still next.
+
+## Latest: selected PDF → live agent → review → design → meeting
+
+See [PDF live workflow](../docs/PDF_LIVE_WORKFLOW.md). Start the local API with
+`uv run python -m trialboard.api --enable-designs --enable-agent-demo --enable-pdf-agent`.
+The PDF flag is separate. Explicitly attested excerpts and two neighboring spans are sent only after consent.
+Server events expose task status and bounded artifacts, not hidden chain-of-thought. Full-screen activity and global busy notice are implemented.
+Human-review tables, in-app replacement confirmation, source-linked hypothetical assumption changes and original report attachment are connected.
+Unresolved original comparison concerns block simulation and produce follow-up questions. Synthetic examples remain marked MOC.
+Current tests: web631/Python414. Actual PDF model run2calls/58s and separate MOC UI calculation/meeting flow verified.
+Full-screen live/global busy final QA and file re-upload remain pending; no production deployment. Overall estimate78%, not85%.
+
+The sections below describe earlier milestones; the app starts with Decision Briefing, not the former agent-first tab.
+
+## Agent briefing and opt-in live demo (2026-09-15)
+
+The first tab now shows recorded extraction/verification/critique/repair/abstention artifacts,
+citation inspection, before/after fields and reviewer questions. Presentation mode hides unrelated
+chrome; arrow keys/Home/End navigate the focused event track. Recorded public model output and
+scripted synthetic repair are labelled separately. Replay timing is not model execution time.
+
+`uv run python -m trialboard.api --enable-agent-demo --enable-designs` enables a separate fixed-case
+live Codex stream after browser consent, using the existing local login adapter, not an API key.
+Only server-owned public/synthetic inputs are accepted. Progress comes from actual engine events;
+failures never fall back to stored successes. No hosted/live multi-user support or durable job state.
+The existing design calculation bridge below remains model-free.
+
+The briefing now includes a separate synthetic what-if stage: baseline/changed assumptions × two
+sample sizes are recalculated together, with input/result checks, stale-result/export guards and
+rule-based KOL prompts. No clinical rates are transferred from the evidence stage; no new model call.
+Markdown/JSON download and desktop/narrow UI checked. See [3-minute script](../docs/DEMO_SCRIPT_3MIN.md).
+
+Rehearsal controls now include GET-only readiness checks, an elapsed wall timer, distinct stop/timeout
+messages and explicit replay recovery. Public live run: 2 model calls, ~52 seconds (one observation,
+not a latency guarantee), 2 accepted drafts/3 concerns/3 questions. Stop then rerun checked in-browser.
+See [rehearsal results](../docs/LIVE_DEMO_REHEARSAL.md).
+
+Validated: 542 web tests, 401 Python tests, build; actual public model/browser run, citation/navigation,
+JSON download, presentation mode/key navigation and narrow layout. Automated JSON re-upload is blocked
+by the Chrome extension's file URL permission; reader round-trip is separately checked.
+See [demo guide](../docs/AGENT_DEMO.md). No deployment or Git push in this task.
+
 React + Material UI + Vite. Node 24 is used for validation; Vite requires Node 20.19+ or 22.12+.
 
 PDF.js 6.3.289 is pinned and requires Node >=22.13 or >=24; use Node 24 for this project.
+
+## Evidence-linked design workspace (2026-09-14)
+
+The PDF workspace now has a wide **설계 비교·KOL** pane: explicit evidence-arm mapping,
+2–4 fixed/equal sample-size alternatives, 1–6 user-declared hypothetical scenarios, version-bound
+comparison tables, KOL questions and append-only user meeting notes. JSON/Markdown meeting packets
+include source citations, assumptions, MC error, questions and history. No clinical recommendation.
+
+File imports/exports remain browser-local. The optional calculation bridge sends the PDF and its current
+review/brief/explicitly attached reports **only to the user's loopback Python service**, after consent.
+Start that service with `uv run python -m trialboard.api --enable-designs`; the default server disables it.
+The browser bridge only works on localhost/127.0.0.1:5173. Hosted sites cannot use this local bridge.
+There is no server persistence, API key, model call or automatic fallback. The existing CSV route stays local.
+
+Field-review restore and current AI recritique report import are also implemented; older dated statements
+below describe their initial implementation, not the current feature set.
+See [design workflow](../docs/DESIGN_WORKSPACE.md), [synthetic rehearsal](../docs/DEMO_REHEARSAL.md),
+and [current completion estimate](../docs/COMPLETION_ESTIMATE.md). Browser interaction QA is pending OS tool permissions.
 
 ## Local PDF source inspection (2026-09-13)
 

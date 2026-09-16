@@ -1,0 +1,9 @@
+.moc-badge { position: fixed; z-index: 1250; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 42px; padding: 9px 20px; background: #172b36; color: #f4f7f8; border-top: 1px solid #46606b; font-size: 12px; line-height: 1.5; pointer-events: none; }
+.moc-badge strong { font-size: 11px; letter-spacing: .1em; background: #ffdd89; color: #302919; padding: 2px 7px; border-radius: 4px; }
+.workspace { padding-bottom: 80px; }
+.moc-file-action { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.demo-recorder { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.demo-recorder small { font-size: 11px; color: #667681; }
+.moc-samples { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0; }
+.moc-samples p { flex-basis: 100%; margin: 0; color: #596570; font-size: 12px; }
+@media (max-width: 600px) { .moc-badge { justify-content: flex-start; font-size: 11px; padding: 8px 12px; } }

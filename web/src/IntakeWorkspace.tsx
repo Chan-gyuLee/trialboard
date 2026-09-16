@@ -1,3 +1,4 @@
+import { MocBadge } from "./MocDemo";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Button, Checkbox, CircularProgress, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import { ArrowDownToLine, ArrowRight, Check, FileSpreadsheet, FileText, FolderOpen, Upload, X } from "lucide-react";
@@ -55,6 +56,7 @@ export function Intake({ onEvidence }: { onEvidence: () => void }) {
     }, null, 2), "application/json");
   }
   return <div className="intake">
+    {table?.origin === "synthetic_example" && <MocBadge />}
     <div className="intake-heading"><span className="document-kicker">자료 검토</span><h1>{report ? "다음 판단 전에 확인할 것" : "검토할 자료부터 시작하세요"}</h1><p>{report ? "제출한 표에서 확인한 사실과, 아직 판단할 수 없는 부분을 구분했습니다." : "용량별 요약표를 넣고 질문을 고르면, 불일치와 빠진 항목을 원래 행과 함께 확인합니다."}</p></div>
     <div className="intake-steps" aria-label="검토 순서"><span className={table ? "complete" : "current"}><i>{table ? <Check size={13} /> : "1"}</i>자료 넣기</span><ArrowRight size={14} /><span className={table && !report ? "current" : report ? "complete" : ""}><i>2</i>내용·질문 확인</span><ArrowRight size={14} /><span className={report ? "current" : ""}><i>3</i>검토 기록</span></div>
     <div className="intake-columns"><section className="intake-main">
