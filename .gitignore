@@ -2,6 +2,7 @@
 *.hwpx
 *.hwp
 *.pdf
+!web/public/data/moc/SYNTHETIC-DEMO-NOT-CLINICAL.pdf
 !data/guidance/.gitkeep
 # python
 .venv/

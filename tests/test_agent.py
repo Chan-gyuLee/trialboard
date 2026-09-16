@@ -176,6 +176,18 @@ class ComparisonCritic(ScriptedProvider):
         return await super().complete(**kwargs)
 
 
+def test_applicability_concerns_handoff_without_reextracting_same_evidence():
+    progress = []
+    result = asyncio.run(run_agent(demo_input(), ComparisonCritic(), on_progress=progress.append))
+    assert result.status == "PARTIAL_ABSTENTION"
+    assert len(result.attempts) == 1
+    assert len(result.accepted) == 4
+    assert len(result.calls) == 2
+    assert all(f.code == "MODEL_COMPARISON_LIMITATION" for f in result.attempts[-1].findings)
+    assert progress[-1]["stage"] == "HANDOFF"
+    assert progress[-1]["items"][0]["kind"] == "decision"
+
+
 def test_comparison_gap_preserves_supported_observations_without_approving_comparison():
     result = run("missing", ComparisonCritic(), Limits(max_repairs=0, max_calls=2))
     assert result.status == "PARTIAL_ABSTENTION"

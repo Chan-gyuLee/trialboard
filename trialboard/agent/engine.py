@@ -2,6 +2,7 @@
 
 import asyncio
 import platform
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from importlib.metadata import version
@@ -52,7 +53,11 @@ class BudgetError(RuntimeError):
 
 
 async def run_agent(
-    data: AgentInput, provider: Provider, limits: Limits | None = None
+    data: AgentInput,
+    provider: Provider,
+    limits: Limits | None = None,
+    *,
+    on_progress: Callable[[dict], None] | None = None,
 ) -> AgentReport:
     limits = limits or Limits()
     if provider.mode not in ("OPENAI_RESPONSES", "CODEX_CHATGPT", "SCRIPTED_TEST_DOUBLE"):
@@ -65,6 +70,11 @@ async def run_agent(
     # Reserve a conservative request ceiling, including JSON schema/protocol overhead.
     # This is a local token safety budget, NOT a dollar spend guarantee.
     reserved_tokens = 102000 + limits.max_output_tokens
+
+    def progress(stage, attempt, state, **counts):
+        # Only application stage metadata; never provider reasoning or raw diagnostics.
+        if on_progress is not None:
+            on_progress({"stage": stage, "attempt": attempt, "state": state, **counts})
 
     async def call(stage, attempt, instructions, payload, schema):
         nonlocal used_tokens
@@ -85,6 +95,15 @@ async def run_agent(
             )
         )
         events.append(Event(stage=stage, attempt=attempt, codes=[]))
+        progress(
+            stage,
+            attempt,
+            "STARTED",
+            items=[
+                {"kind": "source", "id": s.id, "text": s.text[:1000], "span_ids": [s.id]}
+                for s in data.spans[:6]
+            ],
+        )
         try:
             reply = await provider.complete(
                 instructions=instructions,
@@ -141,11 +160,57 @@ async def run_agent(
                     )
                     continue
                 prior = extraction.model_dump(mode="json")
+                progress(
+                    "EXTRACT" if attempt == 0 else "REVISE",
+                    attempt,
+                    "COMPLETED",
+                    observations=len(extraction.observations),
+                    items=[
+                        {
+                            "kind": "observation",
+                            "id": o.id,
+                            "text": (
+                                f"{o.fields.dose.value or '용량 미보고'} · "
+                                f"{o.fields.metric.value or '지표 미보고'} · "
+                                f"사건 {o.fields.events.value or '미보고'} / "
+                                f"분모 {o.fields.denominator.value or '미보고'} · "
+                                f"보고 비율 {o.fields.reported_rate.value or '미보고'}"
+                            )[:1000],
+                            "span_ids": sorted(
+                                {
+                                    f.span_id
+                                    for f in o.fields.__dict__.values()
+                                    if f.span_id is not None
+                                }
+                            )[:12],
+                        }
+                        for o in extraction.observations
+                    ],
+                )
                 candidates, issues = verify(data, extraction)
                 # Nothing from this new attempt is adopted before its critique completes.
                 accepted = []
                 events.append(
                     Event(stage="VERIFY", attempt=attempt, codes=sorted({i.code for i in issues}))
+                )
+                progress(
+                    "VERIFY",
+                    attempt,
+                    "COMPLETED",
+                    findings=len(issues),
+                    codes=sorted({i.code for i in issues}),
+                    items=[
+                        {
+                            "kind": "finding",
+                            "id": f"finding-{n}",
+                            "text": (
+                                f"{i.code} · {i.observation_id or '전체'} · "
+                                f"{i.field or ''} · {i.detail}"
+                            )[:1000],
+                            "span_ids": [],
+                        }
+                        for n, i in enumerate(issues[:24])
+                    ],
                 )
                 critique = None
                 attempts.append(
@@ -171,6 +236,31 @@ async def run_agent(
                     except ValidationError:
                         raise ModelError("INVALID_CRITIQUE_SCHEMA") from None
                     objections = critique_findings(data, candidate_extraction, critique)
+                    progress(
+                        "CRITIQUE",
+                        attempt,
+                        "COMPLETED",
+                        concerns=len(critique.concerns),
+                        questions=len(critique.next_questions),
+                        items=[
+                            {
+                                "kind": "concern",
+                                "id": f"concern-{n}",
+                                "text": c.reason[:1000],
+                                "span_ids": c.span_ids[:12],
+                            }
+                            for n, c in enumerate(critique.concerns)
+                        ]
+                        + [
+                            {
+                                "kind": "question",
+                                "id": f"question-{n}",
+                                "text": q[:1000],
+                                "span_ids": [],
+                            }
+                            for n, q in enumerate(critique.next_questions)
+                        ],
+                    )
                     issues.extend(objections)
                     if not any(i.code == "INVALID_CRITIQUE_REFERENCE" for i in objections):
                         rejected = {i.observation_id for i in objections}
@@ -180,6 +270,32 @@ async def run_agent(
                 )
                 if not issues and accepted:
                     status = "DRAFT_FOR_EXPERT_REVIEW"
+                    break
+                if (
+                    accepted
+                    and issues
+                    and all(i.code == "MODEL_COMPARISON_LIMITATION" for i in issues)
+                ):
+                    # New extraction of the same source cannot settle applicability.
+                    # Preserve the concerns; do not spend another call pretending to repair them.
+                    progress(
+                        "HANDOFF",
+                        attempt,
+                        "COMPLETED",
+                        items=[
+                            {
+                                "kind": "decision",
+                                "id": "comparison-needs-context",
+                                "text": (
+                                    "지원된 관측 초안은 유지합니다. "
+                                    "남은 쟁점은 비교 적용 한계이므로 "
+                                    "같은 자료의 재추출을 생략하고, "
+                                    "확인 질문과 함께 사람에게 인계합니다."
+                                ),
+                                "span_ids": [],
+                            }
+                        ],
+                    )
                     break
                 feedback = [i.model_dump() for i in issues]
             if attempts and attempts[-1].extraction is None:

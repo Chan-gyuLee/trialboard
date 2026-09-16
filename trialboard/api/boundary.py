@@ -16,8 +16,15 @@ DEV_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
 
 
 class LocalBoundary:
-    def __init__(self, app: ASGIApp):
+    def __init__(
+        self,
+        app: ASGIApp,
+        design_body_bytes: int | None = None,
+        project_body_bytes: int | None = None,
+    ):
         self.app = app
+        self.design_body_bytes = design_body_bytes
+        self.project_body_bytes = project_body_bytes
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -47,6 +54,13 @@ class LocalBoundary:
         if scope["method"] != "POST":
             await self.app(scope, receive, safe_send)
             return
+        body_limit = (
+            self.design_body_bytes
+            if scope.get("path") == "/api/design-comparisons" and self.design_body_bytes is not None
+            else MAX_BODY_BYTES
+        )
+        if scope.get("path") == "/api/projects" and self.project_body_bytes is not None:
+            body_limit = self.project_body_bytes
         content_type = headers.get("content-type", "").split(";", 1)[0].strip().lower()
         if content_type != "application/json":
             await reject(415, "JSON_REQUIRED")
@@ -59,7 +73,7 @@ class LocalBoundary:
         if declared < 0:
             await reject(400, "INVALID_CONTENT_LENGTH")
             return
-        if declared > MAX_BODY_BYTES:
+        if declared > body_limit:
             await reject(413, "BODY_TOO_LARGE")
             return
 
@@ -71,7 +85,7 @@ class LocalBoundary:
                     if message["type"] == "http.disconnect":
                         return
                     chunk = message.get("body", b"")
-                    if len(body) + len(chunk) > MAX_BODY_BYTES:
+                    if len(body) + len(chunk) > body_limit:
                         await reject(413, "BODY_TOO_LARGE")
                         return
                     body.extend(chunk)

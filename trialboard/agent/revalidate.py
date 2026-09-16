@@ -23,8 +23,8 @@ JSON_LIMIT = 8 * 1024 * 1024
 PDF_LIMIT = 5 * 1024 * 1024
 
 
-def read_json(raw: bytes):
-    if len(raw) > JSON_LIMIT:
+def read_json(raw: bytes, *, limit: int = JSON_LIMIT):
+    if len(raw) > limit:
         raise ValueError("JSON_FILE_TOO_LARGE")
 
     def pairs(items):
