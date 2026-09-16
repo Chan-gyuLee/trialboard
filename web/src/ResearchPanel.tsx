@@ -6,6 +6,7 @@ import {basisLabel,researchFindingWarnings,readResearchResult,readResearchStream
 import type {ScoutContext} from "./evidence-scout";
 import ResearchActivity from "./ResearchActivity";
 import ResearchCuration from "./ResearchCuration";
+import ResearchLinkage from "./ResearchLinkage";
 import "./research.css";
 
 export default function ResearchPanel({context,onIntake,onBusy,locked,onRestoreContext}:{context:ResearchContext;onIntake:(c:ScoutContext)=>void;onBusy:(busy:boolean)=>void;locked:boolean;onRestoreContext:(c:ResearchContext)=>Promise<void>}){
@@ -48,7 +49,8 @@ export default function ResearchPanel({context,onIntake,onBusy,locked,onRestoreC
  {collection&&<><div className="research-summary"><div><strong>{collection.sources.length}</strong><span>연결된 근거</span></div><div><strong>{collection.sources.filter(s=>s.kind==="PAPER").length}</strong><span>논문 · 초록/서지</span></div><div><strong>{collection.sources.filter(s=>s.pdf_url).length}</strong><span>공개 PDF 연결</span></div><div><strong>{collection.calls.length}</strong><span>모델 요청 기록</span></div></div>
  <Alert severity={collection.status==="COMPLETE"?"info":"warning"}>{collection.status} · {new Date(collection.created_at).toLocaleString("ko-KR")} · {collection.request.asset}/{collection.request.nct_id}. 수집 완료는 임상 근거 검증 완료가 아닙니다.</Alert>
  {collection.execution_mode==="SCRIPTED_TEST_DOUBLE"&&<Alert severity="warning">MOC · 합성 테스트 모델 결과입니다. 실제 AI 검토가 아닙니다.</Alert>}
- <div className="research-tabs" role="group" aria-label="조사 결과 보기">{[["BRIEF","검토 브리핑"],["LIBRARY","근거 DB"],["TRACE","조사 기록"]].map(([id,label])=><Button key={id} variant={view===id?"contained":"text"} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</Button>)}</div>
+ <div className="research-tabs" role="group" aria-label="조사 결과 보기">{[["BRIEF","검토 브리핑"],["LINKAGE","시험·코호트 연결"],["LIBRARY","근거 DB"],["TRACE","조사 기록"]].map(([id,label])=><Button key={id} variant={view===id?"contained":"text"} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</Button>)}</div>
+ {view==="LINKAGE"&&<ResearchLinkage key={collection.id} collection={collection} onInspect={inspectSource}/>}
  {view==="TRACE"&&<ResearchActivity busy={false} events={collection.events} seconds={Math.round((collection.events.at(-1)?.elapsed_ms??0)/1000)} plan={collection.plan} sources={collection.sources}/>}
  {view==="BRIEF"&&!collection.review&&<Alert severity="info">AI 검토 초안이 없습니다. 근거 DB에서 수집 자료를 확인하세요. 수집만 선택했거나 모델 검토가 완료되지 않은 기록입니다.</Alert>}
  {view==="LIBRARY"&&<> <div className="research-db-search"><TextField fullWidth label="저장된 근거 DB 안에서 검색" placeholder="예: 960, randomized, adverse events" value={dbQuery} onChange={e=>setDbQuery(e.target.value)} slotProps={{htmlInput:{maxLength:150}}} helperText="이 조사에 저장한 제목·초록·등록 문구만 검색합니다. 외부 검색·모델 호출 없음. PDF 본문은 이 색인에 포함되지 않습니다."/>{dbBusy&&<CircularProgress size={18}/>}<div aria-live="polite">{dbHits!==null&&<p>{dbHits.length}건 표시 · 최대 20건</p>}{dbHits?.map(h=><Button fullWidth key={h.source_id} onClick={()=>{inspectSource(h.source_id);}}><span><strong>{h.title}</strong><br/>{h.snippet}</span></Button>)}</div></div>

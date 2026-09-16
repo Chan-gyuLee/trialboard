@@ -1,4 +1,5 @@
 import {strictJson} from "./field-review.ts";
+import {linkageMarkdown} from "./research-linkage.ts";
 export type ResearchContext={search_id:string;nct_id:string;asset:string;indication:string};
 export type ResearchSource={id:string;kind:"REGISTRY"|"PAPER"|"PROTOCOL"|"SAP"|"REGULATORY";title:string;url:string;text:string;content_level:string;link_basis:string[];identifiers:Record<string,string>;published:string|null;fetched_at:string;digest:string;pdf_url:string|null;raw_snapshots:string[]};
 export type ResearchPlan={followup_terms:string[];priorities:{source_id:string;reason:string}[];missing_evidence:string[]};
@@ -62,6 +63,7 @@ export function researchMarkdown(c:Collection):string {
     }),
     "## KOL 검토 질문",...(c.review?.questions??[]).map(q=>`- ${q}`),
     "## 출처",...c.sources.map(s=>`- ${s.id}: ${s.title}\n  ${s.url}\n  ${s.content_level} / ${s.link_basis.join(", ")} / SHA256 ${s.digest}`),
+    linkageMarkdown(c.sources,c.request.nct_id),
     "## 한계",...c.notices.map(n=>`- ${n}`),
     ...(c.execution_mode==="SCRIPTED_TEST_DOUBLE"?["MOC · 합성 테스트 모델 결과"]:[]),
   ].join("\n\n");

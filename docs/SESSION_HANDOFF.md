@@ -5,6 +5,25 @@
 
 ## 가장 최근 사용자 요청과 확인
 
+2026-09-16 최신 사용자: ‘깃 한번 업로드해. 그리고 다음작업 진행해.’
+기존 WIP를 `994c726` core / `ba23348` web / `495daa8` docs로 분리해 origin/main에 push 완료.
+다음 [RESEARCH_LINKAGE.md](RESEARCH_LINKAGE.md)의 시험·코호트 연결 사전 점검을 구현. **전체75%, 기업25% 유지.**
+
+- `research-linkage.ts`, `ResearchLinkage.tsx`: 기존 다중 출처 조사에 ‘시험·코호트 연결’ 탭.
+  title/text만 NCT와 지정 코호트 표현을 검사. 약물 규제 문서 별도 분류, 원문 인용/확인 질문/검토 이력 이동.
+  method TEXT_METADATA_RULES/1, clinicalVerified:false. 새 모델 호출/자동 제외/설계 차단 해제 없음.
+  JSON export, 기존 검토 Markdown에 동일 사전 점검 추가. DB 스키마·원본·AI 해석은 바꾸지 않음.
+- sotorasib 기존86근거: 선택NCT8/여러NCT2/다른NCT2/등록부연결0/규제12/미확보62.
+  UI 다른NCT2 필터→NCT05221372 인용/질문→해당 PubMed38507877 원문/검토 화면 이동 확인.
+  390px viewport에서도 가로넘침 없음, override복구. 브라우저1/탭1907030730, 종료시 여러NCT 필터.
+- 웹18개 추가, 전체703통과. Python469·build·Ruff 통과. Vite 빌드의 큰 청크 경고는 남음.
+  Git 후보 비밀/대용량 파일 점검, 로컬 DB/영상 제외. 웹사이트 배포·새 시연 영상 없음.
+- API/Vite와 MOC 프로젝트는 아래 저장·복구 단계 상태 유지. 이번 사전 점검에 추가 모델/대회키 사용 없음.
+- 다음: 원문 관측값에 실제 코호트/분석집단/시점 연결→사용자 확인→설계/차단/KOL→통합 저장의 실자료 UI 완주.
+  문구 사전 점검을 자동 임상 검증으로 부르지 않는다. 전체80%와 독립 임상 평가는 아직 미달.
+
+아래는 같은 날 프로젝트 저장 단계의 이전 기록이다. ‘커밋/push 없음’은 당시 상태다.
+
 2026-09-16 최신 사용자: ‘다음 작업 진행해’. [PROJECT_CHECKPOINTS.md](PROJECT_CHECKPOINTS.md) 구현.
 **제안서 전체 약75%, 기업25% 유지. 목표80% 미달.**
 

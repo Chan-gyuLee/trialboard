@@ -1,5 +1,14 @@
 # TrialBoard 단계별 구현 기록
 
+## 2026-09-16 Git 업로드와 시험·코호트 연결 사전 점검
+
+기존 작업을 `994c726`(core), `ba23348`(web), `495daa8`(docs)로 분리해 origin/main에 push.
+키/인증/로컬 DB/영상 제외 확인, PDF는 binary attribute 지정. 웹사이트 배포는 아님.
+[RESEARCH_LINKAGE](RESEARCH_LINKAGE.md): 수집 제목·문구의 NCT/코호트 표현을 규칙으로 점검하고 6분류/인용/질문/원문 이동/JSON·Markdown 제공.
+저장 sotorasib86건에서 선택NCT8·여러NCT2·다른NCT2·등록부연결0·규제12·미확보62. 임상 정답이나 정확도 수치가 아니다.
+브라우저에서 필터/문구 펼치기/정확한 논문 원문 이동,390px 가로넘침없음 확인. 원본/AI 기록 수정 없음, 새 모델0회.
+웹703/Python469/build/Ruff 통과. 전체75% 유지. 별칭·실제 코호트/전문 판독·실자료 전체 UI·최종영상은 남음.
+
 ## 2026-09-16 로컬 프로젝트 통합 저장·복구
 
 [PROJECT_CHECKPOINTS](PROJECT_CHECKPOINTS.md): PDF 원본/메모/필드 이력/설계 초안/현재 비교·KOL을 하나의 로컬 프로젝트로 저장.
