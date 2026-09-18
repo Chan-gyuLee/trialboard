@@ -19,9 +19,18 @@ data/db/*.sqlite*
 # secrets
 .env
 .env.*
+.secrets/
+dacon-api-key
 # node
 web/node_modules/
+# Demo film is managed locally; product-only GitHub handoff.
+/video/
+video/node_modules/
+video/build/
+video/public/audio/
+tmp/
 web/dist/
+*.tsbuildinfo
 # generated local review reports
 /output/
 # os

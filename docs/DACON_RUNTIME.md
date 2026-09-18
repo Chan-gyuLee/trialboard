@@ -1,7 +1,8 @@
 # 제품 에이전트 · 대회 API 연결
 
 2026-09-16. 사용자가 제품 실행의 대회 API 전환과 기존 팀 키의 실제 테스트를 승인했다.
-메일의 비밀키·연락처·본문 전체는 저장하지 않는다.
+메일의 비밀키·연락처·본문 전체는 저장소에 저장하지 않는다.
+같은 날 사용자가 키의 로컬 파일 보관을 명시 승인했다. 아래 파일 방식은 그 후속 변경이다.
 
 ## 개발 계정과 제품 실행의 분리
 
@@ -26,6 +27,25 @@ uv run python -m trialboard.api \
 키는 해당 서버 프로세스의 환경에만 보관한다. 종료 후 다시 입력해야 한다.
 이미 `TRIALBOARD_DACON_API_KEY`가 안전하게 설정된 서버 환경이라면 `--prompt-dacon-key`는 생략한다.
 `.env` 파일을 자동 로드하지 않으며 `VITE_` 환경변수에는 키를 넣지 않는다.
+
+### 선택: 사용자 승인 로컬 비밀 파일
+
+2026-09-16 사용자 요청으로 개발 Mac의 `/Users/ryul/.config/trialboard/dacon-api-key`에 저장했다.
+상위 디렉터리700/파일600, 저장소 밖이며 키 내용은 문서/로그/화면으로 출력하지 않는다.
+이는 평문 파일의 접근 권한 제한이며 암호화/Keychain 보관은 아니다. Git ignore도 키 파일 이름을 방어적으로 제외한다.
+
+```bash
+uv run python -m trialboard.api \
+  --agent-provider dacon \
+  --dacon-key-file /Users/ryul/.config/trialboard/dacon-api-key \
+  --enable-designs --enable-agent-demo --enable-pdf-agent --enable-evidence-scout
+```
+
+명시한 파일만 시작 시 로드한다. 본인 소유·POSIX 권한(그룹/다른 사용자 접근 없음)·단일 일반 파일·크기를 검사한다.
+심볼릭 링크/하드 링크/공유 읽기 권한/빈 파일은 거부한다. 비표시 입력과 파일 옵션은 동시에 사용할 수 없다.
+개인 Codex 모드에는 대회 키 파일을 적용하지 않는다. 파일 내용은 서버 메모리로 읽으며 브라우저에 보내지 않는다.
+다른 팀원 컴퓨터에는 이 파일이 없다. 각자 승인받은 키를 별도로 준비한다.
+서버 재시작 이후 비표시 재입력이 반드시 필요하다는 이전 기록은 이 명시적 파일 방식을 사용할 때는 적용되지 않는다.
 
 별도 터미널에서 `npm --prefix web run dev` 후 http://127.0.0.1:5173 에 접속한다.
 화면의 모델 안내에는 `대회 API · gpt-5.6-terra · 팀 공용 토큰`이 표시된다.
@@ -70,6 +90,9 @@ uv run python -m trialboard.agent.dacon_smoke --allow-external --prompt-key
 HTTP 요청을 중단해도 원격 모델 처리가 취소되거나 토큰이 환불된다고 보장하지 않는다.
 
 ## 실제 검증 · 2026-09-16
+
+최신 조사 검증: [계획 통과/추가 검색/85개 근거/인용 보류](RESEARCH_VALIDATION_RUN.md).
+아래는 최초 연결 당시의 검증 기록이며 ‘파일 저장 없음’도 당시 상태다.
 
 1. 기존 팀 키를 비표시 터미널 입력으로 전달. 파일 저장 없음.
 2. `gpt-5.6-terra` 합성 구조화 연결 검사: OK, 입력63/출력14 = 77토큰.
