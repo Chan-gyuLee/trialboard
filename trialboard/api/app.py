@@ -76,6 +76,14 @@ def create_app(
         app.include_router(scout_router(evidence_db))
         app.include_router(research_router(evidence_db, model_slot, provider_factory))
         app.include_router(project_router(evidence_db))
+        if enable_designs:
+            from trialboard.api.exploration import exploration_router
+
+            app.include_router(exploration_router(evidence_db, slots))
+        if enable_pdf_agent:
+            from trialboard.api.automation import automation_router
+
+            app.include_router(automation_router(evidence_db, model_slot, provider_factory))
 
     @app.get("/api/agent-demo/capabilities")
     async def agent_capabilities() -> dict:
@@ -93,6 +101,8 @@ def create_app(
             "clinical_approval": False,
             "case_limits": CASE_LIMITS,
             "pdf_enabled": enable_pdf_agent,
+            "automation_enabled": enable_pdf_agent and enable_evidence_scout,
+            "exploration_enabled": enable_designs and enable_evidence_scout,
         }
 
     if enable_agent_demo or enable_pdf_agent:

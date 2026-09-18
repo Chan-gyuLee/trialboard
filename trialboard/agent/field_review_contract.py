@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from trialboard.agent.models import Contract, Digest, Fields, Id, Text
 
@@ -21,15 +21,35 @@ class SupportingCitation(Citation):
     role: Literal["header", "unit", "footnote", "context"]
 
 
+class RateNormalization(Contract):
+    method: Literal["adjacent-percent/1"]
+    display: Text
+    unitSpanId: Id
+    pointEstimateAttested: Literal[True]
+    sameGroupAttested: Literal[True]
+
+    @field_validator("pointEstimateAttested", "sameGroupAttested", mode="before")
+    @classmethod
+    def explicit_attestation(cls, value):
+        if value is not True:
+            raise ValueError("NORMALIZATION_EXPLICIT_ATTESTATION_REQUIRED")
+        return value
+
+
 class Value(Contract):
     value: Text | None
     citation: Citation | None
     supporting: list[SupportingCitation] = Field(
         default_factory=list, max_length=4, exclude_if=lambda v: not v
     )
+    normalization: RateNormalization | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def missing(self):
+        if "normalization" in self.model_fields_set and self.normalization is None:
+            raise ValueError("EMPTY_NORMALIZATION")
+        if self.normalization and (not self.value or not self.citation or not self.supporting):
+            raise ValueError("NORMALIZATION_REQUIRES_CITATIONS")
         if self.value is None and self.citation is not None:
             raise ValueError("MISSING_VALUE_WITH_CITATION")
         if "supporting" in self.model_fields_set:
@@ -124,7 +144,7 @@ class Origin(Contract):
 
 
 class ReviewPacket(Contract):
-    schemaVersion: Literal["pdf-field-review/1", "pdf-field-review/2"]
+    schemaVersion: Literal["pdf-field-review/1", "pdf-field-review/2", "pdf-field-review/3"]
     sourceDigest: Digest
     origin: Origin
     rows: list[ReviewRow] = Field(max_length=12)
@@ -140,6 +160,16 @@ class ReviewPacket(Contract):
     def consistent(self):
         if self.persisted or self.clinicalApproval:
             raise ValueError("UNSUPPORTED_TRUST_CLAIM")
+        for row in self.rows:
+            for name, field in row.fields.items():
+                values = [field.original, field.current]
+                values += [v for h in field.history for v in (h.before, h.after)]
+                if any(v.normalization for v in values) and (
+                    self.schemaVersion != "pdf-field-review/3"
+                    or name != "reported_rate"
+                    or row.valueKind != "reported_percentage"
+                ):
+                    raise ValueError("NORMALIZATION_REQUIRES_RATE_V3")
         if self.schemaVersion == "pdf-field-review/1":
             for row in self.rows:
                 for field in row.fields.values():

@@ -18,4 +18,7 @@ def critique_payload(checked):
     # Preserve the exact legacy request shape when contextual links are absent.
     if links:
         payload["field_context_citations"] = links
+    rates = {k: v for k, v in checked.get("normalized_rates", {}).items() if k in accepted}
+    if rates:
+        payload["user_normalized_rates"] = rates
     return payload

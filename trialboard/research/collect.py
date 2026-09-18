@@ -1,6 +1,7 @@
 """Bounded public connectors. Search matches and clinical evidence are not equivalent."""
 
 import asyncio
+import json
 import re
 from datetime import UTC, datetime
 from html import unescape
@@ -125,6 +126,8 @@ async def registry(run: Collection, store):
         [
             nct,
             protocol["identificationModule"]["briefTitle"],
+            "Registered design (not outcome data): "
+            + json.dumps(protocol.get("designModule", {}), ensure_ascii=False),
             protocol.get("descriptionModule", {}).get("briefSummary", ""),
             *[
                 f"Arm: {a.get('label', '')}. {a.get('description', '')}"
@@ -146,10 +149,46 @@ async def registry(run: Collection, store):
             text=text,
             content_level="REGISTRY_TEXT",
             link_basis=["REGISTRY_RECORD"],
-            identifiers={"nct": nct},
+            identifiers={
+                "nct": nct,
+                **(
+                    {"allocation": protocol["designModule"]["designInfo"]["allocation"]}
+                    if protocol.get("designModule", {}).get("designInfo", {}).get("allocation")
+                    in ("RANDOMIZED", "NON_RANDOMIZED", "NA")
+                    else {}
+                ),
+            },
             raw_snapshots=[raw_digest],
         ),
     )
+    from trialboard.research.result_tables import registry_results
+
+    tables = registry_results(store, run.id, run=run)
+    if tables and (tables["outcomes"] or tables["safety"]):
+        from trialboard.research.result_context import result_pages
+
+        pages = result_pages(tables)
+        included = sum(len(context["included"]) for _, context in pages)
+        run.notices.append(
+            f"등록 결과 모델 입력 후보: {included}행 포함 / "
+            f"{len(tables['outcomes']) + len(tables['safety']) - included}행 생략. "
+            "표 원본과 집단 맥락을 보존합니다."
+        )
+        for index, (result_text, _) in enumerate(pages):
+            add_source(
+                run,
+                source(
+                    id=f"registry_results_{nct}" + (f"_{index + 1}" if index else ""),
+                    kind="REGISTRY",
+                    title=protocol["identificationModule"]["briefTitle"] + " · Posted results",
+                    url=f"https://clinicaltrials.gov/study/{nct}",
+                    text=result_text,
+                    content_level="REGISTRY_TEXT",
+                    link_basis=["REGISTRY_RECORD", "REGISTRY_RESULTS"],
+                    identifiers={"nct": nct},
+                    raw_snapshots=[raw_digest],
+                ),
+            )
     docs = record.get("documentSection", {}).get("largeDocumentModule", {}).get("largeDocs", [])
     for doc in docs[:12]:
         filename = doc.get("filename", "")
@@ -187,16 +226,104 @@ async def registry(run: Collection, store):
     }
 
 
-async def literature(run: Collection, query: str, basis: str, store, refs: dict):
-    data = await get_json(
-        EPMC,
-        {"query": query, "format": "json", "resultType": "core", "pageSize": 20, "sort_date": "y"},
+def literature_page_limit(basis: str) -> int:
+    # Retrieval priority is not an evidence grade. Keep broad discovery bounded.
+    return 2 if basis in ("NCT_SEARCH", "AI_FOLLOWUP") else 1
+
+
+async def literature(run: Collection, query: str, basis: str, store, refs: dict, on_page=None):
+    limit = literature_page_limit(basis)
+    cursor, pages, fetched, total = "*", 0, 0, None
+    seen_cursors, seen_records = set(), set()
+    reason, failed, storage_limited = "SOURCE_LIMIT", False, False
+    while pages < limit and len(run.sources) < 100:
+        seen_cursors.add(cursor)
+        try:
+            data = await get_json(
+                EPMC,
+                {
+                    "query": query,
+                    "format": "json",
+                    "resultType": "core",
+                    "pageSize": 20,
+                    "cursorMark": cursor,
+                },
+            )
+            hits = data["resultList"]["result"]
+            page_total = data["hitCount"]
+            if (
+                not isinstance(hits, list)
+                or len(hits) > 20
+                or type(page_total) is not int
+                or page_total < fetched + len(hits)
+                or any(not isinstance(p, dict) for p in hits)
+            ):
+                raise ValueError("INVALID_LITERATURE_RESPONSE")
+            raw_digest = store.snapshot(data)
+            keys = {(str(p.get("source", "")), str(p.get("id", p.get("pmid", "")))) for p in hits}
+            new_records = keys - seen_records
+            seen_records.update(keys)
+            # Raw response records, not unique stored sources. Inconsistent totals fail closed.
+            fetched += len(hits)
+            total = page_total
+            pages += 1
+            _store_papers(run, hits, basis, refs, raw_digest)
+            storage_limited = any(
+                p.get("source") == "MED"
+                and re.fullmatch(r"\d{1,12}", str(p.get("pmid", p.get("id", ""))))
+                and not any(s.id == f"paper_{p.get('pmid', p.get('id', ''))}" for s in run.sources)
+                for p in hits
+            )
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            failed, reason = True, "REQUEST_FAILED"
+            break
+
+        next_cursor = data.get("nextCursorMark")
+        if storage_limited:
+            reason = "SOURCE_LIMIT"
+        elif hits and pages > 1 and not new_records:
+            reason = "NO_NEW_RECORDS"
+        elif not hits or fetched >= total:
+            reason = "RESULTS_EXHAUSTED"
+        elif len(run.sources) >= 100:
+            reason = "SOURCE_LIMIT"
+        elif pages >= limit:
+            reason = "PAGE_LIMIT"
+        elif (
+            not isinstance(next_cursor, str)
+            or not next_cursor
+            or len(next_cursor) > 2000
+            or next_cursor in seen_cursors
+        ):
+            reason = "CURSOR_UNAVAILABLE"
+        else:
+            reason = ""
+        if on_page:
+            await on_page(pages, fetched, total, not reason)
+        if reason:
+            break
+        cursor = next_cursor
+
+    run.coverage.append(
+        Coverage(
+            channel="Europe PMC / PubMed",
+            query=query,
+            status="FAILED" if failed else "SKIPPED" if not pages else "OK" if fetched else "EMPTY",
+            total=total,
+            fetched=fetched,
+            limited=failed
+            or storage_limited
+            or reason != "RESULTS_EXHAUSTED"
+            or (total is not None and fetched < total),
+            pages=pages,
+            stop_reason=reason,
+        )
     )
-    raw_digest = store.snapshot(data)
-    hits = data["resultList"]["result"]
-    total = data["hitCount"]
-    if not isinstance(hits, list) or len(hits) > 20 or type(total) is not int:
-        raise ValueError("INVALID_LITERATURE_RESPONSE")
+
+
+def _store_papers(run, hits, basis, refs, raw_digest):
     for paper in hits:
         # PubMed records have stable numeric IDs. Other content remains outside this slice.
         pmid = paper.get("pmid", paper.get("id", ""))
@@ -228,16 +355,6 @@ async def literature(run: Collection, query: str, basis: str, store, refs: dict)
                 published=paper.get("firstPublicationDate"),
             ),
         )
-    run.coverage.append(
-        Coverage(
-            channel="Europe PMC / PubMed",
-            query=query,
-            status="OK" if hits else "EMPTY",
-            total=total,
-            fetched=len(hits),
-            limited=total > len(hits),
-        )
-    )
 
 
 async def regulatory(run: Collection, store):

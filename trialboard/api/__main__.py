@@ -4,6 +4,7 @@ import argparse
 import getpass
 import os
 import sys
+from pathlib import Path
 
 import uvicorn
 
@@ -11,10 +12,16 @@ import uvicorn
 def main() -> None:
     parser = argparse.ArgumentParser(description="TrialBoard local synthetic review API")
     parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument(
+    credentials = parser.add_mutually_exclusive_group()
+    credentials.add_argument(
         "--prompt-dacon-key",
         action="store_true",
         help="Read the competition key without echo; memory only",
+    )
+    credentials.add_argument(
+        "--dacon-key-file",
+        type=Path,
+        help="Explicit private key file (POSIX owner-only permissions; keep outside Git)",
     )
     parser.add_argument(
         "--agent-provider",
@@ -45,6 +52,17 @@ def main() -> None:
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("--port must be between 1 and 65535")
+    if args.dacon_key_file:
+        if args.agent_provider != "dacon":
+            parser.error("A competition key file requires the dacon provider")
+        from trialboard.agent.credentials import read_private_key
+
+        try:
+            key = read_private_key(args.dacon_key_file)
+        except ValueError:
+            parser.error("Key file unavailable or unsafe; require owner-only POSIX permissions")
+        os.environ["TRIALBOARD_DACON_API_KEY"] = key.get_secret_value()
+        del key
     if args.prompt_dacon_key:
         if args.agent_provider != "dacon" or not sys.stdin.isatty():
             parser.error("Hidden key input requires an interactive terminal and dacon provider")

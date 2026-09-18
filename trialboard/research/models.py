@@ -98,6 +98,18 @@ class Coverage(Contract):
     total: int | None
     fetched: int
     limited: bool
+    pages: int | None = Field(default=None, ge=0, le=2)
+    stop_reason: (
+        Literal[
+            "RESULTS_EXHAUSTED",
+            "PAGE_LIMIT",
+            "SOURCE_LIMIT",
+            "CURSOR_UNAVAILABLE",
+            "NO_NEW_RECORDS",
+            "REQUEST_FAILED",
+        ]
+        | None
+    ) = None
 
 
 class Collection(Contract):

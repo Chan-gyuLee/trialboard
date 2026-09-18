@@ -48,6 +48,17 @@ def research_router(
             raise HTTPException(404, "RESEARCH_NOT_FOUND")
         return store.search_sources(run_id, q)
 
+    @router.get("/runs/{run_id}/result-tables")
+    async def result_tables(run_id: str):
+        from trialboard.research.result_tables import registry_results
+
+        if not store.get_run(run_id):
+            raise HTTPException(404, "RESEARCH_NOT_FOUND")
+        try:
+            return registry_results(store, run_id)
+        except (ValueError, TypeError, KeyError):
+            raise HTTPException(422, "REGISTRY_RESULTS_UNAVAILABLE") from None
+
     @router.post("/runs/{run_id}/recover")
     async def recover(run_id: str, request: Request):
         if request.headers.get("origin") not in DEV_ORIGINS:

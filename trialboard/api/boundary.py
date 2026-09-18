@@ -61,6 +61,14 @@ class LocalBoundary:
         )
         if scope.get("path") == "/api/projects" and self.project_body_bytes is not None:
             body_limit = self.project_body_bytes
+        if (
+            self.project_body_bytes is not None
+            and scope.get("path", "").startswith("/api/research/runs/")
+            and scope.get("path", "").endswith("/automation")
+        ):
+            from trialboard.api.automation import AUTOMATION_BODY_BYTES
+
+            body_limit = AUTOMATION_BODY_BYTES
         content_type = headers.get("content-type", "").split(";", 1)[0].strip().lower()
         if content_type != "application/json":
             await reject(415, "JSON_REQUIRED")

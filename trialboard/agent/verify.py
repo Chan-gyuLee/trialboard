@@ -16,7 +16,11 @@ def finding(code, observation=None, field=None, detail="") -> Finding:
     return Finding(code=code, observation_id=observation, field=field, detail=detail)
 
 
-def verify(data: AgentInput, extraction: Extraction) -> tuple[list[Observation], list[Finding]]:
+def verify(
+    data: AgentInput, extraction: Extraction, *, normalized_rates=None
+) -> tuple[list[Observation], list[Finding]]:
+    # Only the offline review validator supplies this separately validated mapping.
+    normalized_rates = normalized_rates or {}
     spans = {s.id: s for s in data.spans}
     accepted, issues = [], []
     ids = [o.id for o in extraction.observations]
@@ -83,13 +87,14 @@ def verify(data: AgentInput, extraction: Extraction) -> tuple[list[Observation],
             local.append(finding("COUNT_ROLE_UNSUPPORTED", obs.id))
         rate = obs.fields.reported_rate
         if rate.value is not None:
-            if percentage(rate.value) is None:
+            rate_text = normalized_rates.get(obs.id, rate.value)
+            if percentage(rate_text) is None:
                 local.append(finding("INVALID_REPORTED_PERCENTAGE", obs.id, "reported_rate"))
             else:
                 if (
                     not rate_only
                     and all(v is not None for v in counts)
-                    and not (rate_count_consistent(rate.value, *counts))
+                    and not (rate_count_consistent(rate_text, *counts))
                 ):
                     local.append(finding("RATE_COUNT_MISMATCH", obs.id))
                 binding = reported_rate_binding(obs.fields, spans)

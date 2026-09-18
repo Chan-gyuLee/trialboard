@@ -15,6 +15,7 @@ from trialboard.agent.field_review_contract import (
     Value,
 )
 from trialboard.agent.models import AgentInput, AgentReport, Extraction, Span
+from trialboard.agent.normalization import normalized_rate, reviewed_rates
 from trialboard.agent.report import escaped
 from trialboard.agent.verify import finding, verify
 from trialboard.serialization import sha256_json
@@ -210,6 +211,12 @@ def revalidate(
     changes = []
     for row in review.rows:
         for name, field in row.fields.items():
+            for value in [
+                field.original,
+                field.current,
+                *(v for h in field.history for v in (h.before, h.after)),
+            ]:
+                normalized_rate(value, source, field=name, kind=row.valueKind)
             check(field.original)
             check(field.current, checked=field.decision in ("confirmed", "corrected"))
             for value in (field.original, field.current):
@@ -249,9 +256,11 @@ def revalidate(
     effective = Extraction(
         observations=[o for o in effective.observations if o.id not in held_rows]
     )
-    accepted, issues = verify(data, effective)
+    rates = reviewed_rates(review, source)
+    accepted, issues = verify(data, effective, normalized_rates=rates)
     issues += exclusions
     return {
+        **({"normalized_rates": rates} if rates else {}),
         "schema_version": "field-revalidation/1",
         "rules_digest": sha256_json(
             {
@@ -261,6 +270,7 @@ def revalidate(
                     "clinical.py",
                     "field_review_contract.py",
                     "revalidate.py",
+                    "normalization.py",
                 )
             }
         ),
@@ -331,6 +341,12 @@ def markdown(result):
                 f"{escaped(field['current']['value'])} · {field['decision']}",
                 f"  근거: {escaped(c)} · 사유: {escaped(field['history'][-1]['reason'])}",
             ]
+            if n := field["current"].get("normalization"):
+                lines += [
+                    f"  사용자 해석: {escaped(n['display'])} · {escaped(n['method'])} · "
+                    f"별도 단위 근거: {escaped(n['unitSpanId'])} · "
+                    "원문 숫자/단위 별도 보존 · 임상 의미 미인증"
+                ]
     for title, key in [
         ("현재 쟁점", None),
         ("추가된 쟁점", "added"),

@@ -190,7 +190,11 @@ def compare_designs(
                 block("ONE_ENDPOINT_ROW_REQUIRED", arm.id, detail=family)
         selected.extend(rows)
     extraction = Extraction.model_validate({"observations": selected})
-    _, selected_issues = verify(AgentInput.model_validate(checked["input"]), extraction)
+    _, selected_issues = verify(
+        AgentInput.model_validate(checked["input"]),
+        extraction,
+        normalized_rates=checked.get("normalized_rates"),
+    )
     for f in selected_issues:
         # Rates remain evidence only, never reconstructed counts or simulation truth.
         if f.code not in ("REPORTED_RATE_ONLY", "RATE_BINDING_UNVERIFIED"):

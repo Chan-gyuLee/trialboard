@@ -113,11 +113,13 @@ class FakeModel:
                 "missing_evidence": ["MOC second dose"],
             }
         else:
+            source = next(s for s in kwargs["payload"]["sources"] if s["id"] == "paper_123")
             value = {
                 "findings": [
                     {
-                        "source_id": "paper_123",
-                        "quote": ("fabricated quote" if self.bad else "NCT00000001 uses 10 mg"),
+                        "anchor_id": (
+                            "unknown-anchor" if self.bad else source["segments"][0]["anchor_id"]
+                        ),
                         "interpretation": "MOC interpretation, not clinical",
                     }
                 ],
