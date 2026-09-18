@@ -1,4 +1,4 @@
-export type Study = { nct_id: string; title: string; url: string; conditions: string[]; phases: string[]; status: string; updated: string | null; sponsor: string | null; enrollment: {count: number; type: string} | null; interventions: {name: string; type: string}[]; arms: {label: string; description?: string}[]; primary_outcomes: {measure: string; timeFrame?: string}[]; results_available: boolean; documents: {label?: string; type?: string}[] };
+export type Study = { nct_id: string; title: string; url: string; conditions: string[]; phases: string[]; status: string; updated: string | null; sponsor: string | null; enrollment: {count: number; type: string} | null; interventions: {name: string; type: string}[]; arms: {label: string; description?: string|null}[]; primary_outcomes: {measure: string; timeFrame?: string}[]; results_available: boolean; documents: {label?: string; type?: string}[] };
 export type Receipt = { id: string; query: string; created_at: string; digest: string; total_count: number; fetched_count: number; truncated: boolean; studies: Study[]; mode: "LIVE_PUBLIC"; clinical_verified: false };
 export type ScoutContext = {asset: string; indication: string; study: string; question: string; receiptId: string; document?: {runId:string;sourceId:string;title:string}};
 export type ScoutEvent = {stage: string; message?: string; receipt?: Receipt};
@@ -25,6 +25,7 @@ export function readScoutReceipt(input: unknown): Receipt {
       !rows(s.interventions,"name") || !rows(s.interventions,"type") || !rows(s.arms,"label") || !rows(s.primary_outcomes,"measure") ||
       !Array.isArray(s.documents) || typeof s.results_available !== "boolean") return bad();
     for (const o of s.primary_outcomes as Record<string,unknown>[]) if (o.timeFrame != null && typeof o.timeFrame !== "string") return bad();
+    for (const a of s.arms as Record<string,unknown>[]) if (a.description != null && typeof a.description !== "string") return bad();
     seen.add(s.nct_id);
   }
   return r as unknown as Receipt;

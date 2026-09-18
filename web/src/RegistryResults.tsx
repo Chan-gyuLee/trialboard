@@ -1,0 +1,14 @@
+import {Alert} from '@mui/material';
+import type {AutoResult} from './auto-review';
+export default function RegistryResults({done}:{done:AutoResult}){
+ const r=done.registryResults;
+ if(done.registryError)return <Alert severity="warning">{done.registryError}</Alert>;
+ if(!r||(!r.outcomes.length&&!r.safety.length))return null;
+ return <section className="auto-extraction" aria-label="등록부 실제 결과표"><h3>등록부에 보고된 결과</h3><p>{r.notice}</p><p className="auto-caption">모델이 생성한 숫자가 아닙니다. 등록부 원본에서 같은 집단 ID로 연결한 값이며 임상적 비교 적합성은 미검증입니다.{r.limited?' 일부 행만 표시합니다.':''}</p>
+  {!done.result.collection.sources.some(s=>s.link_basis.includes('REGISTRY_RESULTS'))&&<Alert severity="info">이 저장된 AI 브리핑은 아래 결과표가 모델 입력에 연결되기 전에 작성됐습니다. 결과표를 지금 함께 복구했으며 기존 해석을 자동 갱신한 것은 아닙니다.</Alert>}
+  {r.outcomes[0]&&<div className="auto-plan"><strong>{r.outcomes[0].title}</strong><p>{r.outcomes[0].groupTitle} · {r.outcomes[0].value} {r.outcomes[0].unit}</p><p className="auto-caption">{r.outcomes[0].population}</p></div>}
+  <details><summary>효능·결과 지표 {r.outcomes.length}행 · 등록 집단·분모 확인</summary><div className="auto-result-table"><table><caption>효능·결과 지표 · 등록된 집단 그대로</caption><thead><tr><th>지표·시점·하위 항목</th><th>등록 집단</th><th>보고값·단위</th><th>보고 분모</th></tr></thead><tbody>{r.outcomes.map((o,i)=><tr key={i}><td>{o.title}{(o.classTitle||o.categoryTitle)&&<p className="auto-row-context">{[o.classTitle,o.categoryTitle].filter(Boolean).join(' · ')}</p>}<details><summary>분석집단·시점·원본 위치</summary><p>{o.population}</p><p>{o.groupDescription}</p><p>{o.window}</p><p>{o.definition}</p><p>{o.parameter} · {o.dispersion} · {o.lower??'—'} ~ {o.upper??'—'}</p>{o.spread&&<p>산포값: {o.spread}</p>}{o.comment&&<p>원문 주석: {o.comment}</p>}{o.denominatorScope==='CLASS'&&<p>결과 지표 전체 분모(참고·대체하지 않음): {o.overallDenominators?.map(d=>`${d.value} ${d.unit}`).join(' · ')||'미보고'}</p>}<code>{o.locator}</code></details></td><td>{o.groupTitle}<small>{o.groupId}</small></td><td>{o.value} {o.unit}</td><td>{o.denominators.map(d=>`${d.value} ${d.unit}`).join(' · ')||'미보고'}{o.denominatorScope==='CLASS'&&<small>하위 항목별 분모</small>}</td></tr>)}</tbody></table></div></details>
+  <div className="auto-result-table"><table><caption>안전성 · 서로 다른 지표를 합산하지 않음</caption><thead><tr><th>등록 집단</th><th>등록 지표</th><th>영향 받은 참여자 / 위험집단</th></tr></thead><tbody>{r.safety.map((o,i)=><tr key={i}><td>{o.groupTitle}<details><summary>집단·시점·원본 위치</summary><p>{o.groupDescription}</p><p>{o.window}</p><p>{o.description}</p><code>{o.locator}</code></details></td><td>{o.metric}</td><td>{o.affected??'미보고'} / {o.atRisk??'미보고'}</td></tr>)}</tbody></table></div>
+  <p className="auto-caption">통합집단 효능값은 용량별 효능값이 아닙니다. Serious adverse events를 3등급 이상 이상반응으로 바꾸지 않습니다. 분모·기간·집단이 다른 행을 자동 통합하지 않습니다.</p><a href={`${r.sourceUrl}?tab=results`} target="_blank" rel="noreferrer">ClinicalTrials.gov 결과 원문 열기</a><details><summary>원본 지문</summary><code>{r.snapshotDigest}</code></details>
+ </section>;
+}

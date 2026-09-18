@@ -37,6 +37,8 @@ export async function readRecritique(raw: string, review: FieldReview, source: P
   const acceptedIds=new Set(arr(nested.accepted,12).map(v=>str(obj(v).id,80)));
   const links=review.rows.filter(row=>acceptedIds.has(row.id)).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0).flatMap(row=>Object.entries(row.fields).sort(([a],[b])=>a<b?-1:a>b?1:0).filter(([,f])=>['confirmed','corrected'].includes(f.decision)&&f.current.supporting?.length).map(([field,f])=>({observation_id:row.id,field,citations:f.current.supporting})));
   if(links.length){if(r.prompt_version!=='human-review-recritique/2')fail();payload.field_context_citations=links;}
+  const rates=Object.fromEntries(Object.entries(obj(nested.normalized_rates??{})).filter(([id])=>acceptedIds.has(id)));
+  if(Object.keys(rates).length)payload.user_normalized_rates=rates;
   if (hash(r.request_digest) !== await digest(canonical(payload))) fail("AI 요청 내용의 hash가 일치하지 않습니다.");
   const candidateSet = new Set(rules.acceptedIds);
   function ids(v: unknown, allowed: Set<string>, unique = true): string[] {

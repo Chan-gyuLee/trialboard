@@ -1,5 +1,6 @@
 /** Restore untrusted user records locally. Consistency is not authorship or clinical approval. */
 import type { PdfSource } from "./pdf-contract.ts";
+import {normalizedRate,type RateNormalization} from './rate-normalization.ts';
 import { canonical, exportReview, FIELD_NAMES, locate, REVIEW_LIMITS, strictJson, validateCheckedValue, validateSupporting, type SupportingCitation,
   type Decision, type FieldName, type FieldReview, type ReviewField, type ReviewRow, type Revision, type Value } from "./field-review.ts";
 
@@ -30,7 +31,7 @@ function timestamp(v: unknown): string {
 
 export function restoreReview(raw: string, source: PdfSource): FieldReview {
   const r = obj(strictJson(raw), ["schemaVersion", "sourceDigest", "origin", "rows", "modelFindings", "sourceName", "persisted", "reviewerIdentity", "clinicalApproval", "downstreamStatus", "limitations"]);
-  if (r.schemaVersion !== "pdf-field-review/1" && r.schemaVersion !== "pdf-field-review/2") fail("‘이력 JSON’으로 내려받은 필드 검토 파일을 선택하세요. 에이전트·재검증 결과는 별도 버튼에서 불러옵니다.");
+  if (!["pdf-field-review/1","pdf-field-review/2","pdf-field-review/3"].includes(String(r.schemaVersion))) fail("‘이력 JSON’으로 내려받은 필드 검토 파일을 선택하세요. 에이전트·재검증 결과는 별도 버튼에서 불러옵니다.");
   if (hash(r.sourceDigest) !== source.sha256) fail("다른 PDF의 검토 이력입니다. 저장할 때 사용한 동일한 원본 PDF를 열어 주세요.");
   if (r.persisted !== false || r.reviewerIdentity !== "UNAUTHENTICATED_USER" || r.clinicalApproval !== false || r.downstreamStatus !== "REQUIRES_REVALIDATION") fail("임상 승인·검토자 인증·재검증 완료를 주장하는 이력은 복구할 수 없습니다.");
   const origin = obj(r.origin, ["kind", "runId", "reportDigest", "mode"]);
@@ -42,10 +43,11 @@ export function restoreReview(raw: string, source: PdfSource): FieldReview {
   } else fail();
   function value(v: unknown): Value {
     const hasSupport=!!v && typeof v==='object' && Object.hasOwn(v,'supporting');
-    if(hasSupport && r.schemaVersion!=='pdf-field-review/2')fail();
-    const cell = obj(v, hasSupport?["value", "citation", "supporting"]:["value", "citation"]);
+    const hasNormalization=!!v&&typeof v==='object'&&Object.hasOwn(v,'normalization');
+    if(hasSupport && r.schemaVersion==='pdf-field-review/1'||hasNormalization&&r.schemaVersion!=='pdf-field-review/3')fail();
+    const cell = obj(v, ["value","citation",...(hasSupport?['supporting']:[]),...(hasNormalization?['normalization']:[])]);
     const text = cell.value === null ? null : str(cell.value);
-    if (cell.citation === null) {if(hasSupport)fail();return { value: text, citation: null };}
+    if (cell.citation === null) {if(hasSupport||hasNormalization)fail();return { value: text, citation: null };}
     if (text === null) fail();
     const c = obj(cell.citation, ["spanId", "page", "quote"]);
     if (!Number.isInteger(c.page) || Number(c.page) < 1 || Number(c.page) > 40) fail();
@@ -53,7 +55,8 @@ export function restoreReview(raw: string, source: PdfSource): FieldReview {
     if (!locate(source, citation)) fail("이력의 페이지·문구·인용문이 현재 PDF와 다릅니다. 원본과 추출기 버전을 확인하세요.");
     const result:Value={value:text,citation};
     if(hasSupport)result.supporting=arr(cell.supporting,4).map(v=>{const s=obj(v,['spanId','page','quote','role']);if(!Number.isInteger(s.page))fail();return {spanId:id(s.spanId),page:Number(s.page),quote:str(s.quote),role:str(s.role,20) as SupportingCitation['role']};});
-    validateSupporting(source,result);return result;
+    if(hasNormalization)result.normalization=cell.normalization as RateNormalization;
+    validateSupporting(source,result);normalizedRate(result,source);return result;
   }
   const ids = new Set<string>();
   const rows = arr(r.rows, REVIEW_LIMITS.rows).map(v => {
@@ -67,12 +70,14 @@ export function restoreReview(raw: string, source: PdfSource): FieldReview {
     for (const name of FIELD_NAMES) {
       const f = obj(input[name], ["original", "current", "decision", "history"]);
       const original = value(f.original), current = value(f.current);
+      for(const v of [original,current])normalizedRate(v,source,name,kind);
       if (row.origin === "manual" && (original.value !== null || original.citation !== null)) fail();
       let previous = original, decision: Decision = "unreviewed";
       const history: Revision[] = arr(f.history, REVIEW_LIMITS.revisions).map((h, index) => {
         const rev = obj(h, ["revision", "decision", "before", "after", "reason", "at"]);
         if (rev.revision !== index + 1 || typeof rev.decision !== "string" || !["confirmed", "corrected", "held"].includes(rev.decision)) fail();
         const before = value(rev.before), after = value(rev.after), reason = str(rev.reason);
+        for(const v of [before,after])normalizedRate(v,source,name,kind);
         if (!reason.trim() || !same(before, previous)) fail();
         if (rev.decision === "corrected" ? same(before, after) : !same(before, after)) fail();
         if (rev.decision !== "held") validateCheckedValue(source, kind, name, after);
@@ -86,7 +91,7 @@ export function restoreReview(raw: string, source: PdfSource): FieldReview {
   });
   const modelFindings = arr(r.modelFindings, 300).map(v => str(v, 8100));
   if (origin.kind === "manual" && modelFindings.length) fail();
-  return { schemaVersion: r.schemaVersion, sourceDigest: source.sha256,
+  return { schemaVersion: r.schemaVersion as FieldReview['schemaVersion'], sourceDigest: source.sha256,
     origin: { kind: origin.kind, runId: origin.runId, reportDigest: origin.reportDigest, mode: origin.mode } as FieldReview["origin"], rows, modelFindings,
     exportMetadata: { sourceName: str(r.sourceName), limitations: arr(r.limitations, 20).map(v => str(v)) } };
 }

@@ -8,6 +8,8 @@ export type PdfSource = {
   extractor: string; pages: PdfPage[]; status: "TEXT_EXTRACTED" | "PARTIAL_NO_TEXT" | "NO_TEXT";
   coordinateSystem: "normalized_top_left_rotated_viewport";
 };
+/** Original page numbers may be sparse; not accepted as a legacy project/review source. */
+export type PdfWindowSource = Omit<PdfSource,'schemaVersion'> & {schemaVersion:'pdf-evidence-window/1'};
 export type EvidenceNote = {
   sourceDigest: string; spanId: string; quote: string; page: number; box: Box;
   question: string; comment: string; userAttestedAt: string;

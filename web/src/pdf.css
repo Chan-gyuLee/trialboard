@@ -22,7 +22,7 @@
 .pdf-attest { padding: 16px; display: grid; gap: 14px; }
 .pdf-attest blockquote { margin: 0; padding: 12px; border-left: 3px solid #8badde; background: #f5f8fc; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
 .pdf-attest p { font-size: 12px; color: #617080; line-height: 1.7; }
-.pdf-attest .MuiFormControlLabel-label { font-size: 12px; line-height: 1.6; }
+
 .pdf-original { position: sticky; top: 16px; }
 .pdf-review-grid > div { min-width:0; }
 .pdf-review-grid > div:last-child { position:sticky; top:16px; }

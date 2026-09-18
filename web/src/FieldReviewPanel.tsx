@@ -17,6 +17,7 @@ import { isMocSource } from "./moc-data";
 import { PACKET_BYTES, restoreMeetingSession, type MeetingSession } from "./meeting-packet";
 import RowReview from "./RowReview";
 import SupportingCitations from './SupportingCitations';
+import RateNormalization from './RateNormalization';
 import type {Capture,DesignCheckpoint,ReviewCheckpoint,RestoredProject} from "./project-checkpoint";
 
 const STATUS = { unreviewed: "미확인", confirmed: "사용자 확인", corrected: "사용자 수정", held: "보류" } as const;
@@ -145,6 +146,7 @@ export default function FieldReviewPanel({ source, pdf, selected, readyPage, dis
         <div className="field-citation">{proposed.citation ? <><p>연결 근거 · PDF p.{proposed.citation.page}</p><blockquote>{proposed.citation.quote}</blockquote><Button disabled={!targetSpan || locked} onClick={() => { if (targetSpan) onChoose(targetSpan); }}>원문 위치 열기</Button></> : <p>연결된 근거가 없습니다. 원문 문구에서 이 값을 뒷받침하는 문구를 선택하세요.</p>}</div>
         <div className="field-toolbar"><Button onClick={onText} disabled={locked}>원문 문구 찾기</Button><Button startIcon={<Link2 size={16} />} disabled={!selected?.box || locked} onClick={() => { if (proposed.supporting?.length) {setError('기본 근거를 바꾸려면 보조 근거 연결을 먼저 제거하세요.');return;} if (selected) { setProposed({ value: proposed.value ?? selected.text, citation: { spanId: selected.id, page: selected.page, quote: selected.text } }); setChecked(false); } }}>선택 문구를 근거로 연결</Button></div>
         <SupportingCitations key={`${rowId}-${name}`} source={source} value={proposed} selected={selected} disabled={locked} onChange={value=>{setProposed(value);setChecked(false);}} onChoose={onChoose} onText={onText}/>
+        {name==='reported_rate'&&row?.valueKind==='reported_percentage'&&<RateNormalization key={`${rowId}-${name}`} value={proposed} source={source} disabled={locked} onChange={value=>{setProposed(value);setChecked(false);}} onChoose={onChoose}/>}
         <p className="field-selected">현재 선택: {selected?.text ?? "없음"}</p>
         <TextField fullWidth multiline minRows={2} label="확인·수정·보류 사유" value={reason} disabled={locked} onChange={e => setReason(e.target.value)} slotProps={{ htmlInput: { maxLength: 2000 } }} />
         <FormControlLabel control={<Checkbox checked={checked} disabled={!shown || locked} onChange={e => setChecked(e.target.checked)} />} label={proposed.supporting?.length ? "원문에서 값·필드와 모든 보조 근거의 관계를 직접 대조했습니다." : "원문에서 이 값과 필드의 관계를 직접 대조했습니다."} />

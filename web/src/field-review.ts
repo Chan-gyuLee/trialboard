@@ -1,4 +1,5 @@
 import type { PdfSource, PdfSpan } from "./pdf-contract";
+import {normalizedRate,type RateNormalization} from './rate-normalization.ts';
 
 export const FIELD_LABELS = {
   asset: "약물", indication: "적응증", study: "시험", cohort: "코호트", dose: "용량·투여 일정",
@@ -10,13 +11,13 @@ export const FIELD_NAMES = Object.keys(FIELD_LABELS) as FieldName[];
 export type Citation = { spanId: string; page: number; quote: string };
 export const SUPPORT_ROLES = {header:'표 머리글',unit:'단위',footnote:'각주',context:'주변 문맥'} as const;
 export type SupportingCitation = Citation & {role:keyof typeof SUPPORT_ROLES};
-export type Value = { value: string | null; citation: Citation | null; supporting?:SupportingCitation[] };
+export type Value = { value: string | null; citation: Citation | null; supporting?:SupportingCitation[];normalization?:RateNormalization };
 export type Decision = "unreviewed" | "confirmed" | "corrected" | "held";
 export type Revision = { revision: number; decision: Exclude<Decision, "unreviewed">; before: Value; after: Value; reason: string; at: string };
 export type ReviewField = { original: Value; current: Value; decision: Decision; history: Revision[] };
 export type ReviewRow = { id: string; origin: "manual" | "imported_agent_report"; valueKind: "event_count" | "reported_percentage"; fields: Record<FieldName, ReviewField> };
 export type FieldReview = {
-  schemaVersion: "pdf-field-review/1" | "pdf-field-review/2"; sourceDigest: string;
+  schemaVersion: "pdf-field-review/1" | "pdf-field-review/2" | "pdf-field-review/3"; sourceDigest: string;
   origin: { kind: "manual" | "imported_agent_report"; runId: string | null; reportDigest: string | null; mode: string | null };
   rows: ReviewRow[]; modelFindings: string[];
   /** Preserve historical export identity (including a renamed PDF) for result matching. Not an authentication claim. */
@@ -164,29 +165,36 @@ export function decide(review: FieldReview, source: PdfSource, rowId: string, na
   }
   field.history.push({ revision: field.history.length + 1, decision: action, before: clone(field.current), after: clone(after), reason: reason.trim(), at: now.toISOString() });
   field.current = after; field.decision = action;
-  if(after.supporting?.length)next.schemaVersion='pdf-field-review/2';
+  if(after.normalization)next.schemaVersion='pdf-field-review/3';
+  else if(after.supporting?.length&&next.schemaVersion!=='pdf-field-review/3')next.schemaVersion='pdf-field-review/2';
   return next;
 }
 /** Literal source and numeric-shape checks, not clinical interpretation or reviewer authentication. */
 export function validateCheckedValue(source: PdfSource, kind: ReviewRow["valueKind"], name: FieldName, after: Value): void {
   validateSupporting(source,after);
+  const normalized=normalizedRate(after,source,name,kind);
   if (!locate(source, after.citation)?.box || !after.value?.trim() || after.value.length > 2000 || !after.citation?.quote.includes(after.value)) fail("기록된 확인값과 현재 PDF 근거가 일치하지 않습니다.");
   if (after.citation.quote.length > 2000) fail("근거 인용문은 2,000자 이내만 지원합니다.");
   if (name === "events" && kind === "reported_percentage") fail("비율 자료에서 사건 수를 채우거나 역산할 수 없습니다. 미보고로 두세요.");
   if ((name === "events" || name === "denominator") && (!/^\d{1,7}$/.test(after.value) || (name === "denominator" && Number(after.value) === 0))) fail("사건 수·분모는 원문에 보고된 정수여야 합니다. 분모는 0일 수 없습니다.");
   if ((name === "events" || name === "denominator") && !new RegExp(`(?<![\\w.,+−–—-])${after.value}(?![\\w]|[.,]\\d|\\s*[%％])`, "u").test(after.citation.quote)) fail("비율·소수·다른 숫자의 일부를 사건 수나 분모로 사용할 수 없습니다.");
-  if (name === "reported_rate" && (!/^\d{1,3}(?:\.\d{1,4})?\s*%$/.test(after.value) || Number(after.value.replace("%", "")) > 100)) fail("원문에 보고된 0–100% 비율만 입력하세요.");
+  if (name === "reported_rate" && !normalized && (!/^\d{1,3}(?:\.\d{1,4})?\s*%$/.test(after.value) || Number(after.value.replace("%", "")) > 100)) fail("원문에 보고된 0–100% 비율만 입력하세요. 분리된 %는 별도 수치 해석으로 기록하세요.");
 }
 export function exportReview(review: FieldReview, source: PdfSource) {
   if (review.sourceDigest !== source.sha256) fail();
-  for (const row of review.rows) for (const field of Object.values(row.fields)) {
+  for (const row of review.rows) for (const name of FIELD_NAMES) {
+    const field=row.fields[name];
+    for(const v of [field.original,field.current,...field.history.flatMap(h=>[h.before,h.after])]){
+      if(v.normalization&&review.schemaVersion!=='pdf-field-review/3')fail('수치 해석 이력은 v3 검토 형식이 필요합니다.');
+      normalizedRate(v,source,name,row.valueKind);
+    }
     validateSupporting(source,field.current);
     if (field.current.citation && !locate(source, field.current.citation)) fail("현재 PDF와 맞지 않는 근거가 있습니다.");
   }
   const { exportMetadata, ...content } = clone(review);
   return { ...content, sourceName: exportMetadata?.sourceName ?? source.name, persisted: false, reviewerIdentity: "UNAUTHENTICATED_USER",
     clinicalApproval: false, downstreamStatus: "REQUIRES_REVALIDATION",
-    limitations: exportMetadata?.limitations ?? ["사용자 확인은 임상 승인이나 인증된 전문가 검증이 아닙니다.", "수정값으로 AI 반론·비교·계산을 다시 실행하지 않았습니다.", "단일 추출 문구의 근거만 연결합니다. 표 머리글·각주·문단 전체의 의미를 자동 검증하지 않습니다.", "검토를 이어가려면 같은 원본 PDF와 이력 JSON을 다시 여세요. 원문 메모·모델 결과·재검증 결과 파일은 별도로 보관해야 합니다."] };
+    limitations: exportMetadata?.limitations ?? ["사용자 확인은 임상 승인이나 인증된 전문가 검증이 아닙니다.", "수정값으로 AI 반론·비교·계산을 다시 실행하지 않았습니다.", "원문과 보조 근거를 별도 보존합니다. 인접한 % 해석은 사용자 확인이며 표 머리글·각주·문단 전체의 의미를 자동 검증하지 않습니다.", "검토를 이어가려면 같은 원본 PDF와 이력 JSON을 다시 여세요. 원문 메모·모델 결과·재검증 결과 파일은 별도로 보관해야 합니다."] };
 }
 const escape = (s: string) => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]!)).replace(/([\\`*_{}\[\]()#+.!|~-])/g, "\\$1").replace(/[\r\n]+/g, " ");
 export function reviewMarkdown(review: FieldReview, source: PdfSource): string {
@@ -198,6 +206,7 @@ export function reviewMarkdown(review: FieldReview, source: PdfSource): string {
         `  원래 값: ${escape(f.original.value ?? "미보고")}`,
         `  근거: ${f.current.citation ? `PDF p.${f.current.citation.page} · ${escape(f.current.citation.spanId)} · ${escape(f.current.citation.quote)}` : "없음"}`,
         ...(f.current.supporting??[]).map(c=>`  보조 근거 (${SUPPORT_ROLES[c.role]}): PDF p.${c.page} · ${escape(c.spanId)} · ${escape(c.quote)} · 의미 관계 미인증`),
+        ...(f.current.normalization?[`  사용자 해석: ${escape(f.current.normalization.display)} · ${f.current.normalization.method} · 원문 숫자/단위 별도 보존 · 임상 의미 미인증`]:[]),
         ...f.history.map(h => `  이력 ${h.revision}: ${h.decision} · ${escape(h.reason)} · ${h.at}`)]; }), ""]),
     "## 한계", "", ...packet.limitations.map(l => `- ${l}`), ""].join("\n");
 }

@@ -6,3 +6,5 @@ export type { LoadedPdf } from "./pdf-session";
 GlobalWorkerOptions.workerSrc = workerUrl;
 export const openPdf = (file: File, signal: AbortSignal, progress: (page: number) => void) =>
   openPdfSession(file, signal, progress, getDocument, version);
+export const openAutoPdf = (file: File, signal: AbortSignal, progress: (page: number) => void) =>
+  openPdfSession(file, signal, progress, getDocument, version, 40000, 'auto');

@@ -1,6 +1,7 @@
 /** Inspect a local report, never execute or certify the Python verifier in the browser. */
 import { canonical, exportReview, FIELD_NAMES, locate, strictJson, type FieldName, type FieldReview } from "./field-review.ts";
 import type { PdfSource } from "./pdf-contract.ts";
+import {reviewedRates} from './rate-normalization.ts';
 
 export const RESULT_BYTES = 8 * 1024 * 1024;
 export type Finding = { code: string; observation_id: string | null; field: FieldName | null; detail: string };
@@ -31,6 +32,7 @@ export function readResult(raw: string, review: FieldReview, source: PdfSource):
       || r.comparison_status !== "NOT_APPROVED" || r.critique_status !== "NOT_RERUN"
       || r.source_integrity !== "PDF_BYTES_HASH_MATCH_TEXT_AND_GEOMETRY_NOT_REEXTRACTED") fail("로컬 규칙 재검증 1 결과만 지원합니다. AI 반론 재실행·임상 승인 결과는 아닙니다.");
   const key = reviewKey(review, source);
+  if(!same(r.normalized_rates??{},reviewedRates(review,source)))fail('수치 해석값과 기록한 원문/단위 관계가 다릅니다.');
   if (r.source_digest !== source.sha256 || !same(r.review, exportReview(review, source))) {
     fail("현재 PDF 또는 기록한 필드 검토와 다른 결과입니다. 현재 이력으로 다시 재검증해 주세요.");
   }

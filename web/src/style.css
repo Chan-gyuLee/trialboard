@@ -1,5 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap");
-:root { font-family: "Noto Sans KR", Arial, sans-serif; color: #202733; background: #f7f9fc; font-size: 16px; font-synthesis: none; --blue: #195bd7; --muted: #626d7c; --line: #e4e8ee; }
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap");
+:root { font-family: "DM Sans", "Noto Sans KR", Arial, sans-serif; color: #15223b; background: #f5f7fc; font-size: 16px; font-synthesis: none; --tb-ink:#15223b; --tb-navy:#122346; --tb-blue:#2855e8; --tb-muted:#59677f; --tb-line:#dbe2ef; --tb-soft:#edf2ff; --tb-canvas:#f5f7fc; --tb-blue-line:#b6c9fa; --blue:var(--tb-blue); --muted:var(--tb-muted); --line:var(--tb-line); }
 * { box-sizing: border-box; } body { margin: 0; } button, input, select { font: inherit; } button, a { touch-action: manipulation; } a { color: var(--blue); } h1, h2, h3, h4, p { margin: 0; }
 button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #195bd7; outline-offset: 3px; }
 .skip-link { position: fixed; top: -100px; z-index: 20; background: white; padding: 12px; }.skip-link:focus { top: 10px; }

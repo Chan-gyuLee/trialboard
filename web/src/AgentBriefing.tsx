@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert, Button, Chip, CircularProgress, LinearProgress, MenuItem, TextField } from "@mui/material";
-import { ArrowDownToLine, ArrowRight, Check, ChevronLeft, FileSearch, GitCompareArrows, Maximize2, Minimize2, Pause, Play, RotateCcw, ShieldCheck, Upload } from "lucide-react";
+import { ArrowDownToLine, ArrowRight, Check, ChevronLeft, FileSearch, GitCompareArrows, Pause, Play, RotateCcw, ShieldCheck, Upload } from "lucide-react";
 import { briefingMarkdown, changedFields, readAgentRecord, recordStepFromKey, STAGES, FINDING_LABELS, type AgentRecord, type CitedField } from "./agent-briefing";
 import { FIELD_LABELS, type FieldName } from "./field-review";
 import { downloadText } from "./review";
@@ -22,7 +22,6 @@ export function AgentBriefing({ onIntake, onSimulation,onAgentBusy }: { onIntake
   const [liveBusy, setLiveBusy] = useState(false);
   useEffect(()=>{onAgentBusy?.(liveBusy);},[liveBusy,onAgentBusy]);
   useEffect(()=>()=>onAgentBusy?.(false),[onAgentBusy]);
-  const [presenting, setPresenting] = useState(false);
   const [demoStage, setDemoStage] = useState<"evidence" | "design">("evidence");
   const [error, setError] = useState("");
   const [spanId, setSpanId] = useState<string | null>(null);
@@ -72,12 +71,12 @@ export function AgentBriefing({ onIntake, onSimulation,onAgentBusy }: { onIntake
   const concernList = isFinal ? finalAttempt?.critique?.concerns : event?.stage === "CRITIQUE" ? attempt?.critique?.concerns : undefined;
   const questions = isFinal ? finalAttempt?.critique?.next_questions ?? [] : [];
   const label = (name: string) => FIELD_LABELS[name as FieldName] ?? name;
-  return <section className={`agent-briefing ${presenting ? "ab-presenting" : ""} ${liveBusy ? "ab-live-running" : ""}`} aria-label="에이전트 브리핑">
-    <nav className="ab-demo-nav" aria-label="발표 시연 순서"><Button variant={demoStage === "evidence" ? "contained" : "outlined"} aria-current={demoStage === "evidence" ? "step" : undefined} onClick={() => setDemoStage("evidence")}>01 근거 검토</Button><Button variant={demoStage === "design" ? "contained" : "outlined"} aria-current={demoStage === "design" ? "step" : undefined} disabled={liveBusy || busy} onClick={() => { setPlaying(false); setDemoStage("design"); }}>02 합성 설계 비교</Button>{demoStage === "design" && <Button onClick={() => setPresenting(v => !v)}>{presenting ? "일반 화면으로" : "발표 집중 모드"}</Button>}</nav>
+  return <section className={`agent-briefing ${liveBusy ? "ab-live-running" : ""}`} aria-label="에이전트 브리핑">
+    <nav className="ab-demo-nav" aria-label="검토 단계"><Button variant={demoStage === "evidence" ? "contained" : "outlined"} aria-current={demoStage === "evidence" ? "step" : undefined} onClick={() => setDemoStage("evidence")}>01 근거 검토</Button><Button variant={demoStage === "design" ? "contained" : "outlined"} aria-current={demoStage === "design" ? "step" : undefined} disabled={liveBusy || busy} onClick={() => { setPlaying(false); setDemoStage("design"); }}>02 합성 설계 비교</Button></nav>
     <div hidden={demoStage !== "design"}><ScenarioBriefing active={demoStage === "design"} onBack={() => setDemoStage("evidence")} onAdvanced={onSimulation} /></div>
     <div hidden={demoStage !== "evidence"}>
     {record?.input.provenance === "synthetic_fixture" && <MocBadge detail={scripted ? "합성 자료 · 스크립트 테스트 기록 재생 · 새 AI 호출 없음" : "합성 자료 · 모델 실행 기록 보기 · 임상 성능 평가 아님"} />}
-    <div className="ab-heading"><div><span className="ab-eyebrow">AGENT BRIEFING / 근거에서 검토 질문까지</span><h1>{presenting ? `${record?.input.study ?? "실제 실행"} · 에이전트 브리핑` : "답보다 중요한 건, 판단의 근거."}</h1><p>에이전트가 추출하고, 반론하고, 보류한 이유를 확인하세요.</p></div><div className="ab-heading-actions"><Chip label={liveBusy ? "새 모델 실행 중" : caseId === "live" ? record ? "직접 실행한 기록 보기" : "완료 결과 없음" : "저장 기록 보기"} variant="outlined" /><Button variant={presenting ? "contained" : "outlined"} aria-pressed={presenting} startIcon={presenting ? <Minimize2 size={16} /> : <Maximize2 size={16} />} onClick={() => setPresenting(value => !value)}>{presenting ? "일반 화면으로" : "발표 집중 모드"}</Button></div></div>
+    <div className="ab-heading"><div><span className="ab-eyebrow">AGENT BRIEFING / 근거에서 검토 질문까지</span><h1>근거 검토 브리핑</h1><p>에이전트가 추출하고, 반론하고, 보류한 이유를 확인하세요.</p></div><div className="ab-heading-actions"><Chip label={liveBusy ? "새 모델 실행 중" : caseId === "live" ? record ? "직접 실행한 기록 보기" : "완료 결과 없음" : "저장 기록 보기"} variant="outlined" /></div></div>
     <div className="ab-toolbar"><TextField select label="시연 사례" value={caseId} onChange={e => setCaseId(e.target.value)} disabled={busy || liveBusy} size="small">{cases.map(c => <MenuItem key={c.id} value={c.id}>{c.label}</MenuItem>)}{caseId === "imported" && <MenuItem value="imported">가져온 실행 기록 · 작성자 미인증</MenuItem>}{caseId === "live" && <MenuItem value="live">이번에 직접 실행한 기록</MenuItem>}</TextField>
       <Button component="label" variant="outlined" startIcon={<Upload size={16} />} disabled={busy || liveBusy}>실행 JSON 열기<input type="file" accept=".json,application/json" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void importFile(f); }} /></Button>
       <Button startIcon={<ArrowDownToLine size={16} />} disabled={!record || busy || liveBusy} onClick={() => record && downloadText("trialboard-agent-briefing.md", briefingMarkdown(record), "text/markdown;charset=utf-8")}>브리핑 저장</Button>

@@ -1,0 +1,13 @@
+.logo{display:inline-flex;align-items:center;gap:8px;flex-shrink:0;line-height:1}
+.symbol{display:block;position:relative;overflow:hidden;width:34px;height:34px;flex-shrink:0}
+.symbol img{position:absolute;width:36px;height:36px;max-width:none;left:-1px;top:-2px}
+.wordmark{display:block;position:relative;overflow:hidden;width:128px;height:24px}
+.wordmark img{position:absolute;max-width:none;width:145px;height:auto;left:-8px;top:-14px}
+:global(.app-shell .sidebar .brand)>.logo{display:inline-flex;gap:5px}
+:global(.sidebar) .symbol{width:28px;height:28px}
+:global(.sidebar) .symbol img{width:30px;height:30px}
+:global(.sidebar) .wordmark{width:119px;height:22px}
+:global(.sidebar) .wordmark img{width:135px;left:-8px;top:-13px}
+@media(min-width:761px) and (max-width:1050px){:global(.sidebar) .wordmark{display:none}}
+@media(min-width:1051px) and (max-width:1250px){:global(.sidebar) .wordmark{width:92px;height:18px}:global(.sidebar) .wordmark img{width:104px;left:-6px;top:-10px}}
+@media(max-width:760px){:global(.app-shell .sidebar nav){flex-wrap:wrap;row-gap:4px}}

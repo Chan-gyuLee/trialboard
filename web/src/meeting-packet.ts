@@ -90,6 +90,7 @@ export function packetMarkdown(result: DesignResult, notes: MeetingNotes): strin
         const field = obj(fields[key]), current = obj(field.current), citation = current.citation === null ? null : obj(current.citation);
         lines.push(`- ${key}: ${escape(String(current.value ?? "미보고"))} · ${escape(String(field.decision))}${citation ? ` · PDF p.${citation.page} / ${escape(String(citation.spanId))} · “${escape(String(citation.quote))}”` : " · 인용 없음"}`);
         for(const item of arr(current.supporting??[],0,4)){const c=obj(item);lines.push(`  보조 근거 (${escape(String(c.role))}): PDF p.${c.page} / ${escape(String(c.spanId))} · “${escape(String(c.quote))}” · 의미 관계 미인증`);}
+        if(current.normalization){const n=obj(current.normalization);lines.push(`  사용자 해석: ${escape(String(n.display))} · ${escape(String(n.method))} · 원문 숫자/단위 별도 보존 · 임상 의미 미인증`);}
       }
       lines.push("");
     }

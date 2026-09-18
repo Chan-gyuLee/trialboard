@@ -1,11 +1,15 @@
 import type { getDocument, PDFDocumentLoadingTask, PDFDocumentProxy } from "pdfjs-dist";
 import { extractPages } from "./pdf-extract.ts";
-import { PDF_LIMITS, sourceStatus, validatePdfBytes, type PdfSource } from "./pdf-contract.ts";
+import { PDF_LIMITS, sourceStatus, validatePdfBytes, type PdfSource, type PdfWindowSource } from "./pdf-contract.ts";
+import { extractAutoPages, type PdfCoverage } from "./pdf-auto-pages.ts";
 
-export type LoadedPdf = { source: PdfSource; pdf: PDFDocumentProxy; destroy: () => Promise<void> };
+export type LoadedPdf = { source: PdfSource; coverage?: PdfCoverage; pdf: PDFDocumentProxy; destroy: () => Promise<void> };
+export type LoadedWindowPdf = Omit<LoadedPdf,'source'> & {source:PdfWindowSource};
 
+export function openPdfSession(file:File,signal:AbortSignal,onProgress:(page:number)=>void,createDocument:typeof getDocument,version:string,timeoutMs:number,mode:'auto'):Promise<LoadedWindowPdf>;
+export function openPdfSession(file:File,signal:AbortSignal,onProgress:(page:number)=>void,createDocument:typeof getDocument,version:string,timeoutMs?:number,mode?:'manual'):Promise<LoadedPdf>;
 export async function openPdfSession(file: File, signal: AbortSignal, onProgress: (page: number) => void,
-  createDocument: typeof getDocument, version: string, timeoutMs: number = PDF_LIMITS.timeoutMs): Promise<LoadedPdf> {
+  createDocument: typeof getDocument, version: string, timeoutMs: number = PDF_LIMITS.timeoutMs, mode:'manual'|'auto'='manual'): Promise<LoadedPdf|LoadedWindowPdf> {
   if (file.size > PDF_LIMITS.bytes) throw new Error("PDF는 5 MB 이하만 지원합니다.");
   let task: PDFDocumentLoadingTask | undefined;
   let stopped = false;
@@ -20,7 +24,7 @@ export async function openPdfSession(file: File, signal: AbortSignal, onProgress
   const timeout = new Promise<never>((_, reject) => { timer = setTimeout(() => { stop(); reject(new Error("처리 제한 시간 안에 PDF를 읽지 못했습니다. 문서 범위를 줄여 다시 시도하세요.")); }, timeoutMs); });
   try {
     signal.throwIfAborted();
-    const work = async (): Promise<LoadedPdf> => {
+    const work = async (): Promise<LoadedPdf|LoadedWindowPdf> => {
       const bytes = new Uint8Array(await file.arrayBuffer());
       validatePdfBytes(bytes);
       const hash = await crypto.subtle.digest("SHA-256", bytes);
@@ -31,11 +35,15 @@ export async function openPdfSession(file: File, signal: AbortSignal, onProgress
         maxImageSize: 16000000, canvasMaxAreaInBytes: 16000000, verbosity: 0 });
       const pdf = await task.promise;
       if (pdf.isPureXfa) throw new Error("XFA 양식 PDF는 지원하지 않습니다.");
-      const pages = await extractPages(pdf, onProgress, signal);
+      const extracted = mode==='auto' ? await extractAutoPages(pdf,onProgress,signal) : {pages:await extractPages(pdf,onProgress,signal),coverage:undefined};
+      const {pages,coverage} = extracted;
       if (stopped) throw new DOMException("취소되었습니다.", "AbortError");
-      return { source: { schemaVersion: "pdf-evidence/1", name: file.name, byteLength: file.size, sha256,
-        extractor: `pdfjs-dist/${version}`, pages, status: sourceStatus(pages), coordinateSystem: "normalized_top_left_rotated_viewport" },
-        pdf, destroy: () => pdf.loadingTask.destroy() };
+      const source:Omit<PdfSource,'schemaVersion'>={name:file.name,byteLength:file.size,sha256,
+        extractor:`pdfjs-dist/${version}`,pages,status:sourceStatus(pages),coordinateSystem:'normalized_top_left_rotated_viewport'};
+      const session={coverage,pdf,destroy:()=>pdf.loadingTask.destroy()};
+      return mode==='auto'
+        ? {...session,source:{...source,schemaVersion:'pdf-evidence-window/1'}}
+        : {...session,source:{...source,schemaVersion:'pdf-evidence/1'}};
     };
     return await Promise.race([work(), timeout, abort]);
   } catch (e) {

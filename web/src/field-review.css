@@ -19,7 +19,7 @@
 .field-list strong { display: block; margin-top: 6px; font-weight: 500; overflow-wrap: anywhere; }
 .field-editor { display: grid; grid-template-columns:minmax(0,1fr); gap: 14px; border-top: 2px solid #dbe2e8; padding-top: 18px; }
 .field-editor h3, .field-editor p { margin: 0; }
-.field-editor .MuiFormControlLabel-label { font-size: 14px; line-height: 1.6; }
+
 .field-citation { background: #f6f8fb; padding: 14px; border-radius: 6px; }
 .field-citation p { font-size: 14px; color: #596779; }
 .field-citation blockquote { margin: 8px 0; font-size: 16px; overflow-wrap: anywhere; }

@@ -10,7 +10,7 @@ const rules:[string,RegExp,number][]=[
  ['평가시점·자료마감',/\b(?:data.cut.off|follow.up|months?|weeks?|cutoff)\b|자료마감|추적기간/i,1],
 ];
 export const candidateCategories=[...rules.map(([label])=>label),'약물명 문구','시험명 문구'];
-export function pdfCandidates(source:PdfSource,context:PdfAgentContext,category=''):PdfCandidate[]{
+export function pdfCandidates(source:Pick<PdfSource,'pages'>,context:PdfAgentContext,category=''):PdfCandidate[]{
  const terms=[['약물명 문구',context.asset],['시험명 문구',context.study]] as const;
  return source.pages.flatMap(p=>p.spans).flatMap(s=>{
   if(!s.box||s.text.length>2000||!s.text.trim())return [];

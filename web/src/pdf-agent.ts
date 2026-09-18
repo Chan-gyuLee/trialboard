@@ -3,7 +3,7 @@ import { consumeAgentStream, isLocalDemo, type LiveProgress } from "./agent-live
 import type { PdfSource, EvidenceNote } from "./pdf-contract.ts";
 export type PdfAgentContext={asset:string;indication:string;study:string;question:string};
 /** User selects text candidates without asserting a visual/clinical review. Never invent notes. */
-export function pdfCandidateInput(source:PdfSource,spanIds:string[],context:PdfAgentContext,contextRadius:2|6=2){
+export function pdfCandidateInput(source:Pick<PdfSource,'pages'|'sha256'>,spanIds:string[],context:PdfAgentContext,contextRadius:2|6=2){
  if(contextRadius!==2&&contextRadius!==6)throw Error("지원하지 않는 문맥 범위입니다.");
  if(Object.values(context).some(v=>!v.trim()||v.length>2000))throw Error("약물·적응증·시험·검토 질문을 입력하세요.");
  if(!spanIds.length||new Set(spanIds).size!==spanIds.length)throw Error("중복 없이 후보 문구를 선택하세요.");

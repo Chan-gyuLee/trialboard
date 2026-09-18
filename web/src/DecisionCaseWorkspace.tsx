@@ -1,0 +1,56 @@
+import {useEffect,useRef,useState} from 'react';
+import {Alert,Button,CircularProgress,Tab,Tabs,ToggleButton,ToggleButtonGroup} from '@mui/material';
+import {ArrowLeft,ArrowRight,Check,FileText,Upload} from 'lucide-react';
+import {DEMO_CASE,readDecisionCase,inspectDecisionCase,caseRunInput,bindCaseExecution,caseQuestions,caseConclusion,decisionCaseMarkdown,type DecisionCase} from './decision-case';
+import {downloadText,executeReview,percent} from './review';
+import type {StressComparison} from './scenario-briefing';
+import styles from './DecisionCaseWorkspace.module.css';
+
+export default function DecisionCaseWorkspace({active,onBack,onIntake}:{active:boolean;onBack:()=>void;onIntake:()=>void}){
+ const [data,setData]=useState<DecisionCase|null>(null),[result,setResult]=useState<StressComparison|null>(null);
+ const [busy,setBusy]=useState(false),[error,setError]=useState(''),[log,setLog]=useState<string[]>([]),[view,setView]=useState('comparison'),[scenario,setScenario]=useState<'before'|'after'>('after');
+ const pending=useRef<AbortController|null>(null),ticket=useRef(0),resultTop=useRef<HTMLDivElement|null>(null);
+ useEffect(()=>{if(!active){ticket.current++;pending.current?.abort();pending.current=null;setBusy(false);}return()=>{ticket.current++;pending.current?.abort();pending.current=null;};},[active]);
+ const audit=data?inspectDecisionCase(data):null;
+ function load(raw:string){ticket.current++;const next=readDecisionCase(raw),review=inspectDecisionCase(next);setData(next);setResult(null);setError('');setView('comparison');setScenario('after');setLog([`${next.protocol.id} · 원자료 ${next.rows.length}행과 요약표 ${next.summary.length}행 연결`,review.blockers.length?'군별 분석 문맥이 달라 계산 차단':`수치 대조 완료 · ${review.discrepancies.length}개 불일치`,review.discrepancies.length?'확인 대기 · 요약값을 자동으로 덮어쓰지 않았습니다.':'원자료 기준 가상 계산 준비 완료']);}
+ async function file(file:File|undefined){if(!file||busy)return;const id=++ticket.current;setError('');try{if(file.size>65536)throw Error('합성 사례 JSON은 64 KiB 이하만 지원합니다.');const raw=new TextDecoder('utf-8',{fatal:true}).decode(await file.arrayBuffer());if(id===ticket.current)load(raw);}catch(e){if(id===ticket.current){setData(null);setResult(null);setLog([]);setError(e instanceof Error?e.message:'파일을 읽지 못했습니다.');}}}
+ async function run(){
+  if(!data||pending.current||audit?.blockers.length)return;
+  const controller=new AbortController(),id=++ticket.current;pending.current=controller;setBusy(true);setError('');setResult(null);
+  const snapshot=structuredClone(data),input=caseRunInput(snapshot,true),timer=setTimeout(()=>controller.abort(),30000);
+  setLog(l=>[...l,'원자료 비율을 가상 확률로 연결 · 사용자가 계산 진행 선택',`현재안 ${input.per_arm[0]*2}명 / 증원안 ${input.per_arm[1]*2}명 × 두 가정 · 실제 계산 요청`]);
+  try{const execution=await executeReview(input,controller.signal);if(id!==ticket.current||controller.signal.aborted)return;const bound=bindCaseExecution(snapshot,true,execution);setResult(bound);setLog(l=>[...l,`입력·결과 일치 확인 · 4조합 × 10,000회 · ${(execution.elapsed_ms/1000).toFixed(2)}초`,`계산에 연결한 KOL 질문 ${caseQuestions(snapshot,bound).length}개 구성 · 규칙 기반`]);setView('comparison');requestAnimationFrame(()=>resultTop.current?.scrollIntoView({block:'start',behavior:'smooth'}));}
+  catch(e){if(id===ticket.current){setError(controller.signal.aborted?'계산을 중단했거나 대기 시간이 초과됐습니다. 새 결과를 표시하지 않습니다.':e instanceof Error?e.message:'계산 실패');setLog(l=>[...l,'실행 미완료 · 결과 채택 안 함']);}}
+  finally{clearTimeout(timer);if(id===ticket.current){pending.current=null;setBusy(false);}}
+ }
+ return <section className={styles.workspace} aria-label="자료에서 설계 검토까지">
+  <div className={styles.top}><Button onClick={onBack} startIcon={<ArrowLeft size={16}/>}>약물 검색</Button><span>설계 검토</span><Button onClick={onIntake}>PDF·CSV 검토</Button></div>
+  <header className={styles.heading}><span>PROTOCOL REVIEW · MOC</span><h1>자료의 차이를 찾고,<br/>다음 설계를 비교하세요.</h1><p>현재안 → 근거 대조 → 가정별 비교 → 회의 브리핑</p></header>
+  {!data&&<div className={styles.start}><FileText size={32}/><h2>증원할까요, 용량 범위부터 다시 볼까요?</h2><p>프로토콜·원자료·요약표가 들어 있는 합성 사례로 전체 흐름을 실행합니다.</p><div className={styles.actions}><Button variant="contained" onClick={()=>load(JSON.stringify(DEMO_CASE))} endIcon={<ArrowRight size={18}/>}>합성 사례로 시작</Button><Button component="label" startIcon={<Upload size={16}/>}>사례 JSON 열기<input className="file-input" type="file" accept=".json,application/json" onChange={e=>{void file(e.target.files?.[0]);e.target.value='';}}/></Button></div><Button onClick={()=>downloadText('trialboard-synthetic-case.json',JSON.stringify(DEMO_CASE,null,2),'application/json')}>예제 JSON 내려받기</Button><small>현재 연결은 합성 자료 전용입니다. 실제 자료는 PDF·CSV 검토에서 시작하세요.</small></div>}
+  {error&&<Alert severity="error">{error}</Alert>}
+  {data&&<>
+   <div className={styles.context}><div><span>검토 대상</span><strong>{data.asset}</strong><small>{data.protocol.id}</small></div><div><span>현재 설계</span><strong>총 {data.protocol.currentPerArm*2}명</strong><small>두 군 · 균등 배정</small></div><div><span>검토할 변경</span><strong>총 {data.protocol.alternativePerArm*2}명</strong><small>표본수만 변경 · 용량 변경 아님</small></div></div>
+   <p className={styles.question}>{data.question}</p>
+   <div className={styles.audit}><div><span>01 · 근거 대조</span><h2>{audit!.blockers.length?'같은 조건의 자료가 필요합니다.':audit!.discrepancies.length?`요약표와 원자료에서 ${audit!.discrepancies.length}개 차이를 찾았습니다.`:'원자료와 요약표의 수치가 일치합니다.'}</h2></div>
+    {audit!.blockers.map(b=><Alert severity="warning" key={b}>{b}</Alert>)}
+    {audit!.discrepancies.map(({row,claim})=><div className={styles.difference} key={row.id}><div><small>요약표 · {row.arm} {row.metric==='response'?'반응':'이상반응'}</small><strong>{claim.events}/{claim.denominator} <span>{percent(claim.events/claim.denominator)}</span></strong></div><ArrowRight size={20}/><div><small>원자료 · {row.id}</small><strong>{row.events}/{row.denominator} <span>{percent(row.events/row.denominator)}</span></strong></div><p>{row.population} · {row.timepoint}<br/>요약표 정정 초안 · 전문가 확인 전</p></div>)}
+    <details><summary>원자료 4행과 계산 가정 확인</summary><div className={styles.table}><table><thead><tr><th>출처</th><th>군·지표</th><th>사건수/분모</th><th>문맥</th></tr></thead><tbody>{data.rows.map(r=><tr key={r.id}><td>{r.id}</td><td>{r.arm} · {r.metric==='response'?'반응':'이상반응'}</td><td>{r.events}/{r.denominator}</td><td>{r.population} · {r.timepoint} · {r.definition}</td></tr>)}</tbody></table></div><p>기준 계산은 위 합성 원자료의 사건수/분모를 확률로 대입합니다. 모수 불확실성은 반영하지 않습니다.</p><p>별도 스트레스 이상반응 A/B: {data.sensitivity.adverseEvent.map(percent).join(' / ')} · {data.sensitivity.rationale}</p><p>한계 {percent(data.sensitivity.limit)} · 독성 가중치 {data.sensitivity.penalty} · 권장값 아님</p></details>
+    {!result&&<div className={styles.actions}><Button variant="contained" disabled={busy||!!audit!.blockers.length} onClick={()=>void run()} startIcon={busy?<CircularProgress size={17} color="inherit"/>:undefined}>{busy?'네 조합을 계산하는 중…':audit!.discrepancies.length?'차이 확인 · 원자료 기준 가상 비교':'원자료 기준 가상 비교'}</Button>{busy&&<Button onClick={()=>pending.current?.abort()}>중단</Button>}<small>외부 AI 호출 없음 · 가상 확률만 로컬 계산 서버로 전송 · 임상 승인 아님</small></div>}
+   </div>
+   <details className={styles.log} open={busy}><summary>작업 내역 · {log.length}개 {busy?'· 계산 중':''}</summary><ol>{log.map((line,i)=><li key={i}><Check size={14}/>{line}</li>)}</ol></details>
+   {result&&<div ref={resultTop} className={styles.results}>
+    <div className={styles.resultHeading}><span>02 · 의사결정 브리핑 · MOC</span><h2>{caseConclusion(data,result)}</h2><p>아래는 가정에 따른 선택·보류 빈도입니다. 최종 설계 추천이나 임상 성공 확률이 아닙니다.</p></div>
+    <Tabs value={view} onChange={(_,v)=>setView(v)} aria-label="설계 검토 결과"><Tab value="comparison" label="현재안과 변경안" id="case-tab-comparison" aria-controls="case-panel-comparison"/><Tab value="meeting" label="KOL 회의 브리핑" id="case-tab-meeting" aria-controls="case-panel-meeting"/></Tabs>
+    {view==='comparison'?<div role="tabpanel" id="case-panel-comparison" aria-labelledby="case-tab-comparison"><div className={styles.scenario}><span>같은 설계, 다른 가정</span><ToggleButtonGroup value={scenario} exclusive onChange={(_,v)=>{if(v)setScenario(v);}} size="small" aria-label="계산 가정"><ToggleButton value="before">원자료 비율 가정</ToggleButton><ToggleButton value="after">독성 스트레스</ToggleButton></ToggleButtonGroup></div>
+     <p className={styles.assumptions}>이상반응 A/B {result.plans[0][scenario].scenario.adverse_event.map(percent).join(' / ')} · 한계 {percent(data.sensitivity.limit)} · 반응 확률은 동일</p>
+     <div className={styles.plans}>{result.plans.map((p,i)=>{const s=p[scenario];return <article key={s.design.id}><span>{i?'변경안 · 증원':'현재안'}</span><h3>총 {s.total_sample_size}명</h3><small>군당 {s.design.per_arm}명 · {i?`현재안 대비 +${s.total_sample_size-result.plans[0][scenario].total_sample_size}명`:'비교 기준'}</small><div className={styles.metric}><span>어느 군도 선택하지 않음</span><strong>{percent(s.no_selection_probability)}</strong></div><div className={styles.bar} role="img" aria-label={`A 선택 ${percent(s.selection_probability.dose_a)}, B 선택 ${percent(s.selection_probability.dose_b)}, 보류 ${percent(s.no_selection_probability)}`}><i style={{width:`${s.selection_probability.dose_a*100}%`}}/><i style={{width:`${s.selection_probability.dose_b*100}%`}}/><i style={{width:`${s.no_selection_probability*100}%`}}/></div><div className={styles.legend}><span>A {percent(s.selection_probability.dose_a)}</span><span>B {percent(s.selection_probability.dose_b)}</span><span>보류 {percent(s.no_selection_probability)}</span></div><dl><div><dt>한계 초과 군 선택</dt><dd>{percent(s.selects_true_unsafe_probability)}</dd></div><div><dt>보류 MC 표준오차</dt><dd>{(s.monte_carlo_se.no_selection*100).toFixed(2)}%p</dd></div></dl></article>;})}</div>
+     <div className={styles.takeaway}>바뀐 것은 표본수입니다. 증원해도 입력한 이상반응 확률 자체는 낮아지지 않습니다.</div>
+    </div>:<div className={styles.meeting} role="tabpanel" id="case-panel-meeting" aria-labelledby="case-tab-meeting">{caseQuestions(data,result).map((q,i)=><article key={q.title}><span>0{i+1} · {q.owner}</span><h3>{q.title}</h3><p>{q.text}</p><small>연결: {q.source}</small></article>)}<p>규칙 기반 질문 초안 · 실제 전문가 의견이나 AI 생성 질문이 아닙니다.</p></div>}
+    <div className={styles.actions}><Button variant="contained" onClick={()=>downloadText('trialboard-case-briefing.md',decisionCaseMarkdown(data,result),'text/markdown')}>회의 브리핑 내려받기</Button><Button onClick={()=>downloadText('trialboard-case-input.json',JSON.stringify(data,null,2),'application/json')}>사례 입력 저장</Button><Button onClick={()=>downloadText('trialboard-case-calculation.json',JSON.stringify({schema:'decision-case-calculation/1',dataKind:'SYNTHETIC',case:data,input:result.execution.input,executionId:result.execution.execution_id,simulations:result.execution.report.simulations},null,2),'application/json')}>계산 기록 저장</Button></div>
+    <details><summary>계산 범위와 한계</summary><p>독립 Bernoulli·균등 배정·고정 관찰기간. 결측·탈락·중간중단·기간·비용·검정력은 계산하지 않았습니다. 관측 이상반응률이 한계 이내인 군 중 반응률 − 가중치 × 이상반응률이 높은 군을 선택하며, 모두 초과하면 보류합니다.</p><p>각 조합 10,000회 · seed 42. MC 표준오차는 계산 오차이며 임상 신뢰구간이 아닙니다. 실행 {result.execution.execution_id}. 서버 영구 저장 없음.</p></details>
+   </div>}
+   <div className={styles.actions}><Button disabled={busy} onClick={()=>{setData(null);setResult(null);setLog([]);setError('');}}>다른 사례 열기</Button></div>
+  </>}
+  <footer className={styles.moc}><strong>MOC</strong> 합성 자료 · 규칙 기반 대조·질문 · 실제 로컬 계산 · 임상 권고 아님</footer>
+ </section>;
+}
