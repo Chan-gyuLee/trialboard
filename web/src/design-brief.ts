@@ -4,8 +4,10 @@ import type { PdfSource } from "./pdf-contract.ts";
 
 export type Arm = { id: string; source_dose: string; observation_ids: string[] };
 export type Plan = { id: string; label: string; per_arm: number; rationale: string };
+export type AIProvenance = { kind: "ai_proposed_hypothetical"; proposal_id: string; evidence_ids: string[]; reviewed_input_digest: string | null };
+export type AssumptionProvenance = "user_declared_hypothetical" | AIProvenance;
 export type Assumption = { id: string; label: string; response: number[]; adverse_event: number[];
-  adverse_event_penalty: number; maximum_adverse_event_rate: number; rationale: string; provenance: "user_declared_hypothetical" };
+  adverse_event_penalty: number; maximum_adverse_event_rate: number; rationale: string; provenance: AssumptionProvenance };
 export type DesignBrief = { schema_version: "design-brief/1"; source_digest: string; review_content_digest: string;
   question: string; arms: Arm[]; plans: Plan[]; scenarios: Assumption[]; seed: number; repetitions: number };
 export const BRIEF_BYTES = 100_000;
@@ -21,6 +23,37 @@ export function num(v: unknown, low: number, high: number, integer = false): num
   return typeof v === "number" && Number.isFinite(v) && v >= low && v <= high && (!integer || Number.isSafeInteger(v)) ? v : fail();
 }
 export function unique(values: (string | number)[]) { if (new Set(values).size !== values.length) fail("용량·관측값·설계안·시나리오는 중복될 수 없습니다."); }
+export function readProvenance(value: unknown): AssumptionProvenance {
+  if (value === "user_declared_hypothetical") return value;
+  const p = obj(value); exact(p, ["kind", "proposal_id", "evidence_ids", "reviewed_input_digest"]);
+  if (p.kind !== "ai_proposed_hypothetical") fail("가정의 출처가 올바르지 않습니다.");
+  const evidence_ids = arr(p.evidence_ids, 1, 12).map(id); unique(evidence_ids);
+  return {kind: "ai_proposed_hypothetical", proposal_id: id(p.proposal_id), evidence_ids,
+    reviewed_input_digest: p.reviewed_input_digest === null ? null : hash(p.reviewed_input_digest)};
+}
+export async function proposalReviewDigest(brief: DesignBrief): Promise<string> {
+  const raw = structuredClone(brief);
+  for (const s of raw.scenarios) if (typeof s.provenance !== "string") s.provenance.reviewed_input_digest = null;
+  function numbers(v: unknown): unknown {
+    if (typeof v === "number") {
+      const bytes=new Uint8Array(8); new DataView(bytes.buffer).setFloat64(0, v || 0, false);
+      return {$float64: Array.from(bytes, b => b.toString(16).padStart(2,"0")).join("")};
+    }
+    if (Array.isArray(v)) return v.map(numbers);
+    if (v !== null && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k,value]) => [k,numbers(value)]));
+    return v;
+  }
+  return digest(canonical(numbers(raw)));
+}
+export async function acknowledgeProposal(brief: DesignBrief): Promise<DesignBrief> {
+  const b = validateBrief(structuredClone(brief)), fingerprint = await proposalReviewDigest(b);
+  for (const s of b.scenarios) if (typeof s.provenance !== "string") s.provenance.reviewed_input_digest = fingerprint;
+  return b;
+}
+export async function proposalAcknowledged(brief: DesignBrief): Promise<boolean> {
+  const fingerprint = await proposalReviewDigest(brief);
+  return brief.scenarios.every(s => typeof s.provenance === "string" || s.provenance.reviewed_input_digest === fingerprint);
+}
 export function validateBrief(value: unknown): DesignBrief {
   const r = obj(value);
   exact(r, ["schema_version", "source_digest", "review_content_digest", "question", "arms", "plans", "scenarios", "seed", "repetitions"]);
@@ -39,11 +72,12 @@ export function validateBrief(value: unknown): DesignBrief {
   unique(plans.map(p => p.id)); unique(plans.map(p => p.per_arm));
   const scenarios = arr(r.scenarios, 1, 6).map(v => {
     const s = obj(v); exact(s, ["id", "label", "response", "adverse_event", "adverse_event_penalty", "maximum_adverse_event_rate", "rationale", "provenance"]);
-    if (s.provenance !== "user_declared_hypothetical") fail("실제 근거의 추정치로 표시된 확률은 사용할 수 없습니다.");
+    const provenance = readProvenance(s.provenance);
+    if (typeof provenance !== "string" && provenance.evidence_ids.some(oid => !arms.some(a => a.observation_ids.includes(oid)))) fail("AI 제안의 근거 연결이 일치하지 않습니다.");
     return { id: id(s.id), label: str(s.label), response: arr(s.response, arms.length, arms.length).map(p => num(p, 0, 1)),
       adverse_event: arr(s.adverse_event, arms.length, arms.length).map(p => num(p, 0, 1)),
       adverse_event_penalty: num(s.adverse_event_penalty, 0, 10), maximum_adverse_event_rate: num(s.maximum_adverse_event_rate, 0, 1),
-      rationale: str(s.rationale), provenance: "user_declared_hypothetical" as const };
+      rationale: str(s.rationale), provenance };
   });
   unique(scenarios.map(s => s.id));
   const seed = num(r.seed, 0, 2 ** 32 - 1, true), repetitions = num(r.repetitions, 100, 20000, true);

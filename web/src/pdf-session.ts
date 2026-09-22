@@ -1,15 +1,19 @@
 import type { getDocument, PDFDocumentLoadingTask, PDFDocumentProxy } from "pdfjs-dist";
 import { extractPages } from "./pdf-extract.ts";
-import { PDF_LIMITS, sourceStatus, validatePdfBytes, type PdfSource, type PdfWindowSource } from "./pdf-contract.ts";
+import { PDF_LIMITS, sourceStatus, validatePdfBytes, validatePageSelection, type PdfPageSelection, type PdfSource, type PdfWindowSource } from "./pdf-contract.ts";
 import { extractAutoPages, type PdfCoverage } from "./pdf-auto-pages.ts";
 
 export type LoadedPdf = { source: PdfSource; coverage?: PdfCoverage; pdf: PDFDocumentProxy; destroy: () => Promise<void> };
 export type LoadedWindowPdf = Omit<LoadedPdf,'source'> & {source:PdfWindowSource};
 
 export function openPdfSession(file:File,signal:AbortSignal,onProgress:(page:number)=>void,createDocument:typeof getDocument,version:string,timeoutMs:number,mode:'auto'):Promise<LoadedWindowPdf>;
+export function openPdfSession(file:File,signal:AbortSignal,onProgress:(page:number)=>void,createDocument:typeof getDocument,version:string,timeoutMs:number,mode:PdfPageSelection):Promise<LoadedPdf>;
+export function openPdfSession(file:File,signal:AbortSignal,onProgress:(page:number)=>void,createDocument:typeof getDocument,version:string,timeoutMs:number,mode:'review'):Promise<LoadedPdf>;
 export function openPdfSession(file:File,signal:AbortSignal,onProgress:(page:number)=>void,createDocument:typeof getDocument,version:string,timeoutMs?:number,mode?:'manual'):Promise<LoadedPdf>;
 export async function openPdfSession(file: File, signal: AbortSignal, onProgress: (page: number) => void,
-  createDocument: typeof getDocument, version: string, timeoutMs: number = PDF_LIMITS.timeoutMs, mode:'manual'|'auto'='manual'): Promise<LoadedPdf|LoadedWindowPdf> {
+  createDocument: typeof getDocument, version: string, timeoutMs: number = PDF_LIMITS.timeoutMs, mode:'manual'|'auto'|'review'|PdfPageSelection='manual'): Promise<LoadedPdf|LoadedWindowPdf> {
+  if(typeof mode==='object')validatePageSelection(mode);
+  const selection=typeof mode==='object'?{totalPages:mode.totalPages,pageNumbers:[...mode.pageNumbers]}:undefined;
   if (file.size > PDF_LIMITS.bytes) throw new Error("PDF는 5 MB 이하만 지원합니다.");
   let task: PDFDocumentLoadingTask | undefined;
   let stopped = false;
@@ -35,7 +39,10 @@ export async function openPdfSession(file: File, signal: AbortSignal, onProgress
         maxImageSize: 16000000, canvasMaxAreaInBytes: 16000000, verbosity: 0 });
       const pdf = await task.promise;
       if (pdf.isPureXfa) throw new Error("XFA 양식 PDF는 지원하지 않습니다.");
-      const extracted = mode==='auto' ? await extractAutoPages(pdf,onProgress,signal) : {pages:await extractPages(pdf,onProgress,signal),coverage:undefined};
+      if(selection&&pdf.numPages!==selection.totalPages)throw Error('저장 기록과 실제 PDF 전체 쪽수가 다릅니다.');
+      const scan=mode==='auto'||mode==='review'&&pdf.numPages>PDF_LIMITS.pages;
+      if(mode==='review'&&pdf.numPages>PDF_LIMITS.documentPages)throw Error('PDF는 최대 200쪽까지 탐색합니다. 기존 자료는 유지됩니다.');
+      const extracted = scan ? await extractAutoPages(pdf,onProgress,signal) : {pages:await extractPages(pdf,onProgress,signal,selection?.pageNumbers),coverage:undefined};
       const {pages,coverage} = extracted;
       if (stopped) throw new DOMException("취소되었습니다.", "AbortError");
       const source:Omit<PdfSource,'schemaVersion'>={name:file.name,byteLength:file.size,sha256,
@@ -43,6 +50,8 @@ export async function openPdfSession(file: File, signal: AbortSignal, onProgress
       const session={coverage,pdf,destroy:()=>pdf.loadingTask.destroy()};
       return mode==='auto'
         ? {...session,source:{...source,schemaVersion:'pdf-evidence-window/1'}}
+        : mode==='review'&&coverage ? {...session,source:{...source,schemaVersion:'pdf-evidence-selected/1',totalPages:pdf.numPages}}
+        : selection ? {...session,source:{...source,schemaVersion:'pdf-evidence-selected/1',totalPages:selection.totalPages}}
         : {...session,source:{...source,schemaVersion:'pdf-evidence/1'}};
     };
     return await Promise.race([work(), timeout, abort]);

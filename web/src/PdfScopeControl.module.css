@@ -1,0 +1,7 @@
+.scope{display:grid;gap:12px;margin:12px 0 20px;min-width:0;font-size:14px;color:#4a5d78}
+.scope strong{font-size:16px}.scope p{margin:8px 0;line-height:1.7;overflow-wrap:anywhere}
+.scope details{padding:16px 20px;border:1px solid #d7e3f5;border-radius:12px;background:white}
+.scope summary{cursor:pointer;font-size:14px;color:#244e91;font-weight:600;line-height:1.6}
+.scope small{display:block;font-size:13px;line-height:1.65;margin-top:12px}
+.form{display:flex;gap:16px;align-items:flex-start;margin-top:20px}.form>div{flex:1;min-width:0}.form button{flex-shrink:0;min-height:40px}
+@media(max-width:600px){.form{flex-direction:column}.form>div,.form button{width:100%}.scope details{padding:16px}}

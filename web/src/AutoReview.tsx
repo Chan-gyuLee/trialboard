@@ -15,11 +15,12 @@ import DesignExploration from './DesignExploration';
 import ResultOverview from './ResultOverview';
 import AgentActivity from './AgentActivity';
 import ActivityReplay from './ActivityReplay';
+import ResearchContinuation from './ResearchContinuation';
 import './auto-review.css';
 import './agent-workspace.css';
 import './agent-studio.css';
 
-export default function AutoReview({locked,onBusy,onDetails,onManual,onIntake}:{locked:boolean;onBusy:(busy:boolean)=>void;onDetails:(result:ResearchResult)=>void;onManual:()=>void;onIntake:()=>void}){
+export default function AutoReview({locked,onBusy,onDetails,onManual,onIntake,onContinue}:{locked:boolean;onBusy:(busy:boolean)=>void;onDetails:(result:ResearchResult)=>void;onManual:()=>void;onIntake:()=>void;onContinue:(done:AutoResult)=>void}){
  const [query,setQuery]=useState(''),[consent,setConsent]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const [events,setEvents]=useState<AutoEvent[]>([]),[outcome,setOutcome]=useState<AutoOutcome|null>(null),[scopeKey,setScopeKey]=useState(''),[seconds,setSeconds]=useState(0),[restored,setRestored]=useState(false),[loadingRecord,setLoadingRecord]=useState(false);
  const [history,setHistory]=useState<Pick<Collection,'id'|'request'|'status'|'created_at'>[]>([]);
@@ -80,12 +81,12 @@ export default function AutoReview({locked,onBusy,onDetails,onManual,onIntake}:{
    <p className="auto-caption">처음 동의한 조사 2회·원문 추출/반론 2회, 총 최대 4회 범위에서 이어갑니다.</p>
    <div className="auto-actions"><Button variant="contained" disabled={lockedForm||!scopeKey||!consent} onClick={()=>void run(true)}>이 범위로 조사 계속</Button><Button disabled={busy} onClick={()=>{setOutcome(null);setEvents([]);setConsent(false);}}>입력으로 돌아가기</Button></div>
   </section>}
-  {done&&<AutoBrief key={done.result.collection.id+openView} initialSection={openView} done={done} restored={restored} disabled={lockedForm} onDetails={onDetails} onNew={()=>{setOutcome(null);setEvents([]);setError('');setConsent(false);setQuery('');setScopeKey('');}}/>}
+  {done&&<AutoBrief key={done.result.collection.id+openView} initialSection={openView} done={done} restored={restored} disabled={lockedForm} onDetails={onDetails} onContinue={onContinue} onNew={()=>{setOutcome(null);setEvents([]);setError('');setConsent(false);setQuery('');setScopeKey('');}}/>}
   {!busy&&<ReviewTools history={history} disabled={lockedForm} onOpen={id=>void open(id)} onManual={onManual}/>}
  </section>;
 }
 
-function AutoBrief({done,restored,disabled,onDetails,onNew,initialSection='overview'}:{done:AutoResult;restored:boolean;disabled:boolean;onDetails:(r:ResearchResult)=>void;onNew:()=>void;initialSection?:string}){
+function AutoBrief({done,restored,disabled,onDetails,onNew,onContinue,initialSection='overview'}:{done:AutoResult;restored:boolean;disabled:boolean;onDetails:(r:ResearchResult)=>void;onNew:()=>void;initialSection?:string;onContinue:(done:AutoResult)=>void}){
  const c=done.result.collection,review=c.review,findings=review?.findings??[];
  const [section,setSection]=useState(initialSection);
  const contentTop=useRef<HTMLDivElement|null>(null);
@@ -98,6 +99,7 @@ function AutoBrief({done,restored,disabled,onDetails,onNew,initialSection='overv
   <div ref={contentTop} className="result-navigation"><Tabs className="result-tabs" value={section} onChange={(_,v)=>setSection(v)} variant="scrollable" scrollButtons="auto" aria-label="검토 결과 보기">{[['overview','한눈에 보는 결과'],['evidence','출처·전체 쟁점'],['exploration','가상 비교 · MOC'],['process','원문·처리 기록'],['replay','실행 과정 재생']].map(([id,label])=><Tab key={id} value={id} label={label} id={`result-tab-${id}`} aria-controls={`result-panel-${id}`}/>)}</Tabs></div>
   <div hidden={section!=='overview'} role="tabpanel" id="result-panel-overview" aria-labelledby="result-tab-overview">
   <ResultOverview done={done} onView={viewSection}/>
+  <ResearchContinuation done={done} disabled={disabled} onContinue={onContinue} onProcess={()=>viewSection('process')}/>
   </div>
   <div hidden={section!=='replay'} role="tabpanel" id="result-panel-replay" aria-labelledby="result-tab-replay">{section==='replay'&&<ActivityReplay collection={c}/>}</div>
   <div hidden={section!=='exploration'} role="tabpanel" id="result-panel-exploration" aria-labelledby="result-tab-exploration"><DesignExploration key={c.id} value={done.exploration} error={done.explorationError}/>{!done.exploration&&!done.explorationError&&<Alert severity="info">저장된 가상 설계 계산이 없습니다. 기록 열기만으로 새로 실행하지 않습니다.</Alert>}</div>

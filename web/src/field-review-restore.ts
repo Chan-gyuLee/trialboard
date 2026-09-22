@@ -1,5 +1,5 @@
 /** Restore untrusted user records locally. Consistency is not authorship or clinical approval. */
-import type { PdfSource } from "./pdf-contract.ts";
+import {PDF_LIMITS, type PdfSource} from "./pdf-contract.ts";
 import {normalizedRate,type RateNormalization} from './rate-normalization.ts';
 import { canonical, exportReview, FIELD_NAMES, locate, REVIEW_LIMITS, strictJson, validateCheckedValue, validateSupporting, type SupportingCitation,
   type Decision, type FieldName, type FieldReview, type ReviewField, type ReviewRow, type Revision, type Value } from "./field-review.ts";
@@ -50,7 +50,7 @@ export function restoreReview(raw: string, source: PdfSource): FieldReview {
     if (cell.citation === null) {if(hasSupport||hasNormalization)fail();return { value: text, citation: null };}
     if (text === null) fail();
     const c = obj(cell.citation, ["spanId", "page", "quote"]);
-    if (!Number.isInteger(c.page) || Number(c.page) < 1 || Number(c.page) > 40) fail();
+    if (!Number.isInteger(c.page) || Number(c.page) < 1 || Number(c.page) > PDF_LIMITS.documentPages) fail();
     const citation = { spanId: id(c.spanId), page: Number(c.page), quote: str(c.quote) };
     if (!locate(source, citation)) fail("이력의 페이지·문구·인용문이 현재 PDF와 다릅니다. 원본과 추출기 버전을 확인하세요.");
     const result:Value={value:text,citation};

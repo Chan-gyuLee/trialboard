@@ -1,6 +1,6 @@
 /** Inspect a local report, never execute or certify the Python verifier in the browser. */
 import { canonical, exportReview, FIELD_NAMES, locate, strictJson, type FieldName, type FieldReview } from "./field-review.ts";
-import type { PdfSource } from "./pdf-contract.ts";
+import {pdfPage, type PdfSource} from "./pdf-contract.ts";
 import {reviewedRates} from './rate-normalization.ts';
 
 export const RESULT_BYTES = 8 * 1024 * 1024;
@@ -46,7 +46,7 @@ export function readResult(raw: string, review: FieldReview, source: PdfSource):
     const s = obj(value), id = str(s.id, 80), page = s.page;
     if (seenSpans.has(id) || !Number.isInteger(page) || s.source_digest !== source.sha256) fail();
     seenSpans.add(id);
-    const actual = source.pages[Number(page) - 1]?.spans.find(p => p.id === id);
+    const actual = pdfPage(source,Number(page))?.spans.find(p => p.id === id);
     if (!actual || actual.text !== s.text || actual.page !== page) fail("재검증 입력 문구가 현재 PDF 추출 문구와 일치하지 않습니다.");
   }
   const ids = new Set(review.rows.map(row => row.id));

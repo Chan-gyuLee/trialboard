@@ -1,0 +1,28 @@
+.panel { border:1px solid #cbdcf8; border-top:3px solid #2459d4; border-radius:12px; padding:24px; margin:24px 0; background:#f7faff; color:#15223b; font-size:16px; line-height:1.65; }
+.heading { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.heading h3 { margin:4px 0; font-size:23px; letter-spacing:-.6px; }
+.kicker { color:#2459d4; font-size:12px; font-weight:700; letter-spacing:1.5px; }
+.inputs { display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:20px; margin:24px 0 16px; align-items:start; }
+.consent { align-items:flex-start !important; margin:0 0 16px !important; }
+.consent :global(.MuiCheckbox-root) { padding:2px 10px 2px 0; }
+.consent :global(.MuiFormControlLabel-label) { font-size:14px; line-height:1.6; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0; }
+.progress { margin:20px 0; padding-left:24px; font-size:14px; color:#536681; }
+.progress li { padding:5px 0; }
+.progress li[data-active=true] { color:#154dcd; font-weight:600; }
+.result { border-top:1px solid #d8e3f3; margin-top:24px; padding-top:20px; }
+.result h4 { margin:12px 0 8px; font-size:18px; }
+.plans { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:20px 0; }
+.plans article { display:flex; flex-direction:column; background:#fff; border:1px solid #d8e3f3; border-radius:10px; padding:20px; }
+.plans strong { font-size:38px; line-height:1.3; font-variant-numeric:tabular-nums; margin:12px 0; color:#174fc5; }
+.plans small { font-size:16px; margin-left:6px; font-weight:500; }
+.plans p { margin-bottom:0; font-size:14px; }
+.note { font-size:14px; color:#4e617d; }
+.scenario { background:#fff; border:1px solid #d8e3f3; padding:18px 20px; border-radius:10px; margin:16px 0; overflow-wrap:anywhere; }
+.table { overflow-x:auto; }
+.table table { width:100%; border-collapse:collapse; font-size:14px; }
+.table th,.table td { text-align:right; padding:12px; border-bottom:1px solid #e4ebf6; font-variant-numeric:tabular-nums; }
+.table th:first-child { text-align:left; }
+.acknowledgement { display:grid; gap:12px; margin:20px 0; }
+.acknowledgement :global(.MuiFormControlLabel-root) { margin:0; align-items:flex-start; }
+@media(max-width:700px) { .panel { padding:18px 14px; } .inputs,.plans { grid-template-columns:1fr; } .heading h3 { font-size:20px; } }

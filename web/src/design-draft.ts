@@ -1,7 +1,7 @@
 /** Editable backup, deliberately not a calculation brief or an execution result. */
 import { canonical, digest, exportReview, strictJson, type FieldReview } from "./field-review.ts";
 import type { PdfSource } from "./pdf-contract.ts";
-import { arr, BRIEF_BYTES, draftFromBrief, exact, fail, hash, id, obj, readBrief, str, unique, type DesignDraft } from "./design-brief.ts";
+import { arr, BRIEF_BYTES, draftFromBrief, exact, fail, hash, id, obj, readBrief, readProvenance, str, unique, type DesignDraft } from "./design-brief.ts";
 
 const text = (value: unknown, max = 2000): string => typeof value === "string" && value.length <= max ? value : fail("초안의 입력 길이나 형식이 올바르지 않습니다.");
 export function validateDraft(value: unknown): DesignDraft {
@@ -19,8 +19,7 @@ export function validateDraft(value: unknown): DesignDraft {
   unique(plans.map(p => p.id));
   const scenarios = arr(d.scenarios, 1, 6).map(value => {
     const s = obj(value); exact(s, ["id", "label", "response", "adverse_event", "adverse_event_penalty", "maximum_adverse_event_rate", "rationale", "provenance"]);
-    if (s.provenance !== "user_declared_hypothetical") fail("초안 확률은 사용자가 작성한 가정이어야 합니다.");
-    return { id: id(s.id), label: text(s.label), rationale: text(s.rationale), provenance: "user_declared_hypothetical" as const,
+    return { id: id(s.id), label: text(s.label), rationale: text(s.rationale), provenance: readProvenance(s.provenance),
       response: arr(s.response, arms.length, arms.length).map(v => text(v, 20)),
       adverse_event: arr(s.adverse_event, arms.length, arms.length).map(v => text(v, 20)),
       adverse_event_penalty: text(s.adverse_event_penalty, 20), maximum_adverse_event_rate: text(s.maximum_adverse_event_rate, 20) };

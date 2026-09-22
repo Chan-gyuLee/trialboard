@@ -20,9 +20,9 @@ import { isMocSource } from "./moc-data";
 import EvidenceAssumptionDialog from "./EvidenceAssumptionDialog";
 import {designHandoff} from "./design-handoff";
 import type {Capture,DesignCheckpoint} from "./project-checkpoint";
+import DesignProposalPanel, { AIProposalAcknowledgement } from "./DesignProposalPanel";
+import DesignOutcome from "./DesignOutcome";
 
-const pct = (p: number) => `${(100 * p).toFixed(1)}%`;
-const delta = (p: number) => `${p >= 0 ? "+" : ""}${(100 * p).toFixed(1)}%p`;
 type FileKind = "brief" | "result" | "packet" | "rules";
 export default function DesignPanel({ review, source, pdf, disabled, hasDraft, onSelectRow, initialSession, originalAgentRaw, initialDraft, checkpoint, onCheckpointBusy, context }: {
   review: FieldReview; source: PdfSource; disabled: boolean; hasDraft: boolean; onSelectRow: (id: string,field?:FieldName) => void;
@@ -36,6 +36,7 @@ export default function DesignPanel({ review, source, pdf, disabled, hasDraft, o
 }) {
   const [draft, setDraft] = useState<DesignDraft>(() => initialDraft ?? (initialSession ? draftFromBrief(initialSession.result.brief) : newDraft()));
   const [result, setResult] = useState<DesignResult | null>(initialSession?.result ?? null);
+  const [previousResult, setPreviousResult] = useState<DesignResult | null>(null);
   const [notes, setNotes] = useState<MeetingNotes | null>(initialSession?.notes ?? null);
   const [resultDraft, setResultDraft] = useState(() => initialSession ? canonical(draftFromBrief(initialSession.result.brief)) : "");
   const [tab, setTab] = useState<"input" | "comparison" | "meeting">(initialSession ? "meeting" : "input");
@@ -110,7 +111,7 @@ export default function DesignPanel({ review, source, pdf, disabled, hasDraft, o
         const next = restored?.result ?? await readDesignResult(raw, review, source, expected);
         if (task !== ticket.current) return;
         const nextDraft = draftFromBrief(next.brief);
-        setDraft(nextDraft); setResultDraft(canonical(nextDraft)); setResult(next); setNotes(restored?.notes ?? newMeeting(next));
+        setDraft(nextDraft); setResultDraft(canonical(nextDraft)); setPreviousResult(null); setResult(next); setNotes(restored?.notes ?? newMeeting(next));
         setScenarioId(next.brief.scenarios[0].id); setQuestionId(""); setNote(blankNote()); setNoteDirty(false); setTab(kind === "packet" ? "meeting" : "comparison");
         setNotice(kind === "packet" ? "비교 결과와 회의 기록을 복구했습니다. 작성자·실행 진위는 인증하지 않습니다." : "현재 검토·설계 입력과 결과의 내부 일관성을 확인했습니다. 계산을 재실행하거나 임상적 타당성을 인증한 것은 아닙니다.");
       }
@@ -137,17 +138,23 @@ export default function DesignPanel({ review, source, pdf, disabled, hasDraft, o
   const currentQuestion = result?.questions.find(q => q.id === questionId);
   return <section className="design-workspace" aria-label="근거 연결 설계 비교">
     <Dialog open={!!pendingImport} onClose={()=>setPendingImport(null)} fullWidth maxWidth="sm"><DialogTitle>설계 기록을 불러올까요?</DialogTitle><DialogContent><p>{pendingImport?.file.name}</p><p>현재 설계 입력 또는 비교·회의 기록이 바뀔 수 있습니다. 필요한 기록은 먼저 저장하세요. PDF와 필드 검토는 유지하며 검사를 통과한 파일만 적용합니다.</p></DialogContent><DialogActions><Button onClick={()=>setPendingImport(null)}>현재 설계 유지</Button><Button disabled={locked} variant="contained" onClick={()=>{const next=pendingImport;setPendingImport(null);if(next)void load(next.file,next.kind,true);}}>검사하고 설계 불러오기</Button></DialogActions></Dialog>
-    <header className="design-heading"><div><span className="document-kicker">DESIGN WORKSPACE</span><h2>근거에서 설계 검토로</h2><p>고정 표본수 대안을 비교하고, 무엇을 더 확인해야 할지 회의 의제로 남깁니다.</p></div><Chip label="임상 권고 아님" variant="outlined" /></header>
+    <header className="design-heading"><div><span className="document-kicker">DESIGN WORKSPACE</span><h2>근거에서 설계 검토로</h2>{tab === "input" && <p>고정 표본수 대안을 비교하고, 무엇을 더 확인해야 할지 회의 의제로 남깁니다.</p>}</div><Chip label="임상 권고 아님" variant="outlined" /></header>
+    <details key={tab} open={tab === "input"} className="design-setup"><summary>자료 처리·파일 복구 안내</summary>
     <div className="design-steps"><span>1. 원문 근거 연결</span><span>2. 가정·표본수 입력</span><span>3. 로컬 계산 결과 비교</span><span>4. KOL 회의 자료</span></div>
-    <Alert severity="info">파일 열기·결과 확인은 브라우저에서 처리합니다. 명시적 동의 후 선택하는 ‘로컬 계산’만 내 컴퓨터의 Python 서비스로 자료를 전송합니다. AI 호출·자동 저장은 없습니다. 입력·회의 JSON을 내려받아 보관하세요.</Alert>
-    {review.origin.mode === "SCRIPTED_TEST_DOUBLE" && <Alert severity="warning">스크립트 테스트 결과에 연결된 시연입니다. 실제 AI 성능·사람의 검토·전문가 검증 결과가 아닙니다. 합성 자료의 입력값과 자동 확인 이력을 임상 근거로 사용하지 마세요.</Alert>}
+    <Alert severity="info">파일 열기·결과 확인은 브라우저에서 처리합니다. ‘AI 비교 초안 제안’은 별도 동의 후 설정된 외부 AI에 선택 원문을 전송합니다. ‘로컬 계산’은 AI를 호출하지 않습니다. 입력·제안·회의 JSON을 내려받아 보관하세요.</Alert>
+    {review.origin.mode === "SCRIPTED_TEST_DOUBLE" && <Alert severity="warning">원본 추출·확인 이력은 스크립트 테스트 자료입니다. 아래에서 별도로 요청하는 AI 제안의 실행 여부와는 구분합니다. 합성 자료와 자동 확인 이력을 실제 임상 근거·전문가 검증으로 사용하지 마세요.</Alert>}
     {isMocSource(source) && <div className="moc-samples"><MocFileButton name="design-brief.json" disabled={locked} onFile={file => load(file, "brief")}>MOC 설계 가정 열기</MocFileButton><p>먼저 MOC 검토 예제를 불러오세요. 가정은 임의로 정한 값이며 PDF에서 추정한 확률이 아닙니다. 결과는 아래에서 새로 계산합니다.</p></div>}
     <div className="design-toolbar">{fileButton("brief", "설계 입력 복구")}{fileButton("result", "계산 결과 불러오기")}{fileButton("packet", "회의 JSON 이어하기")}</div>
+    </details>
     <div aria-live="polite">{busy && <p role="status">현재 검토 버전과 파일을 대조하는 중…</p>}{error && <Alert severity="error">{error}</Alert>}{notice && <Alert severity="info">{notice}</Alert>}</div>
     {hasDraft && <Alert severity="warning">필드 검토에 기록하지 않은 편집이 있습니다. 먼저 기록하거나 편집을 취소해 주세요.</Alert>}
     {result && !current && <Alert severity="warning">입력 또는 검토 이력이 바뀌었습니다. 이전 계산·회의 메모는 보관 중이지만 현재 결과로 표시하거나 내보내지 않습니다. 입력을 되돌리거나 새로 계산하세요.</Alert>}
     <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" aria-label="설계 검토 단계"><Tab value="input" label="설계 입력" /><Tab value="comparison" label="결과 비교" /><Tab value="meeting" label="KOL 회의" /></Tabs>
     <div hidden={tab !== "input"}>
+      <DesignProposalPanel review={review} source={source} pdf={pdf} agentRaw={originalAgentRaw} disabled={locked} onBusy={setBusy} onSelectRow={onSelectRow} onAdopt={next => {
+        if ((draft.arms.length || draft.question) && !window.confirm("현재 설계 입력을 AI 초안으로 바꿀까요? 기존 입력이 필요하면 먼저 초안 JSON을 저장하세요. 계산은 별도 확인 후 실행합니다.")) return false;
+        change(next); return true;
+      }} />
       <EvidenceScopePanel review={review} source={source} context={context} selectedIds={draft.arms.flatMap(a=>a.observation_ids)} disabled={locked} onSelect={onSelectRow}/>
       <section className="design-section"><div className="design-section-heading"><h3>01 · 비교할 질문과 원문 근거</h3>{fileButton("rules", "재검증 결과에서 질문 연결")}</div>
         {!draft.arms.length && originalAgentRaw && <div className="design-toolbar"><Button variant="contained" disabled={locked} onClick={()=>void prepareHandoff()}>이 검토의 질문·용량군 연결</Button>{isMocSource(source)&&<Button variant="outlined" disabled={locked} onClick={()=>void prepareHandoff(true)}>이 검토로 MOC 설계 가정 준비</Button>}</div>}
@@ -170,8 +177,9 @@ export default function DesignPanel({ review, source, pdf, disabled, hasDraft, o
         </article>)}</div>
       </section>
       <section className="design-section"><div className="design-section-heading"><h3>03 · 실제 참값이 아닌 가정 시나리오</h3><Button startIcon={<Plus size={16} />} disabled={locked || draft.scenarios.length >= 6} onClick={() => change({ ...draft, scenarios: [...draft.scenarios, { ...blankScenario(1, draft.arms.length), id: nextId("scenario", draft.scenarios.map(s => s.id)) }] })}>가정 추가</Button></div>
-        <p className="design-help">확률은 0–1로 입력합니다. 예: 30% → 0.30. 값과 가중치·한계는 자동 추천하지 않으며, 입력 사유와 민감도 범위를 KOL과 검토해야 합니다.</p>
+        <p className="design-help">확률은 0–1로 입력합니다. 예: 30% → 0.30. 직접 입력하거나 AI 초안을 가져올 수 있습니다. 어떤 경우에도 가정의 이유·가중치·한계와 민감도 범위를 KOL과 검토해야 합니다.</p>
         {draft.scenarios.map((s, i) => { const update = (patch: Partial<typeof s>) => change({ ...draft, scenarios: draft.scenarios.map((v, n) => n === i ? { ...v, ...patch } : v) }); return <article className="design-card design-scenario" key={s.id}>
+          {typeof s.provenance !== "string" && <Chip size="small" variant="outlined" label="AI가 제안한 가정 · 실제 관측 추정치 아님" />}
           {input("가정 이름", s.label, label => update({ label }))}
           <EvidenceAssumptionDialog key={`${s.id}:${key}:${draftKey}`} draft={draft} review={review} source={source} scenarioId={s.id} disabled={locked} onChange={change} />
           <div className="design-rate-grid">{draft.arms.map((a, j) => <div key={a.id}><h4>{a.source_dose}</h4>{input(`${a.source_dose} · 가정 반응확률`, s.response[j], value => update({ response: s.response.map((v, n) => n === j ? value : v) }), true)}{input(`${a.source_dose} · 가정 이상반응확률`, s.adverse_event[j], value => update({ adverse_event: s.adverse_event.map((v, n) => n === j ? value : v) }), true)}</div>)}</div>
@@ -181,30 +189,18 @@ export default function DesignPanel({ review, source, pdf, disabled, hasDraft, o
         </article>; })}
       </section>
       <section className="design-section"><h3>04 · 입력 저장 후 로컬에서 계산</h3><div className="design-card-grid">{input("난수 seed · 0–4294967295", draft.seed, seed => change({ ...draft, seed }), true)}{input("반복 수 · 100–20000", draft.repetitions, repetitions => change({ ...draft, repetitions }), true)}</div>
+        <AIProposalAcknowledgement draft={draft} review={review} source={source} disabled={locked} onChange={change}/>
         <p className="design-help">효용 = 반응률 − 가중치 × 이상반응률. 관측 이상반응이 가정한 한계 이하인 군 중 효용 최대 군을 선택하고, 모두 초과하면 보류합니다. 반응·이상반응 독립 가정입니다.</p>
         <div className="design-toolbar"><Button variant="outlined" startIcon={<ArrowDownToLine size={16} />} disabled={locked} onClick={() => void saveBrief(true)}>작성 중 초안 저장</Button><Button variant="contained" startIcon={<ArrowDownToLine size={16} />} disabled={locked || !review.rows.length} onClick={() => void saveBrief()}>계산용 입력 JSON 내려받기</Button></div>
         <p className="design-help">초안은 빈칸이 있어도 저장할 수 있습니다. 계산용 입력은 모든 필수 항목 검사 후 생성합니다. 둘 다 계산 결과·회의 기록·필드 검토를 포함하지 않습니다.</p>
         <LocalDesignRunner suppliedAgentRaw={originalAgentRaw} draft={draft} review={review} source={source} pdf={pdf} locked={locked} hasDraft={hasDraft} onBusy={setBusy} confirmReplace={() => !result || window.confirm("새 계산 결과가 성공하면 기존 비교 결과와 회의 메모를 새 실행으로 바꿉니다. 필요한 회의 JSON을 보관했나요?")} onResult={next => {
-          const d = draftFromBrief(next.brief); setDraft(d); setResultDraft(canonical(d)); setResult(next); setNotes(newMeeting(next)); setScenarioId(next.brief.scenarios[0].id); setQuestionId(""); setNote(blankNote()); setNoteDirty(false); setTab("comparison"); setNotice("로컬에서 현재 근거를 재검증하고 가정 비교를 계산했습니다. 모델 호출·파일 저장·임상 승인은 하지 않았습니다.");
+          const d = draftFromBrief(next.brief); setPreviousResult(result); setDraft(d); setResultDraft(canonical(d)); setResult(next); setNotes(newMeeting(next)); setScenarioId(next.brief.scenarios[0].id); setQuestionId(""); setNote(blankNote()); setNoteDirty(false); setTab("comparison"); setNotice("");
         }} />
         <details className="design-help"><summary>계산 실행 안내 · 개발용 파일 연결</summary><p>내려받은 입력·이력 JSON, 추출 원문 포함 JSON, 원본 PDF와 최초 에이전트 결과로 실행하세요. AI 의견을 반영하려면 현재 버전의 AI 재검토 결과도 명시적으로 전달해야 합니다. 자동으로 이전 AI 파일을 찾아 쓰지 않습니다.</p><pre>{`uv run python -m trialboard.agent.design_compare \\\n  --brief design-brief.json --review review.json \\\n  --source-export evidence-export.json --pdf original.pdf \\\n  --agent-report original-agent.json \\\n  --ai-review current-ai-report.json`}</pre><p>직접 추가한 검토는 --agent-report 대신 --asset, --indication, --study, --question을 사용합니다. AI 결과가 없으면 --ai-review를 생략하며 결과에 ‘미제공’으로 남습니다. 생성된 output/design-comparison/실행ID/report.json을 위 ‘계산 결과 불러오기’로 선택하세요.</p></details>
       </section>
     </div>
     {tab !== "input" && (!result || !current) && <div className="design-empty"><h3>{result ? "현재 입력으로 다시 계산할 차례입니다" : "비교할 계산 결과가 아직 없습니다"}</h3><p>설계 입력을 내려받아 로컬 계산을 실행하고, 생성된 report.json을 불러오세요.</p><Button onClick={() => setTab("input")}>설계 입력으로 이동</Button></div>}
-    {tab === "comparison" && current && result && <section className="design-section">
-      <Alert severity={result.blockers.length ? "warning" : "info"}>{result.blockers.length ? `근거 연결 쟁점 ${result.blockers.length}개로 계산을 차단했습니다. KOL 선결 질문에서 확인하세요.` : "명시한 가정에서의 선택 빈도입니다. 검정력·허가 가능성·실제 최적 용량일 확률이 아닙니다."}</Alert>
-      <p className="design-help">{result.ai ? `AI 의견 파일 제공 · ${result.ai.mode} · 실행 진위 미인증` : "AI 재검토 미제공 · AI 승인으로 해석하지 마세요"}</p>
-      {result.blockers.map((b, i) => <article key={i} className="design-card"><strong>{b.code}</strong><p>{b.arm_id ?? b.observation_id ?? "비교 자료"} · {b.detail}</p>{b.observation_id && <Button disabled={locked} onClick={() => onSelectRow(b.observation_id!)}>원문 필드 확인</Button>}</article>)}
-      {!!result.simulations.length && <><TextField select fullWidth size="small" label="비교할 가정" value={scenarioId} onChange={e => setScenarioId(e.target.value)}>{result.brief.scenarios.map(s => <MenuItem key={s.id} value={s.id}>{s.label}</MenuItem>)}</TextField>
-        <p>{result.brief.scenarios.find(s => s.id === scenarioId)?.rationale}</p>
-        <div className="design-table-scroll" role="region" aria-label="설계안별 선택 빈도" tabIndex={0}><table><caption>가정별 설계 비교 · ± Monte Carlo SE · {result.brief.repetitions.toLocaleString()}회</caption><thead><tr><th>설계안 / 총 인원</th><th>올바른 선택·보류</th><th>가정상 한계 초과 군 선택</th><th>선택 보류</th></tr></thead><tbody>{result.simulations.filter(s => s.scenarioId === scenarioId).map(s => <tr key={s.planId}><th scope="row">{result.plans.find(p => p.id === s.planId)?.label}<small>{s.total}명 · 군당 {result.plans.find(p => p.id === s.planId)?.per_arm}명</small></th><td>{pct(s.correct)}<small>± {pct(s.se.true_utility_best)}</small></td><td>{pct(s.unsafe)}<small>± {pct(s.se.true_unsafe)}</small></td><td>{pct(s.noSelection)}<small>± {pct(s.se.no_selection)}</small></td></tr>)}</tbody></table></div>
-        <p className="design-help">모든 군이 가정한 안전 한계를 초과할 때 ‘올바른 선택·보류’는 선택을 보류한 빈도입니다. ±는 반복 실험의 수치 오차이지 임상 모수의 불확실성이 아닙니다.</p>
-        {result.tradeoffs.filter(t => t.scenario_id === scenarioId).map(t => <article className="design-card" key={t.alternative_plan_id}><h4>{result.plans.find(p => p.id === t.alternative_plan_id)?.label} vs {result.plans.find(p => p.id === t.reference_plan_id)?.label}</h4><p>참여자 {t.additional_participants >= 0 ? "+" : ""}{t.additional_participants}명 · 올바른 선택·보류 {delta(t.correct_selection_or_abstention_delta)} · 차이 MC SE {(t.delta_monte_carlo_se.true_utility_best * 100).toFixed(1)}%p</p><p className="design-help">추가 인원 대비 이 차이가 충분한지 KOL·통계 전문가와 검토하세요. 자동으로 우수 설계안을 선정하지 않습니다.</p></article>)}
-        <details><summary>사용된 가정과 용량별 선택 빈도</summary>{result.brief.scenarios.filter(s => s.id === scenarioId).map(s => <div key={s.id}><p>효용 가중치 {s.adverse_event_penalty} · 가정한 이상반응 한계 {pct(s.maximum_adverse_event_rate)}</p>{result.brief.arms.map((a, i) => <p key={a.id}>{a.source_dose}: 가정 반응 {pct(s.response[i])} / 가정 이상반응 {pct(s.adverse_event[i])}</p>)}</div>)}{result.simulations.filter(s => s.scenarioId === scenarioId).map(s => <p key={s.planId}>{s.planId}: {Object.entries(s.selection).map(([id, p]) => `${id} ${pct(p)}`).join(" · ")}</p>)}</details>
-      </>}
-      <div className="design-toolbar"><Button variant="contained" onClick={() => setTab("meeting")}>KOL 질문과 회의 자료 보기</Button></div>
-      <details className="design-help"><summary>계산의 한계·출처 식별 정보</summary><ul>{result.limitations.map(l => <li key={l}>{l}</li>)}</ul><p>실행 {result.runId}</p><p>입력 hash {result.briefDigest}</p><p>같은 내용으로 조작된 파일의 진위는 인증하지 못합니다.</p></details>
-    </section>}
+    {tab === "comparison" && current && result && <DesignOutcome key={result.runId} result={result} previous={previousResult} scenarioId={scenarioId} onScenario={setScenarioId} onEdit={()=>setTab("input")} onMeeting={()=>setTab("meeting")} onSelectRow={onSelectRow} disabled={locked}/>}
     {tab === "meeting" && current && result && notes && <section className="design-section">
       <div className="design-section-heading"><div><h3>KOL 검토 의제</h3><p className="design-help">규칙 기반 질문 {result.questions.length}개 · 답변 메모 {result.questions.filter(q => latestNote(notes, q.id)?.answer.trim()).length}개 · 전문가 답변을 자동 생성하지 않습니다.</p></div><div className="design-toolbar"><Button startIcon={<ArrowDownToLine size={16} />} disabled={locked || noteDirty} onClick={() => downloadMeeting(false)}>회의 자료 Markdown</Button><Button variant="outlined" disabled={locked || noteDirty} onClick={() => downloadMeeting(true)}>회의 JSON 저장</Button></div></div>
       <Alert severity="info">회의 메모는 사용자 기재·미인증 기록입니다. 답변을 기록해도 계산 차단이 해제되거나 가정이 자동 변경되지 않습니다.</Alert>

@@ -22,7 +22,7 @@ export function pdfAgentInput(source:PdfSource,notes:EvidenceNote[],context:PdfA
  if(!notes.length) throw new Error("먼저 원문에서 문구를 확인하고 메모를 남기세요.");
  const selected=new Set<string>();
  for(const note of notes) {
-  const page=source.pages[note.page-1],i=page?.spans.findIndex(s=>s.id===note.spanId)??-1,span=page?.spans[i];
+  const page=source.pages.find(p=>p.number===note.page),i=page?.spans.findIndex(s=>s.id===note.spanId)??-1,span=page?.spans[i];
   if(!span || note.sourceDigest!==source.sha256 || note.quote!==span.text || canonical(note.box)!==canonical(span.box) || !span.box || note.locationStatus!=="USER_ATTESTED_VISUAL_MATCH" || note.meaningStatus!=="NOT_ASSESSED") throw new Error("원문 메모와 PDF 문구가 일치하지 않습니다.");
   page.spans.slice(Math.max(0,i-2),i+3).forEach(s=>selected.add(s.id));
  }

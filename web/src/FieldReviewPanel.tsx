@@ -3,7 +3,7 @@ import { Alert, Button, Checkbox, Chip, Dialog, DialogTitle, DialogContent, Dial
 import { ArrowDownToLine, Check, FileInput, Link2, Plus } from "lucide-react";
 import type { PdfSource, PdfSpan } from "./pdf-contract";
 import { downloadText } from "./review";
-import { addRow, decide, FIELD_LABELS, FIELD_NAMES, importAgentReport, locate, newReview,
+import { addRow, decide, digest, FIELD_LABELS, FIELD_NAMES, importAgentReport, locate, newReview,
   REVIEW_LIMITS, reviewMarkdown, type FieldName, type FieldReview, type ReviewRow, type Value } from "./field-review";
 import "./field-review.css";
 import RevalidationPanel from "./RevalidationPanel";
@@ -19,6 +19,7 @@ import RowReview from "./RowReview";
 import SupportingCitations from './SupportingCitations';
 import RateNormalization from './RateNormalization';
 import type {Capture,DesignCheckpoint,ReviewCheckpoint,RestoredProject} from "./project-checkpoint";
+import ReviewProgress from './ReviewProgress';
 
 const STATUS = { unreviewed: "미확인", confirmed: "사용자 확인", corrected: "사용자 수정", held: "보류" } as const;
 export default function FieldReviewPanel({ source, pdf, selected, readyPage, disabled, onChoose, onText, view = "fields", onFields, onDesign, agentHandoff, initialProject, checkpoint, onCheckpointBusy, context }: {
@@ -92,9 +93,11 @@ export default function FieldReviewPanel({ source, pdf, selected, readyPage, dis
       const raw = new TextDecoder("utf-8", { fatal: true }).decode(await file.arrayBuffer());
       const session = recover === "meeting" ? await restoreMeetingSession(raw, source) : null;
       const next = session?.review ?? (recover ? restoreReview(raw, source) : await importAgentReport(raw, source));
+      const linkedAgent = !recover ? raw : originalAgentRaw &&
+        await digest(originalAgentRaw) === next.origin.reportDigest ? originalAgentRaw : null;
       if (ticket !== generation.current) return;
       setReview(next); setRowId(next.rows[0]?.id ?? ""); setName("dose"); setRestored(Boolean(recover));
-      setOriginalAgentRaw(recover ? null : raw);
+      setOriginalAgentRaw(linkedAgent);
       setUseProjectDraft(false);
       setMeetingSession(session); setSessionVersion(v => v + 1);
       setProposed(next.rows[0] ? structuredClone(next.rows[0].fields.dose.current) : { value: null, citation: null }); setReason(""); setChecked(false);
@@ -121,6 +124,7 @@ export default function FieldReviewPanel({ source, pdf, selected, readyPage, dis
     <Dialog open={!!pendingFile} onClose={()=>setPendingFile(null)} maxWidth="sm" fullWidth aria-labelledby="review-replace-title"><DialogTitle id="review-replace-title">이 기록으로 검토를 시작할까요?</DialogTitle><DialogContent><p>{pendingFile?.file.name}</p><p>현재 필드 검토·미기록 편집·설계 입력·비교 결과·회의 기록이 교체됩니다. 필요한 JSON은 먼저 내려받으세요. 원본 PDF와 원문 메모는 유지합니다.</p><Alert severity="info">파일 검사를 통과한 뒤에만 교체합니다. 새 추출 결과의 모든 필드는 미확인으로 시작합니다.</Alert></DialogContent><DialogActions><Button onClick={()=>setPendingFile(null)}>기존 작업 유지</Button><Button variant="contained" disabled={locked} onClick={()=>void acceptFile()}>확인하고 검토 시작</Button></DialogActions></Dialog>
     <div hidden={view === "design"}>
     <div className="field-title"><div><h2>필드 검토</h2><p>원문 값과 사용자 판단을 구분해서 남깁니다.</p></div><Chip size="small" label={`${reviewed} / ${review.rows.length * FIELD_NAMES.length} 검토 기록`} /></div>
+    <ReviewProgress review={review} source={source} disabled={locked} onDesign={onDesign} onSelect={(id,key)=>{if(selectField(id,key,true))requestAnimationFrame(()=>{editor.current?.focus();editor.current?.scrollIntoView({block:'nearest',behavior:'instant'});});}}/>
     <div className="field-toolbar"><Button component="label" variant="outlined" startIcon={<FileInput size={16} />} disabled={locked}>추출 결과 불러오기<input className="file-input" type="file" accept=".json,application/json" onChange={e => { void load(e.target.files?.[0]); e.target.value = ""; }} /></Button>
       <Button component="label" variant="outlined" startIcon={<FileInput size={16} />} disabled={locked}>저장한 검토 이어하기<input className="file-input" type="file" accept=".json,application/json" onChange={e => { void load(e.target.files?.[0], true); e.target.value = ""; }} /></Button>
       <Button component="label" variant="outlined" startIcon={<FileInput size={16} />} disabled={locked}>회의 파일로 전체 검토 복구<input className="file-input" type="file" accept=".json,application/json" onChange={e => { void load(e.target.files?.[0], "meeting"); e.target.value = ""; }} /></Button>

@@ -3,7 +3,7 @@ import { canonical, digest, strictJson, type FieldReview } from "./field-review.
 import type { PdfSource } from "./pdf-contract.ts";
 import { readResult, reviewKey, RESULT_BYTES, type RevalidationResult } from "./revalidation-result.ts";
 import { readRecritique, type RecritiqueResult } from "./recritique-result.ts";
-import { arr, bindBrief, exact, fail, hash, id, num, obj, same, str, unique, type DesignBrief, type Plan } from "./design-brief.ts";
+import { arr, bindBrief, exact, fail, hash, id, num, obj, proposalReviewDigest, same, str, unique, type DesignBrief, type Plan } from "./design-brief.ts";
 
 export type Blocker = { code: string; arm_id: string | null; observation_id: string | null; detail: string };
 export type KolQuestion = { id: string; category: string; priority: "BEFORE_COMPARISON" | "BEFORE_PROTOCOL"; trigger: Record<string, unknown>; question: string; answer_status: "UNANSWERED" };
@@ -45,6 +45,8 @@ export async function readDesignResult(raw: string, review: FieldReview, source:
     return { code: str(q.code, 100), arm_id: q.arm_id as string | null, observation_id: q.observation_id as string | null, detail: q.detail };
   });
   if (r.status !== (blockers.length ? "BLOCKED_EVIDENCE_LINK" : "HYPOTHETICAL_COMPARISON_ONLY")) fail();
+  const acknowledgedDigest = await proposalReviewDigest(b);
+  for (const s of b.scenarios) if (typeof s.provenance !== "string" && s.provenance.reviewed_input_digest !== acknowledgedDigest && !blockers.some(v => v.code === "AI_PROPOSAL_REVIEW_REQUIRED" && v.detail === s.id)) fail("미확인 AI 제안의 계산 차단이 누락됐습니다.");
   const accepted = arr(nested.accepted, 0, 12).map(obj), withheld = new Set(ai?.withheldIds ?? []);
   const expectedRows = b.arms.flatMap(a => a.observation_ids.flatMap(oid => {
     const row = accepted.find(v => v.id === oid);

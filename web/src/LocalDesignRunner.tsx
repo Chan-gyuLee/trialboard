@@ -3,7 +3,7 @@ import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/mater
 import { Play, FileInput } from "lucide-react";
 import { digest, strictJson, type FieldReview } from "./field-review";
 import type { PdfSource } from "./pdf-contract";
-import { briefFromDraft, type DesignDraft } from "./design-brief";
+import { briefFromDraft, proposalAcknowledged, type DesignDraft } from "./design-brief";
 import { executeLocalDesign, localDesignOrigin } from "./design-client";
 import { readRecritique } from "./recritique-result";
 import { reviewKey, RESULT_BYTES } from "./revalidation-result";
@@ -62,6 +62,7 @@ export default function LocalDesignRunner({ draft, review, source, pdf, locked, 
     const timer = setTimeout(() => controller.abort(), 60000);
     try {
       const brief = await briefFromDraft(draft, review, source);
+      if (!await proposalAcknowledged(brief)) throw Error("AI 제안의 현재 가정·표본수를 먼저 확인하세요. 입력이 바뀌면 다시 확인해야 합니다.");
       const result = await executeLocalDesign({ origin: window.location.origin, consent, brief, review, source, pdf, signal: controller.signal,
         attachments: { agentRaw: agentCurrent ? effectiveAgent!.raw : null, aiRaw: ai?.raw ?? null,
           context: review.origin.kind === "manual" ? { ...context, question: draft.question } : null } });

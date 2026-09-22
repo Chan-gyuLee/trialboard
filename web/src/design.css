@@ -1,4 +1,7 @@
 .design-workspace { color: #243244; max-width: 1160px; margin: auto; }
+.design-setup {padding:12px 0;margin-bottom:12px;border-bottom:1px solid #e4e9ef;}
+.design-setup > summary {font-size:14px;color:#52677e;cursor:pointer;min-height:26px;}
+.design-setup > .MuiAlert-root {margin-block:16px;}
 .design-workspace > .MuiAlert-root {margin-block:16px;}
 .design-workspace > .MuiAlert-root + .MuiButton-root {margin-top:4px;}
 .design-heading, .design-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }

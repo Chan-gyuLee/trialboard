@@ -8,7 +8,7 @@ const BODY_BYTES = 24 * 1024 * 1024;
 const RESPONSE_BYTES = 16 * 1024 * 1024;
 export const localDesignOrigin = (origin: string) => ["http://127.0.0.1:5173", "http://localhost:5173"].includes(origin);
 export type DesignAttachments = { agentRaw: string | null; aiRaw: string | null; context: { asset: string; indication: string; study: string; question: string } | null };
-async function responseText(response: Response, max: number): Promise<string> {
+export async function responseText(response: Response, max: number): Promise<string> {
   if (!response.body) throw new Error("로컬 서비스의 응답이 비어 있습니다.");
   const reader = response.body.getReader(), decoder = new TextDecoder("utf-8", { fatal: true }); let bytes = 0, raw = "";
   try {

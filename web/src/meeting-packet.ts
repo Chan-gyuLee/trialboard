@@ -95,8 +95,9 @@ export function packetMarkdown(result: DesignResult, notes: MeetingNotes): strin
       lines.push("");
     }
   }
-  lines.push("## 사용자가 선언한 가정 — 실제 참값·추정치 아님", "");
+  lines.push("## 비교 가정 — 실제 참값·추정치 아님", "");
   for (const s of b.scenarios) {
+    lines.push(typeof s.provenance === "string" ? "출처: 사용자 지정 가정" : `출처: AI 제안 가정 (사용자 편집 가능) · 제안 ${s.provenance.proposal_id} · 근거 ${s.provenance.evidence_ids.join(", ")} · 입력 확인은 전문가 인증·임상 승인이 아닙니다.`, "");
     lines.push(`### ${escape(s.label)}`, "", escape(s.rationale), "", "| 용량군 | 가정 반응확률 | 가정 이상반응확률 |", "| --- | ---: | ---: |",
       ...b.arms.map((a, i) => `| ${escape(a.source_dose)} | ${rate(s.response[i])} | ${rate(s.adverse_event[i])} |`), "",
       `효용 가중치: ${s.adverse_event_penalty} · 가정한 이상반응 한계: ${rate(s.maximum_adverse_event_rate)}`, "");

@@ -3,7 +3,7 @@ import { PDF_LIMITS, sourceStatus, textBox, type PdfPage } from "./pdf-contract.
 
 /** Shared by browser and real-PDF integration tests. Keeps PDF item text unchanged. */
 export async function extractPages(pdf: PDFDocumentProxy, onProgress: (page: number) => void = () => {}, signal?: AbortSignal, pageNumbers?: number[]): Promise<PdfPage[]> {
-  if (!Number.isInteger(pdf.numPages) || pdf.numPages < 1 || pdf.numPages > (pageNumbers ? 200 : PDF_LIMITS.pages)) throw new Error("40페이지 이하 PDF만 지원합니다. 필요한 문서 범위를 별도로 준비해 주세요.");
+  if (!Number.isInteger(pdf.numPages) || pdf.numPages < 1 || pdf.numPages > (pageNumbers ? PDF_LIMITS.documentPages : PDF_LIMITS.pages)) throw new Error("40페이지 이하 PDF만 지원합니다. 긴 문서의 저장된 추출 결과는 조사 화면의 ‘검토 이어가기’로 연결하세요.");
   const selected = pageNumbers ?? Array.from({length: pdf.numPages}, (_, i) => i + 1);
   if (!selected.length || selected.length > PDF_LIMITS.pages || selected.some((n, i) => !Number.isInteger(n) || n < 1 || n > pdf.numPages || (i > 0 && n <= selected[i - 1]))) throw new Error("PDF 페이지 선택 범위를 확인해 주세요.");
   const pages: PdfPage[] = [];

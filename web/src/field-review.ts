@@ -1,4 +1,4 @@
-import type { PdfSource, PdfSpan } from "./pdf-contract";
+import {pdfPage, type PdfSource, type PdfSpan} from "./pdf-contract.ts";
 import {normalizedRate,type RateNormalization} from './rate-normalization.ts';
 
 export const FIELD_LABELS = {
@@ -88,7 +88,7 @@ export function addRow(review: FieldReview, id: string, valueKind: ReviewRow["va
 }
 export function locate(source: PdfSource, citation: Citation | null): PdfSpan | null {
   if (!citation || !citation.quote.trim() || !Number.isInteger(citation.page)) return null;
-  const span = source.pages[citation.page - 1]?.spans.find(s => s.id === citation.spanId);
+  const span = pdfPage(source,citation.page)?.spans.find(s => s.id === citation.spanId);
   return span && span.page === citation.page && span.text.includes(citation.quote) ? span : null;
 }
 /** Same-page contextual links only. They never authorize a new value or unit. */
@@ -117,7 +117,7 @@ export async function importAgentReport(raw: string, source: PdfSource): Promise
     const s = object(value), id = string(s.id, 80);
     if (seen.has(id)) fail(); seen.add(id);
     if (s.source_digest !== source.sha256 || !Number.isInteger(s.page)) fail("다른 PDF 또는 버전의 결과입니다. 같은 원본 PDF를 열어 주세요.");
-    const span = source.pages[Number(s.page) - 1]?.spans.find(p => p.id === id);
+    const span = pdfPage(source,Number(s.page))?.spans.find(p => p.id === id);
     if (!span || span.text !== s.text || span.page !== s.page) fail("PDF 추출 문구·페이지가 결과와 일치하지 않습니다. 원본과 추출기 버전을 확인하세요.");
   }
   const attempts = array(report.attempts, 3); if (!attempts.length) fail();
