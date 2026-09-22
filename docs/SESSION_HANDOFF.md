@@ -5,6 +5,78 @@
 
 ## 가장 최근 사용자 요청과 확인
 
+2026-09-22 ‘깃에 일단 배포’: 최신 제품 코드를 origin/main에 공유하는 요청. 사이트 배포가 아니다.
+제품 엔진/API·웹 화면/테스트·문서로 커밋을 나누며 영상·출력물·로컬 DB·API 키는 제외한다.
+Python725/웹1012/Ruff/build 통과. Git 대상만 별도 폴더에 풀어 uv sync --locked/API import/npm ci/build 확인.
+깨끗한 복사본 웹1008통과·선택적 참고 PDF4개 skip·실패0. 테스트는 저장소 루트에서 실행한다.
+410개 대상 파일의 비밀값 패턴 검사에서 실제 자격증명 발견 없음(합성 PDF 문서 ID는 제외).
+README의 현재 기능·검증 수·남은 작업 갱신. 진행률79%는 계획상 주관적 추정이며 출시 준비도가 아니다.
+이번 작업의 모델 API 호출0, 기존 서비스/사용자 DB/영상 보존. 아래 ‘push 없음’은 각 과거 작업 당시 기록이다.
+최종 원격 반영 여부와 커밋은 git log 및 origin/main으로 확인한다.
+
+2026-09-22 최신 ‘다음 작업 계속해’: [실제 공개 PDF 대조](PUBLIC_PDF_AUDIT.md).
+FDA172696 51쪽/3,005,656바이트, sha0e2c73e8… 실제33·35쪽 결과표는 이미지이며PDF.js/pdfplumber텍스트0.
+NCT03600883 API스냅샷 resultsSection 없음. Amgen172698 146쪽/5,663,303바이트는현재한도초과; 우회하지않음.
+FDA자료는CodeBreaK200 sotorasib/docetaxel 비교이지CodeBreaK100 두용량비교아님. 개발자 원문대조만/전문가검증아님.
+openReviewPdf: ≤40기존full,41–200키워드탐색→selected최대40. 직접업로드도긴문서지원.
+PdfScopeControl/pdf-page-range: 텍스트미확보쪽수,명시적범위변경(확인후기존편집초기화)/지문/쪽수대조.
+실패/거절시기존자료보존, OCR/이미지표수치생성 없음. 프로젝트복구후안내는저장범위만, 전체scan영구저장아님.
+실제FDA표33/35렌더링·무텍스트확인버튼차단·41쪽범위거절·교체취소·임시DB저장/새로고침/복구QA.
+1440/390px 콘솔0/넘침0, output/public-pdf-audit/, tmp/qa-public-pdf.mjs. 모델호출0.
+웹1012(선택적실제PDF검사1포함)/Python725/Ruff/build통과. 해당파일없으면1skip, 테스트에서다운로드안함.
+주석tests/fixtures/fda-codebreak200-audit.json,원본PDF Git제외. 원본은/tmp/trialboard-fda-odac-2023.pdf.
+전체79%/기업25%유지. 기존API50808/session2946·5173유지, 실제사용자DB/영상보존, Gitcommit/push/외부배포없음.
+QA 임시8002/PID65788/session71467 정상종료·임시DB정리. FDA원본/tmp파일은 재현테스트용으로 남겼다.
+다음: OCR/vision인용계약 및 제공모델지원확인→실제표추출검증→다문서/영구비교. 완주나임상정확도검증으로설명하지않기.
+
+2026-09-22 최신 ‘이어서해’: [긴 PDF 선택 페이지 검토](SELECTED_PDF_REVIEW.md).
+`pdf-evidence-selected/1`+totalPages, 최대200쪽의 저장된 최대40쪽. 기존full계약/직렬화 보존.
+research-handoff→openSelectedPdf→원래page번호 기반 필드/메모/인용/정규화/재검증/설계 연결.
+PdfPageNavigation: 포함/미포함 범위·원래 쪽수 선택, 프로젝트 복구 시 동일 선택 재추출/검증.
+전체 쪽수 불일치/손상 파일/인용 범위 오류 차단, 신규 모델 요청·사용자 확인 자동생성 없음.
+웹991/Python725/Ruff/build 통과. 합성80쪽 PDF48쪽 근거/73쪽빈페이지, 실제PDF.js·임시SQLite 브라우저 QA.
+1440/390px,48→73→48 탐색·강조·미확인44·설계진입·저장새로고침복구·손상시기존4관측유지, 콘솔0/넘침0.
+output/selected-pages-qa/ 및 tmp/qa-research-handoff.mjs --selected 참조. 모델호출0.
+로컬API8075→최신PID50808/session2946, 기존대회옵션·외부키파일, localhost8000. Vite5173 유지.
+QA 임시8002/PID43203 정상 종료 및 임시DB 정리. 실제 사용자DB에는 QA 프로젝트를 저장하지 않았다.
+전체79%/기업25% 유지, 기존 변경/DB/영상 보존, Git commit/push/배포 없음.
+직접 파일 전체 읽기는40쪽, 임의페이지추가/전문검토/실제임상검증 미구현. 다음은 실제문서 독립대조·다문서/등록결과·영구변경비교.
+
+2026-09-22 최신 ‘남은 작업 많이 이어서’: [공개 조사→원문 검토 연결](RESEARCH_REVIEW_HANDOFF.md).
+ResearchContinuation/research-handoff/ReviewProgress: 저장된 추출을 PDF 필드 검토로 직접 연결, 핵심 값 탐색.
+캐시 전용 GET run/source/digest, 지문/문구/페이지 대조 후 원본추출·조사맥락·질문 연결. 모든 필드 미확인.
+관측0/계획문서만/40페이지초과/미완료는 이유 표시, 무추출·무다운로드·무모델재시도. 기존 작업 교체 전 확인.
+프로젝트 저장→새로고침→복구에서 원본추출/문맥 유지. 프로젝트 출처 검사도 정확한digest로 수정.
+웹976/Python710/Ruff/build. 합성 조사 fixture + 실제PDF/캐시/별도 임시SQLite로 브라우저1440/390 검증.
+원문 이동/미확인44/제안동의false/저장복구/손상파일 기존검토 보존/콘솔0/넘침0. 모델호출0.
+output/handoff-qa/ 및 tmp/qa-research-handoff.mjs 참조. 최근실제조사6건 automation 없음; 실제약물완주 미검증.
+기존 변경/사용자DB/영상 보존, Git commit/push/배포 없음. 전체79%/기업25% 유지.
+최종 서버: 기존92790→최신PID8075/session20802, localhost8000, 기존대회옵션·외부키파일 유지. Vite5173 유지.
+QA 임시8002서버/PID1959 종료·임시DB 정리, 실제DB에는 QA 프로젝트 미저장. 다음: 긴PDF 연결·실자료 대조·영구 변경 비교.
+Python 첫 전체1실패는 기존 Codex killpg PermissionError 재발. 미수정, 최종 전체 재실행710통과. dacon신규호출 없음.
+
+2026-09-22 최신 ‘우리 제품 더 멋지게’: [설계 결과 브리핑·직전 계산 비교](DESIGN_OUTCOME_BRIEFING.md).
+DesignOutcome/CSS module/design-insight: 요약→가정 탭→3차이 지표→2설계 카드→원문→회의 질문.
+DesignPanel의 로컬 재계산 때 직전 결과를 메모리에 보관, 입력 변경·세 계산 빈도 전후 비교/Markdown 저장.
+원문/검토/질문/용량군/엔진 변경·보류이면 수치 비교 차단. 새로고침 복원/영구 이력은 미구현.
+결과 진입 시 제목 포커스·스크롤, 준비/복구 안내 접기. MOC/근거 범위/MC 오차 유지.
+웹959/Python708/Ruff/build 통과. 합성 브라우저1440/390px 재계산·다운로드·KOL·키보드·넘침0/콘솔0.
+output/outcome-qa/의 스크린샷/qa-report.json과 tmp/qa-design-outcome.mjs 참조. 이번 대회 모델 호출0.
+기존 API17150/5173 유지, DB/영상/기존 변경 보존. 커밋/push/사이트 배포 없음. 전체79%/기업25% 유지.
+다음은 실제 문서 한 사례 독립 대조, 공개 조사→검토PDF→제안 연결 단순화, 영구 변경 이력.
+
+2026-09-22 최신 ‘남은 개발 이어서’: [AI 설계 초안 연결](AI_DESIGN_PROPOSAL.md).
+검토된 PDF/원본 실행 → 결정적 사전검사 → 대회 단일 호출 → 2안×2–3가정 → 사용자 입력 확인 → 기존 계산·KOL.
+`ai_proposed_hypothetical`의 제안ID/관측ID/확인digest 보존. 변경 시 확인 무효화, 미확인 서버 계산 차단.
+DesignProposalPanel/AIProposalAcknowledgement, `/api/design-proposals` SSE. enable-designs+enable-pdf-agent 필요.
+실제 합성 대회2호출: 엔진1회(2,705+1,645토큰), 브라우저1회. 각각2안×3가정/6계산 성공.
+브라우저1440/390px·KOL·표본수 변경 무효화·콘솔0/가로넘침0, output/proposal-qa/ 참조.
+API 이전PID38423 종료→새PID17150/session54169, localhost8000. 기존5173 Vite 유지.
+키는 기존 승인된 외부 비밀파일만 서버 로드, DB·영상 유지. Git commit/push/외부배포 없음.
+전체 추정79%(±10%p), 기업25% 유지. 실제 약물 임상 검증/자동 수집부터 완주/다문서 연결은 미완료.
+최종 Python708/웹946/Ruff/build 통과. 병렬 테스트의 기존 Codex subprocess killpg PermissionError1회는 단독/전체 재실행 통과, 미수정 간헐 이슈로 기록.
+다음: 실제 문서 한 사례 독립 대조→공개 조사/검토 결과에서 이 경로 진입 단순화→변경 영향 추적.
+
 2026-09-18 최신 ‘친구가 빌드하도록 제품 코드 GitHub 공유, 영상 제외’:
 제품 Python/API/웹 UI/자동화/합성 설계 검토/로고/테스트/문서만 업로드 대상으로 선정.
 `/video/` 전체와 output/tmp/로컬DB/비밀키는 제외. 기존 영상 작업은 로컬 보존.
