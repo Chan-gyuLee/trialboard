@@ -16,15 +16,31 @@ def from_pdf_export(
             invalid()
         source = packet["source"]
         digest = source["sha256"]
-        if source["schemaVersion"] != "pdf-evidence/1" or not re.fullmatch("[0-9a-f]{64}", digest):
+        if source["schemaVersion"] not in (
+            "pdf-evidence/1",
+            "pdf-evidence-selected/1",
+        ) or not re.fullmatch("[0-9a-f]{64}", digest):
+            invalid()
+        selected_pages = source["schemaVersion"] == "pdf-evidence-selected/1"
+        total = source.get("totalPages")
+        if (selected_pages and (type(total) is not int or not 1 <= total <= 200)) or (
+            not selected_pages and "totalPages" in source
+        ):
             invalid()
         pages = source["pages"]
         if not isinstance(pages, list) or not 1 <= len(pages) <= 40:
             invalid()
-        index = {}
-        for number, page in enumerate(pages, 1):
-            if type(page["number"]) is not int or page["number"] != number:
+        index, page_index, previous = {}, {}, 0
+        for ordinal, page in enumerate(pages, 1):
+            number = page["number"]
+            if (
+                type(number) is not int
+                or number <= previous
+                or (number > total if selected_pages else number != ordinal)
+            ):
                 invalid()
+            previous = number
+            page_index[number] = page
             for position, span in enumerate(page["spans"]):
                 if span["id"] in index or type(span["page"]) is not int or span["page"] != number:
                     invalid()
@@ -48,7 +64,7 @@ def from_pdf_export(
             ):
                 invalid()
             # Include immediate context, never silently send the whole PDF export.
-            neighbors = pages[number - 1]["spans"][max(0, position - 2) : position + 3]
+            neighbors = page_index[number]["spans"][max(0, position - 2) : position + 3]
             selected.update(s["id"] for s in neighbors)
         spans = [
             Span(id=s["id"], source_digest=digest, page=number, text=s["text"])

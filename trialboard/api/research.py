@@ -3,6 +3,7 @@
 import asyncio
 import hashlib
 import json
+import re
 from pathlib import Path
 from threading import BoundedSemaphore
 from time import monotonic
@@ -166,6 +167,48 @@ def research_router(
                     model_slot.release()
 
         return StreamingResponse(stream(), media_type="text/event-stream")
+
+    @router.get("/runs/{run_id}/documents/{source_id}/cached")
+    async def cached_pdf(run_id: str, source_id: str, sha256: str):
+        """Read an exact saved version; never download, pick a newer version, or call AI."""
+        if not re.fullmatch(r"[a-f0-9]{64}", sha256):
+            raise HTTPException(422, "INVALID_DOCUMENT_DIGEST")
+        run = store.get_run(run_id)
+        if not run or not any(s.id == source_id and s.pdf_url for s in run.sources):
+            raise HTTPException(404, "SAVED_DOCUMENT_NOT_FOUND")
+        con = store.connect()
+        try:
+            tables = {
+                r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            }
+            if not {"public_pdf_receipts", "public_pdf_blobs"}.issubset(tables):
+                raise HTTPException(404, "SAVED_DOCUMENT_NOT_FOUND")
+            row = con.execute(
+                """SELECT b.content FROM public_pdf_receipts r
+                JOIN public_pdf_blobs b ON b.digest=r.digest
+                WHERE r.run_id=? AND r.source_id=? AND r.digest=?""",
+                (run_id, source_id, sha256),
+            ).fetchone()
+        finally:
+            con.close()
+        if not row:
+            raise HTTPException(404, "SAVED_DOCUMENT_NOT_FOUND")
+        raw = row[0]
+        if (
+            not isinstance(raw, bytes)
+            or len(raw) > 5_000_000
+            or hashlib.sha256(raw).hexdigest() != sha256
+        ):
+            raise HTTPException(409, "SAVED_DOCUMENT_INTEGRITY_FAILED")
+        return Response(
+            raw,
+            media_type="application/pdf",
+            headers={
+                "X-Source-Sha256": sha256,
+                "X-Source-Cache": "HIT",
+                "Cache-Control": "no-store",
+            },
+        )
 
     @router.post("/runs/{run_id}/documents/{source_id}")
     async def pdf(run_id: str, source_id: str, request: Request):

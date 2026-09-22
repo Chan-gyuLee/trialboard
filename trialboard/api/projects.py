@@ -154,8 +154,9 @@ class ProjectStore(EvidenceStore):
                     ).fetchone()
                     cached = (
                         connection.execute(
-                            "SELECT digest FROM public_pdf_receipts WHERE run_id=? AND source_id=?",
-                            (document["runId"], document["sourceId"]),
+                            "SELECT digest FROM public_pdf_receipts "
+                            "WHERE run_id=? AND source_id=? AND digest=?",
+                            (document["runId"], document["sourceId"], source.sha256),
                         ).fetchone()
                         if exists
                         else None

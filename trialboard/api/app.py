@@ -58,6 +58,22 @@ def create_app(
     slots = BoundedSemaphore(MAX_CONCURRENT_RUNS)
     model_slot = BoundedSemaphore(1)
 
+    @app.get("/api/design-proposals/capabilities")
+    async def proposal_capabilities() -> dict:
+        return {
+            "enabled": enable_designs and enable_pdf_agent,
+            "persisted": False,
+            "max_calls": 1,
+            "transport": "LOOPBACK_ONLY",
+            "clinical_approval": False,
+            **metadata,
+        }
+
+    if enable_designs and enable_pdf_agent:
+        from trialboard.api.proposals import proposal_router
+
+        app.include_router(proposal_router(model_slot, provider_factory))
+
     @app.get("/api/evidence-scout/capabilities")
     async def scout_capabilities() -> dict:
         return {

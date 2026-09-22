@@ -1,0 +1,36 @@
+{
+  "case": "fda-odac-codebreak200-2023-text-gap/1",
+  "annotation": "DEVELOPER_VISUAL_TRANSCRIPTION_NOT_EXPERT_VALIDATED",
+  "source_url": "https://www.fda.gov/media/172696/download",
+  "author": "FDA",
+  "document_date": "2023-10-05",
+  "retrieved_date": "2026-09-22",
+  "sha256": "0e2c73e81b0aea8bf433ef9ec8233ac386287fa6a211d79568fe0552eed9fd48",
+  "bytes": 3005656,
+  "pages": 51,
+  "study": "CodeBreaK 200",
+  "cutoff": "2022-08-02",
+  "efficacy": {
+    "pdf_page": 33,
+    "table": 10,
+    "metric": "ORR by BICR",
+    "sotorasib": {"denominator": 171, "percent": 28},
+    "docetaxel": {"denominator": 174, "percent": 13}
+  },
+  "safety": {
+    "pdf_page": 35,
+    "table": 11,
+    "population": "Safety analysis set, received at least one dose",
+    "metric": "All-cause TEAEs, any grade",
+    "sotorasib": {"denominator": 169, "affected": 138, "percent": 82},
+    "docetaxel": {"denominator": 151, "affected": 139, "percent": 92}
+  },
+  "prohibited_inferences": [
+    "Do not treat docetaxel as a second sotorasib dose.",
+    "Do not transfer efficacy denominators into the safety table.",
+    "Do not infer responder counts from rounded percentages.",
+    "Do not use data cutoff as observation duration.",
+    "No text extraction does not mean no evidence.",
+    "This briefing is not a final regulatory determination."
+  ]
+}

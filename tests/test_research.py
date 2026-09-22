@@ -325,6 +325,58 @@ def test_pdf_download_is_db_selected_and_hash_persisted(setup, monkeypatch):
             assert raw == pdf
 
 
+def test_cached_pdf_is_exact_read_only_and_never_downloads(setup, monkeypatch):
+    path, request, _ = setup
+    run = asyncio.run(execute(path, request))
+    import hashlib
+
+    import trialboard.api.research as api
+
+    async def forbidden(*args):
+        raise AssertionError("cached GET must not download")
+
+    monkeypatch.setattr(api, "download_pdf", forbidden)
+    app = FastAPI()
+    app.include_router(research_router(path, BoundedSemaphore(1)))
+    raw = b"%PDF-1.7\nMOC exact saved version"
+    digest = hashlib.sha256(raw).hexdigest()
+    url = f"/api/research/runs/{run.id}/documents/doc_NCT00000001_Prot_000/cached"
+    with TestClient(app) as client:
+        assert client.get(url, params={"sha256": digest}).status_code == 404
+        assert client.get(url, params={"sha256": "../invalid"}).status_code == 422
+        with sqlite3.connect(path) as db:
+            db.execute("CREATE TABLE public_pdf_blobs (digest TEXT PRIMARY KEY, content BLOB)")
+            db.execute(
+                "CREATE TABLE public_pdf_receipts (run_id TEXT, source_id TEXT, digest TEXT)"
+            )
+            db.execute("INSERT INTO public_pdf_blobs VALUES (?,?)", (digest, raw))
+            db.execute(
+                "INSERT INTO public_pdf_receipts VALUES (?,?,?)",
+                (run.id, "doc_NCT00000001_Prot_000", digest),
+            )
+        response = client.get(url, params={"sha256": digest})
+        assert response.content == raw
+        assert response.headers["X-Source-Sha256"] == digest
+        assert response.headers["Cache-Control"] == "no-store"
+        assert client.get(url, params={"sha256": "0" * 64}).status_code == 404
+        assert (
+            client.get(
+                url.replace("doc_NCT00000001_Prot_000", "paper_123"), params={"sha256": digest}
+            ).status_code
+            == 404
+        )
+        assert (
+            client.get(
+                url.replace(run.id, "00000000-0000-4000-8000-000000000001"),
+                params={"sha256": digest},
+            ).status_code
+            == 404
+        )
+        with sqlite3.connect(path) as db:
+            db.execute("UPDATE public_pdf_blobs SET content=? WHERE digest=?", (b"corrupt", digest))
+        assert client.get(url, params={"sha256": digest}).status_code == 409
+
+
 def test_curation_versions_are_append_only_and_do_not_modify_ai_or_sources(setup):
     path, request, _ = setup
     run = asyncio.run(execute(path, request, FakeModel()))

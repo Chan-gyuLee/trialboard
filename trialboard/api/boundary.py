@@ -56,7 +56,8 @@ class LocalBoundary:
             return
         body_limit = (
             self.design_body_bytes
-            if scope.get("path") == "/api/design-comparisons" and self.design_body_bytes is not None
+            if scope.get("path") in ("/api/design-comparisons", "/api/design-proposals")
+            and self.design_body_bytes is not None
             else MAX_BODY_BYTES
         )
         if scope.get("path") == "/api/projects" and self.project_body_bytes is not None:

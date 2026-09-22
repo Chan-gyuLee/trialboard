@@ -5,6 +5,7 @@ import json
 import math
 import os
 import platform
+import struct
 from importlib.metadata import version
 from pathlib import Path
 from typing import Annotated, Literal
@@ -38,6 +39,13 @@ class Plan(Contract):
     rationale: Text
 
 
+class AIProvenance(Contract):
+    kind: Literal["ai_proposed_hypothetical"]
+    proposal_id: Id
+    evidence_ids: list[Id] = Field(min_length=1, max_length=12)
+    reviewed_input_digest: Digest | None
+
+
 class Assumption(Contract):
     id: Id
     label: Text
@@ -46,7 +54,7 @@ class Assumption(Contract):
     adverse_event_penalty: float = Field(ge=0, le=10)
     maximum_adverse_event_rate: Probability
     rationale: Text
-    provenance: Literal["user_declared_hypothetical"]
+    provenance: Literal["user_declared_hypothetical"] | AIProvenance
 
 
 class DesignBrief(Contract):
@@ -93,6 +101,26 @@ class DesignBrief(Contract):
         if len(self.arms) * len(self.plans) * len(self.scenarios) * self.repetitions > 1000000:
             raise ValueError("SIMULATION_WORK_BUDGET_EXCEEDED")
         return self
+
+
+def proposal_review_digest(brief: DesignBrief) -> str:
+    """Bind local acknowledgement to every input, including origin and evidence links."""
+    raw = brief.model_dump()
+    for scenario in raw["scenarios"]:
+        if isinstance(scenario["provenance"], dict):
+            scenario["provenance"]["reviewed_input_digest"] = None
+
+    def numbers(value):
+        # IEEE-754 bytes avoid Python 1.0 vs JS 1 and exponent-format differences.
+        if type(value) in (int, float):
+            return {"$float64": struct.pack(">d", float(value) or 0.0).hex()}
+        if isinstance(value, list):
+            return [numbers(v) for v in value]
+        if isinstance(value, dict):
+            return {k: numbers(v) for k, v in value.items()}
+        return value
+
+    return sha256_json(numbers(raw))
 
 
 def _ai_review(raw, checked):
@@ -162,6 +190,17 @@ def compare_designs(
             {"code": code, "arm_id": arm, "observation_id": observation, "detail": detail}
         )
 
+    for scenario in brief.scenarios:
+        origin = scenario.provenance
+        if isinstance(origin, AIProvenance):
+            if origin.reviewed_input_digest != proposal_review_digest(brief):
+                block("AI_PROPOSAL_REVIEW_REQUIRED", detail=scenario.id)
+            linked = {oid for arm in brief.arms for oid in arm.observation_ids}
+            if not set(origin.evidence_ids) <= linked or len(set(origin.evidence_ids)) != len(
+                origin.evidence_ids
+            ):
+                block("AI_PROPOSAL_EVIDENCE_MISMATCH", detail=scenario.id)
+
     for arm in brief.arms:
         rows = []
         for oid in arm.observation_ids:
@@ -216,6 +255,8 @@ def compare_designs(
             block("AI_COMPARISON_LIMITATION", detail=c.reason)
 
     blocker_labels = {
+        "AI_PROPOSAL_REVIEW_REQUIRED": "AI 제안 가정·설계의 현재 버전 확인 필요 (임상 승인 아님)",
+        "AI_PROPOSAL_EVIDENCE_MISMATCH": "AI 제안의 근거 연결 불일치",
         "OBSERVATION_WITHHELD": "미확인·사용자 보류·규칙 제외 또는 AI 오류 의심",
         "SOURCE_DOSE_MISMATCH": "설계 용량과 원문 용량 불일치",
         "ONE_ENDPOINT_ROW_REQUIRED": "용량별 반응·이상반응 근거 누락 또는 중복",
@@ -379,7 +420,8 @@ def compare_designs(
         "simulations": simulations,
         "tradeoffs": tradeoffs,
         "limitations": [
-            "사용자가 지정한 고정 표본수·균등배정 대안의 가정 실험이며 "
+            *[s for s in checked["limitations"] if s.startswith("선택 페이지 검토:")],
+            "사용자 지정 또는 사용자 확인을 거친 AI 제안의 고정 표본수·균등배정 가정 실험이며 "
             "완성된 임상 프로토콜이 아닙니다.",
             "관측 수치에서 참확률·효용 가중치·안전 한계·권장 표본수를 추정하지 않습니다.",
             "응답과 이상반응은 독립 Bernoulli 가정입니다. "
@@ -420,6 +462,12 @@ def markdown(r):
         )
     lines.append("확률 배열의 순서는 위 용량군 순서입니다. 실제 자료에서 추정한 값이 아닙니다.")
     for s in r["brief"]["scenarios"]:
+        origin = s["provenance"]
+        if isinstance(origin, dict):
+            lines.append(
+                f"  출처: AI 제안 (사용자 편집 가능) · {escaped(origin['proposal_id'])} · "
+                f"근거 {escaped(origin['evidence_ids'])} · 입력 확인은 임상 승인이 아닙니다."
+            )
         lines.append(
             f"- {escaped(s['label'])}: 반응 {s['response']}, 이상반응 {s['adverse_event']}, "
             f"효용 가중치 {s['adverse_event_penalty']}, 가정한 이상반응 한계 "

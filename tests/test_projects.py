@@ -202,8 +202,10 @@ def test_disabled_by_default(tmp_path):
     assert not (tmp_path / "unused.sqlite").exists()
 
 
-@pytest.mark.parametrize("document", [False, True])
-def test_saved_research_context_links_only_existing_receipts(tmp_path, payload, document):
+@pytest.mark.parametrize("document,older_version", [(False, False), (True, False), (True, True)])
+def test_saved_research_context_links_only_existing_receipts(
+    tmp_path, payload, document, older_version
+):
     path = tmp_path / "context.sqlite"
     raw = {
         "studies": [
@@ -244,6 +246,11 @@ def test_saved_research_context_links_only_existing_receipts(tmp_path, payload, 
                 con.execute(
                     "CREATE TABLE public_pdf_receipts (run_id TEXT, source_id TEXT, digest TEXT)"
                 )
+                if older_version:
+                    con.execute(
+                        "INSERT INTO public_pdf_receipts VALUES (?,?,?)",
+                        (run.id, "moc_source", "0" * 64),
+                    )
                 con.execute(
                     "INSERT INTO public_pdf_receipts VALUES (?,?,?)",
                     (run.id, "moc_source", bundle["source"]["sha256"]),

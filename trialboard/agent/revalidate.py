@@ -304,6 +304,14 @@ def revalidate(
         if baseline_report
         else None,
         "limitations": [
+            *(
+                [
+                    f"선택 페이지 검토: 전체 {source.totalPages}쪽 중 {len(source.pages)}쪽만 "
+                    "작업에 포함됩니다. 원래 PDF 쪽수를 유지하며 전체 전문 검토가 아닙니다."
+                ]
+                if source.schemaVersion == "pdf-evidence-selected/1"
+                else []
+            ),
             "사용자 확인과 수정 이력은 인증·서명된 전문가 승인 기록이 아닙니다.",
             "PDF 파일 hash만 재확인했습니다. "
             "추출 문구·좌표를 PDF에서 독립적으로 다시 읽지 않았습니다.",

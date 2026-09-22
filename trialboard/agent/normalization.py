@@ -46,7 +46,7 @@ def normalized_rate(value, source, *, field="reported_rate", kind="reported_perc
     if overlap < min(a.height, b.height) * 0.5 or not -0.002 <= b.x - (a.x + a.width) <= 0.04:
         raise ValueError("NORMALIZATION_UNIT_NOT_ADJACENT")
     # A separate confidence-level/CI label on the same visual line is ambiguous.
-    for s in source.pages[p.page - 1].spans:
+    for s in next(page for page in source.pages if page.number == p.page).spans:
         if s.id in (p.id, u.id) or not s.box:
             continue
         box = s.box

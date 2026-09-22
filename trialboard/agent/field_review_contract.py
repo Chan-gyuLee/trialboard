@@ -13,7 +13,7 @@ Decision = Literal["unreviewed", "confirmed", "corrected", "held"]
 
 class Citation(Contract):
     spanId: Id
-    page: int = Field(ge=1, le=40)
+    page: int = Field(ge=1, le=200)
     quote: Text
 
 
@@ -199,14 +199,14 @@ class Box(Contract):
 
 class PdfSpan(Contract):
     id: Id
-    page: int = Field(ge=1, le=40)
+    page: int = Field(ge=1, le=200)
     item: int = Field(ge=0, le=20000)
     text: Annotated[str, Field(min_length=1, max_length=250000)]
     box: Box | None
 
 
 class PdfPage(Contract):
-    number: int = Field(ge=1, le=40)
+    number: int = Field(ge=1, le=200)
     width: float = Field(gt=0)
     height: float = Field(gt=0)
     rotation: Literal[0, 90, 180, 270]
@@ -215,7 +215,8 @@ class PdfPage(Contract):
 
 
 class PdfSource(Contract):
-    schemaVersion: Literal["pdf-evidence/1"]
+    schemaVersion: Literal["pdf-evidence/1", "pdf-evidence-selected/1"]
+    totalPages: int | None = Field(default=None, ge=1, le=200, exclude_if=lambda v: v is None)
     name: Annotated[str, Field(min_length=1, max_length=2000)]
     sha256: Digest
     byteLength: int = Field(ge=5, le=5 * 1024 * 1024)
@@ -226,10 +227,23 @@ class PdfSource(Contract):
 
     @model_validator(mode="after")
     def structure(self):
+        selected = self.schemaVersion == "pdf-evidence-selected/1"
+        if (selected and self.totalPages is None) or (
+            not selected and "totalPages" in self.model_fields_set
+        ):
+            raise ValueError("INVALID_PAGE_SELECTION")
         seen, count, characters, empty = set(), 0, 0, 0
-        for number, page in enumerate(self.pages, 1):
-            if page.number != number or (page.status == "NO_TEXT") != (not page.spans):
+        previous = 0
+        for index, page in enumerate(self.pages, 1):
+            number = page.number
+            if (
+                (not selected and number != index)
+                or number <= previous
+                or (selected and number > self.totalPages)
+                or (page.status == "NO_TEXT") != (not page.spans)
+            ):
                 raise ValueError("INVALID_PAGE_ORDER_OR_STATUS")
+            previous = number
             empty += not page.spans
             for span in page.spans:
                 if span.id in seen or span.page != number or span.id != f"p{number}-i{span.item}":
