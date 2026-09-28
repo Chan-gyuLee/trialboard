@@ -1,0 +1,63 @@
+/* Product-wide visual layer. Data, permissions and execution remain unchanged. */
+:root{--tb-ink:#172a48;--tb-navy:#102851;--tb-blue:#245bea;--tb-muted:#62718b;--tb-line:#e3e9f2;--tb-soft:#eef3ff;--tb-canvas:#f6f8fc;--tb-blue-line:#bdd0fa;--tb-radius:18px;--tb-shadow:0 8px 32px #173a6e06}
+.app-shell{background:var(--tb-canvas);-webkit-font-smoothing:antialiased}
+.app-shell .sidebar{background:#fff;border-right:1px solid var(--tb-line);padding:28px 16px;width:208px}
+.app-shell .brand{padding:0 7px}.app-shell .sidebar nav{margin-top:52px}
+.app-shell .workspace-shell{margin-left:208px}.app-shell .workspace{max-width:1552px;padding:28px 40px 64px}
+.app-shell .nav-item{border-radius:10px;padding:14px 13px;color:#6a7890;font-size:14px;margin-bottom:8px;transition:background .18s,color .18s}
+.app-shell .nav-item.active{background:#eef3ff;color:#245bea;box-shadow:inset 3px 0 #245bea}
+.app-shell .nav-item svg{width:19px;height:19px;stroke-width:1.7}
+.app-shell .nav-advanced{border-top:1px solid var(--tb-line);margin-top:28px;padding-top:12px}
+.app-shell .topbar{height:64px;background:#ffffffb8;border-bottom:1px solid var(--tb-line);padding-inline:40px}
+.app-shell .breadcrumbs{font-size:14px}.app-shell .connection{font-size:12px}
+.app-shell .auto-review{max-width:1280px}
+.app-shell .agent-workspace-bar{min-height:82px;margin-bottom:32px;border-color:var(--tb-line)}
+.app-shell .agent-scene-nav{background:#fff;border:1px solid var(--tb-line);padding:5px;border-radius:12px;gap:4px}
+.app-shell .agent-scene-nav>span{border-radius:8px;font-size:14px;padding:7px 16px}
+.app-shell .agent-scene-nav>span[data-active=true]{background:#eef3ff;color:#245bea;box-shadow:none;border-radius:8px}
+.app-shell .auto-heading{margin:54px auto 32px;max-width:840px}
+.app-shell .auto-heading h1{font-weight:600;font-size:clamp(38px,4.2vw,62px);letter-spacing:-.065em;line-height:1.16;margin:0 0 22px}
+.app-shell .auto-heading>p{font-size:20px;font-weight:400;line-height:1.7;color:#526580}
+.app-shell .auto-intake{max-width:780px;padding:30px 32px 24px;border:1px solid #d7e2f3;border-radius:22px;box-shadow:0 16px 48px #163a7010,0 2px 6px #163a7004}
+.app-shell .composer-label{font-size:14px;color:#60738e;margin-bottom:18px}
+.app-shell .auto-intake .MuiOutlinedInput-root{font-size:26px;font-weight:500}
+.app-shell .auto-purpose{font-size:14px;margin-top:12px}
+.app-shell .agent-consent{margin-top:20px;padding-top:10px}
+.app-shell .auto-intake .auto-actions{padding-top:18px;margin-top:14px}
+.app-shell .auto-intake .MuiButton-contained{min-height:48px;border-radius:10px;padding-inline:24px}
+.app-shell .agent-start-path{font-size:14px;margin:26px auto 28px;gap:20px}
+.app-shell .agent-start-path b{display:grid;place-items:center;width:25px;height:25px;background:#eaf0fc;border-radius:7px;font-size:12px}
+.app-shell .start-tools{max-width:780px}.app-shell .auto-brief{max-width:none;border:1px solid var(--tb-line);border-radius:20px;padding:30px 34px;box-shadow:var(--tb-shadow)}
+.app-shell .result-header h1{font-size:32px;font-weight:600;line-height:1.4;margin-block:6px}
+.app-shell .result-header h1 span{font-size:16px;font-weight:400}.app-shell .result-header{padding-bottom:20px}
+.app-shell .auto-brief>.auto-caption{margin:12px 0;font-size:12px}
+.app-shell .result-tabs{margin-top:12px}.app-shell .auto-brief .auto-actions{border-top:1px solid var(--tb-line);padding-top:22px}
+.app-shell .design-workspace{max-width:1240px;color:var(--tb-ink)}
+.app-shell .design-heading{padding:8px 0 18px}.app-shell .design-heading h2{font-size:27px;font-weight:600;letter-spacing:-1px}
+.app-shell .design-setup{background:#f8faff;border:1px solid var(--tb-line);border-radius:10px;padding:10px 16px;margin:0 0 18px}
+.app-shell .design-setup>summary{font-size:14px;line-height:26px}
+.app-shell .design-setup[open]{padding-bottom:18px}
+.app-shell .design-context{border:1px solid var(--tb-line);border-radius:10px;padding:12px 16px;margin:18px 0;font-size:14px;color:var(--tb-muted)}.app-shell .design-context>summary{cursor:pointer;line-height:24px}.app-shell .design-context .evidence-scope{border:0;padding:20px 0 0;margin:0}
+.app-shell .design-workspace>.MuiTabs-root{border-bottom:1px solid var(--tb-line);margin-bottom:22px}
+.app-shell .design-section{padding:24px 0;gap:22px}.app-shell .design-section h3{font-size:20px;letter-spacing:-.5px}
+.app-shell .design-card{border-color:var(--tb-line);border-radius:14px;background:#fff;padding:24px;gap:20px}
+.app-shell .design-help{font-size:14px;line-height:1.8}
+.app-shell .design-meeting-grid{grid-template-columns:minmax(280px,.85fr) minmax(0,1.15fr);gap:28px}
+.app-shell .design-question-list{gap:10px;padding:3px;max-height:580px}
+.app-shell .design-question-list button{border-color:var(--tb-line);padding:20px;border-radius:12px;transition:background .18s,border-color .18s}
+.app-shell .design-question-list button small{font-size:12px;letter-spacing:.01em;margin-bottom:10px}
+.app-shell .design-question-list button span{font-size:15px;line-height:1.75}
+.app-shell .design-question-list button[aria-pressed=true]{border-color:#aac0f4;background:#eff4ff;box-shadow:inset 3px 0 #245bea}
+.app-shell .design-note-editor{padding:26px;background:#fff;border:1px solid var(--tb-line);border-radius:16px;gap:20px}
+.app-shell .design-note-editor h4{font-size:18px;line-height:1.65;color:var(--tb-ink)}
+.meeting-brief{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:26px 28px;border-radius:16px;background:#102851;color:#fff}
+.meeting-brief h3{font-size:25px!important;font-weight:500!important;margin:8px 0!important;letter-spacing:-.6px}.meeting-brief p{font-size:14px;color:#c3d2ed}
+.meeting-brief>div>span{font-size:12px;letter-spacing:.12em;color:#a9c5ff}
+.meeting-counts{display:flex;gap:32px;flex-shrink:0}.meeting-counts>div{display:grid;gap:3px}.meeting-counts strong{font-size:36px;line-height:1.2;font-weight:500;font-variant-numeric:tabular-nums}.meeting-counts span{font-size:13px;color:#c3d2ed}
+.meeting-disclosure{font-size:13px;line-height:1.8;color:var(--tb-muted);padding:12px 16px;border:1px solid var(--tb-line);border-radius:10px}
+.meeting-disclosure summary{cursor:pointer;font-size:14px}.meeting-disclosure p{padding-top:8px}
+.app-shell .design-meeting-section{border-bottom:0;padding-top:4px}
+.app-shell .design-status{margin-block:12px}
+@media(min-width:1600px){.app-shell .workspace{padding-inline:48px}.app-shell .auto-heading{margin-top:70px}}
+@media(max-width:1100px) and (min-width:761px){.app-shell .sidebar{width:80px;padding:24px 10px}.app-shell .workspace-shell{margin-left:80px}.app-shell .sidebar .brand>span:last-child,.app-shell .nav-item>span{display:none}.app-shell .nav-item{justify-content:center;padding:14px}.app-shell .workspace{padding-inline:24px}.app-shell .nav-advanced>summary{font-size:12px;text-align:center;padding-inline:0}.app-shell .nav-advanced[open] .nav-item>span{display:block}}
+@media(max-width:760px){.app-shell .sidebar{position:static;width:auto;padding:10px 12px;border-right:0;border-bottom:1px solid var(--tb-line)}.app-shell .sidebar nav{margin:0;display:flex;gap:4px}.app-shell .nav-item{padding:10px 8px;margin:0;width:auto;font-size:12px}.app-shell .nav-item.active{box-shadow:none}.app-shell .nav-advanced{border:0;margin:0 0 0 auto;padding:0}.app-shell .workspace-shell{margin-left:0}.app-shell .workspace{padding:20px 16px 64px}.app-shell .topbar{padding-inline:16px}.app-shell .connection{display:none}.app-shell .agent-workspace-bar{min-height:76px;margin-bottom:24px}.app-shell .agent-scene-nav>span{font-size:12px;padding:6px 12px}.app-shell .auto-heading{margin:34px auto 26px}.app-shell .auto-heading>p{font-size:16px}.app-shell .auto-intake{padding:24px 18px 18px;border-radius:16px}.app-shell .auto-intake .MuiOutlinedInput-root{font-size:22px}.app-shell .auto-purpose{font-size:13px}.app-shell .agent-start-path{font-size:12px;gap:8px}.app-shell .agent-start-path b{margin-inline:auto}.app-shell .auto-brief{padding:22px 18px;border-radius:16px}.app-shell .result-header h1{font-size:28px}.app-shell .design-heading h2{font-size:23px}.app-shell .design-meeting-grid{grid-template-columns:1fr}.app-shell .design-note-editor{padding:20px}.meeting-brief{flex-direction:column;align-items:flex-start;padding:22px}.meeting-counts{width:100%;gap:36px}.meeting-counts strong{font-size:30px}.app-shell .design-question-list{max-height:320px}}

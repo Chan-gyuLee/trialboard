@@ -29,10 +29,10 @@ export default function DesignOutcome({result, previous, scenarioId, onScenario,
       <div className={styles.heroFooter}><span>{result.plans.length}개 설계 · {result.brief.scenarios.length}개 가정 · {result.brief.repetitions.toLocaleString()}회 반복</span><span>임상 권고 · 검정력 계산 아님</span></div>
     </header>
     {insight.kind==="blocked" ? <div className={styles.blockers}>{result.blockers.map((b,i)=><article key={i}><ShieldAlert size={20}/><div><strong>{b.observation_id??b.arm_id??"비교 자료"}</strong><p>{b.detail||b.code}</p><small>{b.code}</small></div>{b.observation_id&&<Button disabled={disabled} onClick={()=>onSelectRow(b.observation_id!)}>원문 확인</Button>}</article>)}</div> : <>
-      <div className={styles.sectionHead}><div><span className={styles.eyebrow}>01 / 가정별 비교</span><h4>조건이 바뀌면 결과도 달라집니다</h4></div><Button disabled={disabled} onClick={onEdit}>가정 수정</Button></div>
+      <div className={styles.sectionHead}><h4>가정별 설계 비교</h4><Button disabled={disabled} onClick={onEdit}>가정 수정</Button></div>
       <Tabs value={scenarioId} onChange={(_,v)=>onScenario(v)} variant="scrollable" scrollButtons="auto" aria-label="결과 가정 선택" className={styles.tabs}>{result.brief.scenarios.map((s,i)=><Tab id={`outcome-tab-${s.id}`} aria-controls="outcome-scenario-panel" key={s.id} value={s.id} label={`${String(i+1).padStart(2,"0")} ${s.label}`}/>)}</Tabs>
       <div id="outcome-scenario-panel" role="tabpanel" aria-labelledby={`outcome-tab-${scenarioId}`}>
-        <div className={styles.context}><Layers size={18}/><div><strong>{selected.label}</strong><p>{selected.rationale}</p><span>{typeof selected.provenance==="string"?"사용자 지정 가정":"AI 제안에서 시작한 가정 · 사용자 편집 가능"}</span></div></div>
+        <div className={styles.context}><Layers size={18}/><div><details><summary>{selected.label} <span>가정 근거 보기</span></summary><p>{selected.rationale}</p></details><span>{typeof selected.provenance==="string"?"사용자 지정 가정":"AI 제안에서 시작한 가정 · 사용자 편집 가능"}</span></div></div>
         {result.plans.length>2&&<TextField select label="기준 설계와 비교할 대안" value={effectiveAlternative} onChange={e=>setAlternativeId(e.target.value)}>{result.plans.slice(1).map(p=><MenuItem key={p.id} value={p.id}>{p.label}</MenuItem>)}</TextField>}
         <div className={styles.deltas} aria-label="기준 설계 대비 차이">
           <div><span>추가 참여자</span><strong>{insight.tradeoff!.additional_participants>=0?"+":""}{insight.tradeoff!.additional_participants}<small>명</small></strong><p>{result.plans[0].label} 대비</p></div>
@@ -40,8 +40,8 @@ export default function DesignOutcome({result, previous, scenarioId, onScenario,
           <div><span>가정상 한계 초과군 선택</span><strong>{percentagePoint(insight.tradeoff!.unsafe_selection_delta)}</strong><p>{result.plans.find(p=>p.id===effectiveAlternative)?.label} − 기준</p></div>
         </div>
         <div className={styles.plans} role="region" aria-label="설계안별 선택 빈도">{insight.rows.filter(r=>[result.plans[0].id,effectiveAlternative].includes(r.plan.id)).map((row,i)=><article className={styles.plan} key={row.plan.id}>
-          <div className={styles.planHeading}><span>{i===0?"기준 설계":"비교 대안"}</span><span>군당 {row.plan.per_arm}명</span></div><h4>{row.plan.label}</h4><div className={styles.total}>{row.simulation.total}<small>명</small></div>
-          <p className={styles.planReason}>{row.plan.rationale}</p>
+          <div className={styles.planHeading}><span>{i===0?"기준 설계":"비교 대안"}</span><span>군당 {row.plan.per_arm}명</span></div><div className={styles.planIdentity}><h4>{row.plan.label}</h4><div className={styles.total}>{row.simulation.total}<small>명</small></div></div>
+          <details className={styles.planReason}><summary>이 설계안을 비교하는 이유</summary><p>{row.plan.rationale}</p></details>
           {([['가정상 올바른 선택·보류',row.simulation.correct,row.simulation.se.true_utility_best],['가정상 한계 초과군 선택',row.simulation.unsafe,row.simulation.se.true_unsafe],['선택 보류',row.simulation.noSelection,row.simulation.se.no_selection]] as const).map(([label,value,se],j)=><div className={styles.metric} key={label}><div><span>{label}</span><strong>{percent(value)}</strong></div><div className={styles.track} aria-hidden="true"><span data-kind={j} style={{width:`${value*100}%`}}/></div><small>MC SE ± {percent(se)}</small></div>)}
         </article>)}</div>
         <p className={styles.note}>모든 군이 가정한 안전 한계를 초과하면 ‘올바른 선택·보류’는 선택하지 않은 빈도입니다. MC SE는 반복 계산의 수치 오차이며 임상적 불확실성이나 우월성 검정이 아닙니다.</p>

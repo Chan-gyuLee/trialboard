@@ -21,3 +21,10 @@
 @media(max-width:1000px){.metrics{column-gap:16px}.columns{grid-template-columns:1fr;gap:8px}}
 @media(max-width:600px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics>div:nth-child(n+3){margin-top:12px}.metrics strong{font-size:28px}}
 @media(prefers-reduced-motion:reduce){.arrivals article{animation:none}}
+
+.metrics{border:0;padding:0;margin-top:18px;gap:8px 12px}
+.metrics>div{padding:16px 18px;background:#f7f9fd;border:1px solid var(--tb-line);border-radius:10px;grid-template-rows:24px 42px minmax(20px,auto);grid-row:auto;row-gap:4px}
+.metrics strong{font-size:34px;line-height:42px;color:var(--tb-ink);letter-spacing:-1.4px}.metrics span{font-size:14px;line-height:24px}.metrics small{font-size:12px;line-height:20px}
+.columns{gap:24px}.progress h4{font-size:14px;font-weight:600;color:var(--tb-ink)}.arrivals article{border:1px solid var(--tb-line);background:#fff;border-radius:9px;padding:14px 16px;margin-bottom:10px}.arrivals a,.arrivals span{line-height:1.6}.scope{border:0;background:#f8faff;border-radius:8px;padding:10px 12px;gap:6px 12px}.scope strong{font-size:12px}.input{padding:6px 0}.searches details{padding:12px 0}
+@media(max-width:1050px){.metrics{gap:8px}.metrics>div{padding:14px 10px}.metrics span{font-size:13px}.metrics small{font-size:12px}}
+@media(max-width:600px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metrics>div{padding:14px}.metrics>div:nth-child(n+3){margin-top:0}}

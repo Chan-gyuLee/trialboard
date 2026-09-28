@@ -9,7 +9,7 @@ import styles from './ResultOverview.module.css';
 export default function ResultOverview({done,onView}:{done:AutoResult;onView:(section:string)=>void}){
  const decision=decisionView(done),c=done.result.collection,findings=c.review?.findings??[],questions=c.review?.questions??[];
  const status=decision.state==='candidate'?'전문가 검토 필요':decision.state==='incomplete'?'조사 미완료':decision.state==='unknown'?'판단 미확인':decision.state==='limited'?'일부 자료만 확인':'추가 근거 필요';
- return <section className={styles.brief} aria-label="이번 검토에서 무엇을 알았나요">
+ return <section className={styles.brief} aria-label="이번 검토에서 무엇을 알았나요" data-product-scene="research-brief">
   <header className={styles.conclusion}>
    <div className={styles.eyebrow}><span>공개 근거 검토 결과</span><span className={styles.status}>{status}</span></div>
    <h2>{decision.title}</h2>
@@ -34,7 +34,7 @@ export default function ResultOverview({done,onView}:{done:AutoResult;onView:(se
    <section className={styles.actions}><div className={styles.sectionHeading}><span>02</span><h3>다음에 무엇을 해야 하나요?</h3></div>
     <p className={styles.next}>{decision.next[0]}</p>
     <h4>전문가에게 가져갈 질문</h4>
-    <p className={styles.question}>{questions[0]??'AI 질문을 확보하지 못했습니다. 원문과 미완료 기록부터 확인하세요.'}</p>
+    {questions.length ? <ol className={styles.questions}>{questions.slice(0,3).map((question,i)=><li key={i}><span>{String(i+1).padStart(2,'0')}</span><p>{question}</p></li>)}</ol> : <p className={styles.question}>AI 질문을 확보하지 못했습니다. 원문과 미완료 기록부터 확인하세요.</p>}
 
     <Button onClick={()=>onView('evidence')} endIcon={<ArrowRight size={16}/>}>전체 질문 {questions.length}개 보기</Button>
    </section>

@@ -17,6 +17,7 @@ import EvidenceScout, {type ScoutContext} from "./EvidenceScout";
 import AutoReview from "./AutoReview";
 import DecisionCaseWorkspace from './DecisionCaseWorkspace';
 import BrandLogo from './BrandLogo';
+import './product-polish.css';
 
 type Tab = "start" | "case" | "manual" | "decision" | "agent" | "intake" | "simulation" | "evidence" | "report";
 const navigation = [

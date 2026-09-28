@@ -32,3 +32,7 @@
 .supporting-citations blockquote { margin:12px 0 0; overflow-wrap:anywhere; font-size:16px; }
 .supporting-citations .MuiTextField-root { min-width:150px; }
 @media (max-width: 600px) { .field-review { padding: 14px; } .field-list { grid-template-columns: 1fr; } }
+.field-files,.field-scope,.field-restored{border:1px solid #e0e7f2;border-radius:9px;padding:10px 14px;margin:12px 0;font-size:14px;color:#526580}
+.field-files>summary,.field-scope>summary,.field-restored>summary{cursor:pointer;font-size:14px;line-height:24px}
+.field-files[open]>.field-toolbar{margin:16px 0}.field-files[open]>p{margin:12px 0}.field-restored{background:#fffaf1;border-color:#eee2c9;color:#786035;font-size:13px}.field-restored>summary{font-size:13px}.field-restored p{margin:10px 0;font-size:13px;line-height:1.8}.field-scope .evidence-scope{border:0;padding:16px 0 0;margin:0}.field-add{margin:18px 0}.field-scope+ .MuiFormControl-root{margin-top:8px}
+.field-review>div:not([hidden])>.field-origin{font-size:12px;line-height:1.7;margin:10px 0}.field-review>div:not([hidden])>div[aria-live]{margin:12px 0}.field-list{border-radius:10px;gap:0;margin:14px 0 20px}.field-list button{padding:13px 14px}.field-list strong{font-size:15px}.field-editor{padding:22px 0 0;border-top:1px solid #dce5f4}.field-editor h3{font-size:20px}.field-citation{background:#f2f6ff;border:1px solid #dce6fa;border-radius:10px;padding:18px}.field-editor>.MuiFormControlLabel-root{align-items:flex-start}
