@@ -122,6 +122,62 @@ def test_model_can_abstain():
     assert r["status"] == "NEEDS_EVIDENCE" and r["brief"] is None
 
 
+def test_new_dose_suggestion_passes_through_when_cited_by_eligible_evidence():
+    p = Proposer(
+        lambda v: v.update(
+            new_dose_suggestion={
+                "dose": "7.5 mg",
+                "rationale": "인용된 논문 고찰에서 7.5 mg 추가 시험을 제안합니다.",
+                "evidence_ids": ["obs-0"],
+            }
+        )
+    )
+    r = propose(provider=p)
+    assert r["status"] == "AWAITING_REVIEW"
+    assert r["new_dose_suggestion"] == {
+        "dose": "7.5 mg",
+        "rationale": "인용된 논문 고찰에서 7.5 mg 추가 시험을 제안합니다.",
+        "evidence_ids": ["obs-0"],
+    }
+
+
+def test_new_dose_suggestion_rejected_when_evidence_unknown():
+    p = Proposer(
+        lambda v: v.update(
+            new_dose_suggestion={
+                "dose": "7.5 mg",
+                "rationale": "근거 없는 추정",
+                "evidence_ids": ["invented"],
+            }
+        )
+    )
+    r = propose(provider=p)
+    assert r["status"] == "FAILED" and r["brief"] is None
+    assert r["errors"] == ["PROPOSAL_REFERENCE_INVALID"]
+
+
+def test_new_dose_suggestion_forbidden_alongside_abstention():
+    p = Proposer(
+        lambda v: v.update(
+            status="NEEDS_EVIDENCE",
+            plans=[],
+            scenarios=[],
+            new_dose_suggestion={
+                "dose": "7.5 mg",
+                "rationale": "비일관",
+                "evidence_ids": ["obs-0"],
+            },
+        )
+    )
+    r = propose(provider=p)
+    assert r["status"] == "FAILED" and r["brief"] is None
+
+
+def test_no_new_dose_suggestion_defaults_to_none():
+    r = propose()
+    assert r["new_dose_suggestion"] is None
+
+
 @pytest.mark.parametrize("exception", [ModelError("PRIVATE_DETAIL"), TimeoutError()])
 def test_failure_is_bounded_and_sanitized(exception):
     class Failing(Proposer):
