@@ -19,6 +19,8 @@ from trialboard.agent.models import Contract, Id, Text
 from trialboard.agent.provider import Provider
 from trialboard.review.engine import conflicting_groups, structurally_valid_claims
 from trialboard.review.models import ReviewRequest
+from trialboard.serialization import sha256_json
+from trialboard.user_cache import UserScopedCache
 
 INSTRUCTIONS = """You look at groups of same-arm, same-metric, same-context clinical
 claims whose reported event counts/denominators already disagree and have already
@@ -80,9 +82,21 @@ def _payload(request: ReviewRequest) -> dict:
 
 
 async def classify_conflicts(
-    request: ReviewRequest, provider: Provider | None
+    request: ReviewRequest,
+    provider: Provider | None,
+    *,
+    cache: UserScopedCache[list[ConflictVerdict]] | None = None,
+    user_id: str | None = None,
 ) -> list[ConflictVerdict]:
-    """Best-effort, additive annotation. Returns [] whenever nothing can run."""
+    """Best-effort, additive annotation. Returns [] whenever nothing can run.
+
+    `cache`/`user_id` are both optional: when supplied, a repeat call with the
+    identical conflict payload from the SAME user reuses that user's own
+    cached verdicts instead of a new model call. A different user querying
+    the identical groups never reads another user's cached entry — each
+    user gets an independent slot, never a shared/common one, per the
+    product's "공통 캐시와 별개의 사용자별 캐시" requirement.
+    """
     if provider is None:
         return []
     if provider.mode not in ("DACON_RESPONSES", "CODEX_CHATGPT", "SCRIPTED_TEST_DOUBLE"):
@@ -90,6 +104,11 @@ async def classify_conflicts(
     payload = _payload(request)
     if not payload["groups"]:
         return []
+    cache_key = sha256_json(payload) if (cache is not None and user_id is not None) else None
+    if cache_key is not None:
+        cached = cache.get(user_id, cache_key)
+        if cached is not None:
+            return cached
     valid_ids_by_group = {
         g["group_key"]: {c["claim_id"] for c in g["claims"]} for g in payload["groups"]
     }
@@ -109,4 +128,6 @@ async def classify_conflicts(
         if allowed is None or not set(v.claim_ids) <= allowed:
             continue  # Drop any verdict that cites claims outside its own group.
         verdicts.append(v)
+    if cache_key is not None:
+        cache.set(user_id, cache_key, verdicts)
     return verdicts

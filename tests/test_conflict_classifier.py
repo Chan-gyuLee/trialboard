@@ -10,6 +10,7 @@ from trialboard.review.engine import check_evidence
 from trialboard.review.example import make_example
 from trialboard.review.models import EvidenceClaim, EvidenceSource
 from trialboard.serialization import sha256_json
+from trialboard.user_cache import UserScopedCache
 
 
 def conflicting_request():
@@ -48,8 +49,8 @@ class FakeProvider:
         return Reply(self.value, "test", 10, 20)
 
 
-def run(request, provider):
-    return asyncio.run(classify_conflicts(request, provider))
+def run(request, provider, **kwargs):
+    return asyncio.run(classify_conflicts(request, provider, **kwargs))
 
 
 def test_no_provider_skips_classification_without_error():
@@ -175,3 +176,45 @@ def test_all_verdict_values_accepted(verdict):
     )
     verdicts = run(conflicting_request(), provider)
     assert verdicts[0].verdict == verdict
+
+
+def _classified_provider():
+    return FakeProvider(
+        {
+            "classifications": [
+                {
+                    "group_key": "dose_a__response",
+                    "verdict": "LIKELY_REASONABLE_DISCREPANCY",
+                    "rationale": "근거 검토",
+                    "claim_ids": ["claim_dose_a_response"],
+                }
+            ]
+        }
+    )
+
+
+def test_second_call_by_same_user_reuses_cache_without_a_new_model_call():
+    cache = UserScopedCache()
+    provider = _classified_provider()
+    request = conflicting_request()
+    first = run(request, provider, cache=cache, user_id="alice")
+    second = run(request, provider, cache=cache, user_id="alice")
+    assert len(provider.calls) == 1
+    assert [v.verdict for v in second] == [v.verdict for v in first]
+
+
+def test_different_user_never_reuses_another_users_cached_verdict():
+    cache = UserScopedCache()
+    provider = _classified_provider()
+    request = conflicting_request()
+    run(request, provider, cache=cache, user_id="alice")
+    run(request, provider, cache=cache, user_id="bob")
+    assert len(provider.calls) == 2
+
+
+def test_cache_omitted_calls_model_every_time():
+    provider = _classified_provider()
+    request = conflicting_request()
+    run(request, provider)
+    run(request, provider)
+    assert len(provider.calls) == 2
