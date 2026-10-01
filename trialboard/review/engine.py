@@ -19,7 +19,13 @@ from trialboard.review.models import (
 from trialboard.serialization import sha256_json
 
 
-def check_evidence(request: ReviewRequest) -> tuple[list[CheckedClaim], list[Issue]]:
+def structurally_valid_claims(request: ReviewRequest) -> tuple[list[CheckedClaim], list[Issue]]:
+    """Per-claim structural gate only: source/version/record/context/arm/value match.
+
+    Shared by check_evidence() and review/conflict_classifier.py so both ever
+    look at the same notion of "a claim that passed the basic record checks" —
+    conflict detection and its optional AI annotation never disagree on that.
+    """
     sources = {s.id: s for s in request.sources}
     checked: list[CheckedClaim] = []
     issues: list[Issue] = []
@@ -62,26 +68,41 @@ def check_evidence(request: ReviewRequest) -> tuple[list[CheckedClaim], list[Iss
                     locator=f"{claim.source_id}@{claim.source_version}#record={claim.record_id}",
                 )
             )
+    return checked, issues
 
-    # Distinct sources may disagree. Do not silently average them or choose the first.
-    conflicted = set()
-    for arm in request.arms:
+
+def conflicting_groups(
+    checked: list[CheckedClaim], arms: tuple[str, ...]
+) -> list[tuple[str, str, list[CheckedClaim]]]:
+    """(arm, metric, claims) triples where structurally valid claims still disagree."""
+    groups = []
+    for arm in arms:
         for metric in ("response", "adverse_event"):
             group = [
                 c for c in checked if c.claim.stated.arm == arm and c.claim.stated.metric == metric
             ]
             values = {(c.claim.stated.events, c.claim.stated.denominator) for c in group}
             if len(values) > 1:
-                conflicted.update(c.claim.id for c in group)
-                issues.append(
-                    Issue(
-                        code="CONFLICTING_RECORDS",
-                        message=f"{arm}의 {metric} 수치가 상충합니다.",
-                        affected_decision="상충한 수치를 근거로 한 용량군 비교",
-                        owner="임상·자료 검토 담당자",
-                        needed="분석집단·자료 기준일·평가 정의를 대조하여 차이를 해소",
-                    )
-                )
+                groups.append((arm, metric, group))
+    return groups
+
+
+def check_evidence(request: ReviewRequest) -> tuple[list[CheckedClaim], list[Issue]]:
+    checked, issues = structurally_valid_claims(request)
+
+    # Distinct sources may disagree. Do not silently average them or choose the first.
+    conflicted = set()
+    for arm, metric, group in conflicting_groups(checked, request.arms):
+        conflicted.update(c.claim.id for c in group)
+        issues.append(
+            Issue(
+                code="CONFLICTING_RECORDS",
+                message=f"{arm}의 {metric} 수치가 상충합니다.",
+                affected_decision="상충한 수치를 근거로 한 용량군 비교",
+                owner="임상·자료 검토 담당자",
+                needed="분석집단·자료 기준일·평가 정의를 대조하여 차이를 해소",
+            )
+        )
     checked = [c for c in checked if c.claim.id not in conflicted]
     covered = {(c.claim.stated.arm, c.claim.stated.metric) for c in checked}
     for arm in request.arms:
