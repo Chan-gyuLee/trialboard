@@ -70,7 +70,19 @@
 .project-history{display:grid;gap:8px;margin-top:12px;max-height:260px;overflow:auto}
 .project-history .MuiButton-root{justify-content:flex-start;text-align:left;overflow-wrap:anywhere}
 .project-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.project-history-row small{grid-column:1/-1;color:#8a5a22}
+.project-history-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.project-kanban{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:8px}
+.project-kanban-column{background:#f4f7f6;border:1px solid #d7e2e0;border-radius:12px;padding:10px;min-width:0}
+.project-kanban-column h4{margin:0 0 8px;display:flex;align-items:center;gap:6px;color:#285c50;font-size:.92rem}
+.project-kanban-cards{display:grid;gap:8px;max-height:420px;overflow:auto}
+.project-kanban-card{background:#fff;border:1px solid #dae5e2;border-radius:10px;padding:10px;display:grid;gap:6px}
+.project-kanban-card strong{overflow-wrap:anywhere;font-size:.9rem}
+.project-kanban-card p{margin:0;color:#52635f;font-size:.78rem}
+.project-kanban-chips{display:flex;flex-wrap:wrap;gap:4px}
+.project-kanban-actions{display:flex;gap:6px;flex-wrap:wrap}
+.project-kanban-card small{color:#8a5a22}
+.project-kanban-empty{margin:0;color:#8a978f;font-size:.8rem}
 .project-shelf summary{cursor:pointer;font-weight:600;color:#285c50}
 .team-import{border-top:1px solid #d7e2e0;padding-top:12px}.team-import>p{max-width:72ch;color:#52635f}.team-import-grid{display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,auto);gap:8px;align-items:center;margin:12px 0}.team-import-grid>.MuiFormControlLabel-root,.team-import-grid>.MuiAlert-root,.team-import-wide{grid-column:1/-1}.usage-policy{border:1px solid #bfd0cc;border-radius:10px;padding:16px;display:grid;gap:12px;background:#fff}.usage-policy legend{padding:0 6px;font-weight:650;color:#285c50}.usage-policy>p{margin:0;color:#52635f}.usage-policy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.policy-manager{border-top:1px solid #bfcfcb;padding-top:16px;display:grid;gap:12px}.policy-manager h3,.policy-manager p{margin:0}.policy-manager>div:first-child p{font-size:.75rem;color:#687874;overflow-wrap:anywhere}.policy-actions{display:flex;justify-content:flex-end;gap:8px}.team-review{border-top:1px solid #bfcfcb;padding-top:16px;display:grid;gap:10px}.team-review header{display:flex;align-items:center;justify-content:space-between}.team-review h3{margin:2px 0 0}.team-review>p{margin:0;color:#52635f}.team-review-compose{display:grid;grid-template-columns:180px 1fr auto;gap:10px;align-items:start}.team-review-history{display:grid;gap:8px}.team-review-history article{display:flex;gap:10px;padding:11px 0;border-top:1px solid #dce5e3}.team-review-history article svg{color:#287264;flex:none;margin-top:2px}.team-review-history p{margin:4px 0;white-space:pre-wrap}.team-review-history small{color:#687874}
 @media(max-width:600px){.project-shelf{padding:16px}.project-actions{align-items:stretch;flex-direction:column}.source-version-choice{grid-template-columns:1fr}.source-version-choice .MuiTextField-root{min-width:0;width:100%}}
-@media(max-width:760px){.team-import-grid,.team-review-compose,.usage-policy-grid,.project-history-row{grid-template-columns:1fr}.team-import-grid .MuiButton-root,.team-review-compose .MuiButton-root{width:100%}}
+@media(max-width:760px){.team-import-grid,.team-review-compose,.usage-policy-grid,.project-history-row{grid-template-columns:1fr}.team-import-grid .MuiButton-root,.team-review-compose .MuiButton-root{width:100%}.project-kanban{grid-template-columns:1fr}}
