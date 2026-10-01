@@ -16,6 +16,7 @@ from trialboard.api.scout import EvidenceStore, normalize
 from trialboard.research import collect
 from trialboard.research.agent import run_research
 from trialboard.research.models import CurationInput, ResearchRequest
+from trialboard.research.retry_queue import RetryQueue
 from trialboard.research.store import ResearchStore
 
 ORIGIN = {"Origin": "http://127.0.0.1:5173"}
@@ -133,7 +134,7 @@ class FakeModel:
         return Reply(value, f"MOC-{len(self.calls)}", 100, 50)
 
 
-async def execute(path, request, provider=None):
+async def execute(path, request, provider=None, retry_queue=None):
     if provider is not None:
         request = request.model_copy(update={"model_consent": True})
     store = ResearchStore(path)
@@ -143,7 +144,7 @@ async def execute(path, request, provider=None):
         run.events.append({"stage": stage, "message": message, **extra})
         store.save_run(run)
 
-    await run_research(run, store, emit, provider)
+    await run_research(run, store, emit, provider, retry_queue=retry_queue)
     return run
 
 
@@ -345,6 +346,32 @@ def test_failed_connector_is_partial_not_zero_evidence(setup, monkeypatch):
     assert run.status == "PARTIAL" and any(c.status == "FAILED" for c in run.coverage)
     assert "sensitive diagnostics" not in run.model_dump_json()
     assert len(run.sources) == 2
+
+
+def test_failed_connector_enqueues_into_supplied_retry_queue(setup, monkeypatch):
+    path, request, _ = setup
+
+    async def failed(url, params):
+        raise TimeoutError("sensitive diagnostics")
+
+    monkeypatch.setattr(collect, "get_json", failed)
+    queue = RetryQueue()
+    run = asyncio.run(execute(path, request, retry_queue=queue))
+    assert run.status == "PARTIAL"
+    assert queue.pending()
+    assert all(e.channel for e in queue.pending())
+    assert "sensitive diagnostics" not in str(queue.all())
+
+
+def test_no_retry_queue_supplied_is_a_no_op(setup, monkeypatch):
+    path, request, _ = setup
+
+    async def failed(url, params):
+        raise TimeoutError("boom")
+
+    monkeypatch.setattr(collect, "get_json", failed)
+    run = asyncio.run(execute(path, request))
+    assert run.status == "PARTIAL"
 
 
 def test_failed_contrarian_search_is_attempted_but_not_success(setup, monkeypatch):

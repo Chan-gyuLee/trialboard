@@ -13,6 +13,7 @@ from trialboard.research.citations import (
 from trialboard.research.glossary import search_term
 from trialboard.research.models import Collection, Coverage, FollowupExecution, SearchPlan
 from trialboard.research.relevance import select_review_sources, selection_record, signals
+from trialboard.research.retry_queue import RetryQueue
 from trialboard.research.validation import (
     RESEARCH_CONTRACT_VERSION,
     plan_payload,
@@ -90,7 +91,14 @@ with repetitions when only a few distinct supported issues exist.
 """
 
 
-async def run_research(run: Collection, store, emit, provider: Provider | None = None):
+async def run_research(
+    run: Collection,
+    store,
+    emit,
+    provider: Provider | None = None,
+    *,
+    retry_queue: RetryQueue | None = None,
+):
     if provider is not None and not run.request.model_consent:
         provider = None
         run.notices.append(
@@ -156,6 +164,13 @@ async def run_research(run: Collection, store, emit, provider: Provider | None =
                     inventory=inventory(),
                 )
                 return result
+            if receipt.status == "FAILED" and retry_queue is not None:
+                retry_queue.enqueue(
+                    id=f"{label}:{query}",
+                    channel=label,
+                    query=query,
+                    reason=receipt.stop_reason or "REQUEST_FAILED",
+                )
             await checkpoint(
                 "GAP" if receipt.status == "FAILED" else "SOURCE",
                 f"{label} · {unit} {receipt.total if receipt.total is not None else '미확인'}건 중 "
@@ -183,6 +198,10 @@ async def run_research(run: Collection, store, emit, provider: Provider | None =
                 )
             )
             run.notices.append(f"{label}: 수집 실패. 다른 출처로 성공을 가장하지 않았습니다.")
+            if retry_queue is not None:
+                retry_queue.enqueue(
+                    id=f"{label}:{query}", channel=label, query=query, reason="REQUEST_EXCEPTION"
+                )
             await checkpoint(
                 "GAP",
                 f"{label} 수집 실패 · 재확인 필요",
