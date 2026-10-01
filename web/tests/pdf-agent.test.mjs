@@ -19,6 +19,13 @@ test('no notes or incomplete context blocks execution input',()=>{assert.throws(
 test('unconsented or remote execution rejected before fetch',async()=>{const fail=()=>{throw new Error('FETCH MUST NOT RUN');};await assert.rejects(executePdfAgent(pdfAgentInput(source,notes,context),false,new AbortController().signal,()=>{},loc,fail),/동의/);await assert.rejects(executePdfAgent(pdfAgentInput(source,notes,context),true,new AbortController().signal,()=>{},{...loc,hostname:'remote.invalid'},fail),/동의/);});
 test('disabled capability never posts source text',async()=>{const calls=[];await assert.rejects(executePdfAgent(pdfAgentInput(source,notes,context),true,new AbortController().signal,()=>{},loc,async(url,options)=>{calls.push({url,options});return Response.json({pdf_enabled:false,provider:'CODEX_CHATGPT',persisted:false,transport:'LOOPBACK_ONLY'});}),/아직 자료를 전송하지/);assert.equal(calls.length,1);assert.equal(calls[0].options.body,undefined);});
 test('request-byte budget rejects before capability or model calls',async()=>{const input=pdfAgentInput(source,notes,context);input.question='가'.repeat(12000);let fetched=false;await assert.rejects(executePdfAgent(input,true,new AbortController().signal,()=>{},loc,async()=>{fetched=true;throw Error('unexpected');}),/32 KiB/);assert.equal(fetched,false);});
+test('project model binding is sent exactly with independent public consent',async()=>{
+ const input=pdfAgentInput(source,notes,context),calls=[];
+ const binding={project_id:'12345678-1234-4234-8234-123456789012',review_revision:3,pdf_digest:source.sha256,policy_revision:7};
+ const fetcher=async(url,options)=>{calls.push({url,options});if(url.includes('capabilities'))return Response.json({pdf_enabled:true,provider:'CODEX_CHATGPT',configured:true,persisted:false,transport:'LOOPBACK_ONLY'});return new Response('data: {"type":"error","code":"STOP"}\n\n',{headers:{'content-type':'text/event-stream'}});};
+ await assert.rejects(executePdfAgent(input,true,new AbortController().signal,()=>{},loc,fetcher,binding));
+ const body=JSON.parse(calls[1].options.body);assert.deepEqual(body.model_binding,binding);assert.equal(body.public_authorized_non_sensitive,true);assert.equal(body.consent,true);
+});
 test('Python-normalized PDF input roundtrips through final stream without hash mismatch',async()=>{
  const f=JSON.parse(execFileSync('uv',['run','python','-c',`import json,sys
 sys.path.insert(0,'tests')

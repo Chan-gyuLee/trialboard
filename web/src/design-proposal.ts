@@ -2,6 +2,7 @@ import { canonical, digest, exportReview, strictJson, type FieldReview } from ".
 import { evidenceExport, type PdfSource } from "./pdf-contract.ts";
 import { arr, bindBrief, fail, hash, id, num, obj, str, type DesignBrief } from "./design-brief.ts";
 import { localDesignOrigin, responseText } from "./design-client.ts";
+import type {ProjectModelBinding} from "./project-checkpoint.ts";
 
 export const PROPOSAL_STAGES = {
   REVALIDATING_EVIDENCE: "검토한 근거·용량군·비교 조건을 다시 확인하고 있어요.",
@@ -58,7 +59,7 @@ export async function consumeProposalStream(response: Response, onProgress: (sta
 
 export async function requestDesignProposal(args: { origin: string; consent: boolean; review: FieldReview; source: PdfSource;
   pdf: Blob; agentRaw: string; constraints: ProposalConstraints; signal: AbortSignal;
-  onProgress: (stage: keyof typeof PROPOSAL_STAGES) => void; fetcher?: typeof fetch }): Promise<DesignProposal> {
+  onProgress: (stage: keyof typeof PROPOSAL_STAGES) => void; fetcher?: typeof fetch; modelBinding?:ProjectModelBinding }): Promise<DesignProposal> {
   if (!localDesignOrigin(args.origin) || args.consent !== true) fail("로컬 화면에서 외부 AI 전송에 동의해야 합니다.");
   const {review, source, constraints} = args;
   str(constraints.objective); num(constraints.max_per_arm, 3, 500, true);
@@ -77,7 +78,8 @@ export async function requestDesignProposal(args: { origin: string; consent: boo
   const exported = exportReview(review, source);
   const body = JSON.stringify({consent: true, constraints, review_json: JSON.stringify(exported),
     source_json: JSON.stringify(evidenceExport({...source, name: exported.sourceName}, [])),
-    pdf_base64: btoa(binary), agent_json: args.agentRaw, context: null});
+    pdf_base64: btoa(binary), agent_json: args.agentRaw, context: null,
+    ...(args.modelBinding?{public_authorized_non_sensitive:true,model_binding:args.modelBinding}:{})});
   if (new TextEncoder().encode(body).length > 24*1024*1024) fail("요청 크기 한도 초과");
   const response = await fetcher("/api/design-proposals", {...options, method:"POST", headers:{"Content-Type":"application/json"}, body});
   const raw = await consumeProposalStream(response, args.onProgress);

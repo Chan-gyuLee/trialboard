@@ -15,6 +15,7 @@ from trialboard.agent.design_compare import DesignBrief, compare_designs, markdo
 from trialboard.agent.example import ScriptedProvider
 from trialboard.agent.provider import Reply
 from trialboard.agent.recritique import recritique
+from trialboard.agent.report import escaped
 from trialboard.serialization import sha256_json
 
 
@@ -154,6 +155,83 @@ def test_two_plans_two_scenarios_are_hypothetical_not_recommended():
         assert s["scenario"]["provenance"] == "synthetic_assumption"
     assert r["simulations"] == run(f, b)["simulations"]
     assert all(q["answer_status"] == "UNANSWERED" for q in r["kol_questions"])
+
+
+def test_v2_urgency_is_repeatable_coarse_and_stably_tied():
+    first, second = run(), run()
+    def without_run_ids(value):
+        if isinstance(value, dict):
+            return {k: without_run_ids(v) for k, v in value.items() if k != "run_id"}
+        if isinstance(value, list):
+            return [without_run_ids(v) for v in value]
+        return value
+
+    assert without_run_ids(first) == without_run_ids(second)
+    assert first["schema_version"] == "design-comparison/2"
+    questions = first["kol_questions"]
+    assert [q["urgency_score"] for q in questions] == [100] * len(questions)
+    assert [q["id"] for q in questions[:6]] == [
+        "dose_schedule",
+        "endpoint",
+        "assumptions",
+        "decision_rule",
+        "feasibility",
+        "statistics",
+    ]
+    assert all(q["urgency_reasons"] for q in questions)
+    assert "측정 위험이 아닌" in next(
+        q for q in questions if q["id"] == "decision_rule"
+    )["urgency_reasons"][-1]
+    report = markdown(first)
+    positions = [report.index(escaped(q["question"])) for q in questions]
+    assert positions == sorted(positions)
+    assert all(escaped(reason) in report for q in questions for reason in q["urgency_reasons"])
+
+
+def test_withholding_and_context_severity_precede_protocol_questions():
+    held = sample()
+    revise(held["review"]["rows"][0]["fields"]["reported_rate"], decision="held")
+    held_questions = run(held)["kol_questions"]
+    withheld = next(
+        q for q in held_questions if q["trigger"].get("code") == "OBSERVATION_WITHHELD"
+    )
+    context_fixture = sample()
+    span = context_fixture["source"]["source"]["pages"][0]["spans"][1]
+    span["text"] = span["text"].replace("week-12", "week-24")
+    field = context_fixture["review"]["rows"][1]["fields"]["window"]
+    field["current"]["value"] = "week-24"
+    field["current"]["citation"]["quote"] = "window week-24"
+    field["history"][-1]["after"] = copy.deepcopy(field["current"])
+    context_questions = run(context_fixture)["kol_questions"]
+    context = next(
+        q
+        for q in context_questions
+        if q["trigger"].get("code") == "COMPARISON_CONTEXT_MISMATCH"
+    )
+    assert withheld["urgency_score"] == 400
+    assert context["urgency_score"] == 300
+    assert held_questions.index(withheld) < next(
+        i for i, q in enumerate(held_questions) if q["priority"] == "BEFORE_PROTOCOL"
+    )
+    assert context_questions.index(context) < next(
+        i for i, q in enumerate(context_questions) if q["priority"] == "BEFORE_PROTOCOL"
+    )
+    assert "보류·제외" in withheld["urgency_reasons"][1]
+    assert "문맥" in context["urgency_reasons"][1]
+
+
+def test_blocked_report_does_not_invent_missing_safety_frequencies():
+    f = sample()
+    revise(f["review"]["rows"][0]["fields"]["reported_rate"], decision="held")
+    result = run(f)
+    assert not result["simulations"]
+    decision = next(q for q in result["kol_questions"] if q["id"] == "decision_rule")
+    assert decision["urgency_reasons"] == [
+        "프로토콜 확정 전에 효용·안전 한계와 보류 규칙을 확인할 의제입니다."
+    ]
+    text = markdown(result)
+    assert "규칙 기반 우선순위 400" in text
+    assert "필수 원문 관측값이 보류·제외" in text
 
 
 def test_scenario_assumptions_not_derived_from_observed_counts():

@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Alert,Autocomplete,Button,Checkbox,Chip,FormControlLabel,TextField,Tab,Tabs} from '@mui/material';
+import {Alert,Autocomplete,Button,Checkbox,Chip,FormControlLabel,TextField,Tab,Tabs,Dialog,DialogTitle,DialogContent,DialogActions} from '@mui/material';
 import {ArrowRight,Paperclip} from 'lucide-react';
 import {ReviewHeader,ReviewTools} from './ReviewNavigation';
 import {AUTO_PURPOSE,openAutoRecord,runAutoReview,type AutoEvent,type AutoOutcome,type AutoResult} from './auto-review';
@@ -16,60 +16,76 @@ import ResultOverview from './ResultOverview';
 import AgentActivity from './AgentActivity';
 import ActivityReplay from './ActivityReplay';
 import ResearchContinuation from './ResearchContinuation';
+import {useTeamSession} from './AccessShell';
+import {runTeamCollection,type TeamCollectionResult} from './team-research-collection';
+import RawStorageConsent from './RawStorageConsent';
+import {emptyRawStorageDrafts,permissionsFromDrafts,type RawStoragePermission} from './raw-storage-consent';
+import SourcePolicyManager from './SourcePolicyManager';
+import ResearchRawPolicy from './ResearchRawPolicy';
+import SavedResearchReview from './SavedResearchReview';
+import TeamReviewWorkflow from './TeamReviewWorkflow';
+import type {ScoutContext} from './evidence-scout';
 import './auto-review.css';
 import './agent-workspace.css';
 import './agent-studio.css';
 
-export default function AutoReview({locked,onBusy,onDetails,onManual,onIntake,onContinue}:{locked:boolean;onBusy:(busy:boolean)=>void;onDetails:(result:ResearchResult)=>void;onManual:()=>void;onIntake:()=>void;onContinue:(done:AutoResult)=>void}){
+export default function AutoReview({locked,onBusy,onDetails,onManual,onIntake,onContinue,onSourceIntake}:{locked:boolean;onBusy:(busy:boolean)=>void;onDetails:(result:ResearchResult)=>void;onManual:()=>void;onIntake:()=>void;onContinue:(done:AutoResult)=>void;onSourceIntake?:(context:ScoutContext)=>void}){
+ const teamSession=useTeamSession(),isTeam=Boolean(teamSession),teamReadOnly=teamSession?.role==='viewer';
+ const [rawDrafts,setRawDrafts]=useState(emptyRawStorageDrafts),[teamCollection,setTeamCollection]=useState<TeamCollectionResult|null>(null);
+ let storagePermissions:RawStoragePermission[]=[];try{storagePermissions=permissionsFromDrafts(rawDrafts);}catch{/* Keep execution disabled until selected permissions are complete. */}
  const [query,setQuery]=useState(''),[consent,setConsent]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const [events,setEvents]=useState<AutoEvent[]>([]),[outcome,setOutcome]=useState<AutoOutcome|null>(null),[scopeKey,setScopeKey]=useState(''),[seconds,setSeconds]=useState(0),[restored,setRestored]=useState(false),[loadingRecord,setLoadingRecord]=useState(false);
  const [history,setHistory]=useState<Pick<Collection,'id'|'request'|'status'|'created_at'>[]>([]);
  const [openView,setOpenView]=useState('overview');
+ const [teamRecord,setTeamRecord]=useState('');
+ const [teamReviewBusy,setTeamReviewBusy]=useState(false);
  const surface=useRef<HTMLElement|null>(null);
  const controller=useRef<AbortController|null>(null),mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;controller.current?.abort();};},[]);
- useEffect(()=>{onBusy(busy&&!loadingRecord);return()=>onBusy(false);},[busy,loadingRecord,onBusy]);
+ useEffect(()=>{onBusy(busy&&!loadingRecord||teamReviewBusy);return()=>onBusy(false);},[busy,loadingRecord,teamReviewBusy,onBusy]);
  async function refresh(){try{const response=await fetch('/api/research/runs',{signal:AbortSignal.timeout(5000)});if(response.ok){const rows=await response.json();if(mounted.current&&Array.isArray(rows))setHistory(rows.filter(r=>r&&/^[a-f\d-]{36}$/.test(r.id)&&r.request&&typeof r.request.asset==='string'&&typeof r.request.nct_id==='string'&&typeof r.status==='string'&&typeof r.created_at==='string').slice(0,6));}}catch{/* current work stays visible */}}
  useEffect(()=>{void refresh();},[]);
  async function run(resume=false){
-  if(controller.current||locked||!consent)return;
+  if(controller.current||locked||teamReviewBusy||!consent||teamReadOnly||isTeam&&!storagePermissions.length)return;
   const pending=resume&&outcome?.kind==='scope'?outcome:null;
   const selected=pending?pending.candidates.find(c=>JSON.stringify([c.asset,c.indication])===scopeKey):undefined;
   if(resume&&!selected)return;
-  const c=new AbortController();controller.current=c;setBusy(true);setError('');setRestored(false);setOpenView('overview');setSeconds(0);setOutcome(null);if(!resume){setEvents([]);setScopeKey('');}
+  const c=new AbortController();controller.current=c;setBusy(true);setError('');setRestored(false);setOpenView('overview');setSeconds(0);setOutcome(null);setTeamCollection(null);if(!resume){setEvents([]);setScopeKey('');}
   const started=performance.now(),tick=setInterval(()=>setSeconds(Math.floor((performance.now()-started)/1000)),1000),timeout=setTimeout(()=>c.abort(),510000);
   let waitingForScope=false;
   try{
-   const next=await runAutoReview({query,consent,signal:c.signal,onEvent:e=>{if(mounted.current)setEvents(es=>[...es,e]);},receipt:pending?.receipt,scope:selected?{asset:selected.asset,indication:selected.indication}:undefined});
-   waitingForScope=next.kind==='scope';if(mounted.current)setOutcome(next);
+   const options={query,consent,signal:c.signal,onEvent:(e:AutoEvent)=>{if(mounted.current)setEvents(es=>[...es,e]);},receipt:pending?.receipt,scope:selected?{asset:selected.asset,indication:selected.indication}:undefined};
+   const next=isTeam?await runTeamCollection({...options,permissions:storagePermissions}):await runAutoReview(options);
+   waitingForScope=next.kind==='scope';if(mounted.current){if(next.kind==='collected')setTeamCollection(next);else setOutcome(next);}
   }catch(e){if(mounted.current){setError(c.signal.aborted?'실행 대기를 중단했습니다. 저장된 부분 기록은 최근 조사에서 열 수 있습니다. 자동 재실행하지 않습니다.':e instanceof Error?e.message:'조사 실패');setOutcome(null);}}
   finally{clearInterval(tick);clearTimeout(timeout);controller.current=null;if(mounted.current){setBusy(false);if(!waitingForScope)setConsent(false);void refresh();}}
  }
  async function open(id:string,view='overview'){
-  if(controller.current||busy||locked)return;const c=new AbortController();controller.current=c;setBusy(true);setLoadingRecord(true);setEvents([]);setError('');const timeout=setTimeout(()=>c.abort(),10000);
+  if(controller.current||busy||locked)return;const c=new AbortController();controller.current=c;setBusy(true);setLoadingRecord(true);setEvents([]);setError('');setTeamCollection(null);const timeout=setTimeout(()=>c.abort(),10000);
   try{const next=await openAutoRecord(id,c.signal);if(mounted.current){setOpenView(view);setOutcome(next);setQuery(next.receipt.query);setConsent(false);setEvents([]);setRestored(true);}}
-  catch(e){if(mounted.current)setError(e instanceof Error?e.message:'기록 열기 실패');}
+  catch(e){if(mounted.current)setError(`${e instanceof Error?e.message:'기록 열기 실패'} 원문 이용조건으로 차단된 경우 최근 검토의 ‘출처 이용조건’과 ‘수집 원본 이용조건’을 확인하세요.`);}
   finally{clearTimeout(timeout);controller.current=null;if(mounted.current){setBusy(false);setLoadingRecord(false);}}
  }
  const pending=outcome?.kind==='scope'?outcome:null,done=outcome?.kind==='result'?outcome:null;
  const scopes=pending?[...new Map(pending.candidates.map(c=>[JSON.stringify([c.asset,c.indication]),c])).entries()]:[];
- const lockedForm=busy||locked;
- const scene=loadingRecord?'loading':pending?'scope':busy?'running':done?'result':error?'error':'input';
+ const lockedForm=busy||locked||teamReadOnly||teamReviewBusy;
+ const scene=loadingRecord?'loading':pending?'scope':busy?'running':done||teamCollection?'result':error?'error':'input';
  useEffect(()=>{surface.current?.scrollIntoView({block:'start',behavior:'instant'});},[scene]);
  return <section ref={surface} className="auto-review" aria-label="자동 근거 조사와 브리핑" data-demo-scene={scene}>
   <ReviewHeader step={done?2:busy?1:0}/>
-  {!done&&!busy&&<header className="auto-heading"><h1>{pending?'One quick clarification.':<>A clearer <span>next step.</span></>}</h1><p>{pending?'검토할 약물·적응증만 확인해주세요.':'다음 임상을, 더 명확하게.'}</p><p className="auto-hero-description">{pending?'범위가 정해지면 에이전트가 이어서 조사합니다.':'약물명으로 시작하세요. 공개 근거 수집부터 검토 브리핑까지 연결합니다.'}</p></header>}
-  {!pending&&!done&&!busy&&<form className="auto-intake" onSubmit={e=>{e.preventDefault();void run();}}>
+  {!done&&!teamCollection&&!busy&&<header className="auto-heading"><h1>{pending?'One quick clarification.':<>A clearer <span>next step.</span></>}</h1><p>{pending?'검토할 약물·적응증만 확인해주세요.':'다음 임상을, 더 명확하게.'}</p><p className="auto-hero-description">{pending?'범위를 확인한 뒤 조사를 이어갑니다.':isTeam?'허가한 공개 근거를 수집하고, 이용조건을 확인한 뒤 AI 검토로 이어갑니다.':'약물명으로 시작하세요. 공개 근거 수집부터 검토 브리핑까지 연결합니다.'}</p></header>}
+  {!pending&&!done&&!teamCollection&&!busy&&<form className="auto-intake" onSubmit={e=>{e.preventDefault();void run();}}>
    <label className="composer-label" htmlFor="agent-drug-input">어떤 약물을 검토할까요?</label>
    <TextField id="agent-drug-input" fullWidth placeholder="약물명 또는 NCT 번호를 입력하세요" value={query} disabled={lockedForm} onChange={e=>{setQuery(e.target.value);setConsent(false);}} slotProps={{htmlInput:{maxLength:100,'aria-label':'약물명 또는 NCT 번호'}}}/>
    <div className="auto-purpose"><span>검토 목적</span><strong>{AUTO_PURPOSE}</strong></div>
-   <div className="agent-consent"><FormControlLabel control={<Checkbox size="small" checked={consent} disabled={lockedForm} onChange={e=>setConsent(e.target.checked)} slotProps={{input:{'aria-describedby':'agent-data-details'}}}/>} label="공개 자료 검색·저장 및 외부 AI 분석에 동의합니다."/><details id="agent-data-details"><summary>데이터 처리 안내</summary><p>입력한 약물명·시험번호로 공개 자료를 검색하고 결과를 이 기기에 저장합니다. 선택한 공개 자료의 발췌문은 대회 제공 AI API로 전송합니다. 민감 정보는 입력하지 마세요.</p><p>공개 PDF 최대 2개 처리, 조사 최대 2회와 원문 추출·반론 최대 2회, 총 최대 4회 모델 요청입니다. MOC는 실제 약물 추정치가 아닌 별도의 합성 가정 계산입니다.</p></details></div>
-   <div className="auto-actions"><Button disabled={lockedForm} startIcon={<Paperclip size={17}/>} onClick={onIntake}>보유 자료로 검토</Button><Button size="large" variant="contained" type="submit" disabled={lockedForm||!consent||query.trim().length<2} endIcon={<ArrowRight size={18}/>}>에이전트 시작</Button></div>
+   {isTeam&&<><Alert severity="info">팀 모드는 수집과 AI 전송을 나눕니다. 먼저 자료를 저장하고, 출처 텍스트와 수집 원본의 전송 허가를 확인한 뒤 별도로 AI 검토를 실행하세요.</Alert><RawStorageConsent value={rawDrafts} onChange={v=>{setRawDrafts(v);setConsent(false);}} disabled={lockedForm}/>{teamReadOnly&&<p>읽기 전용 계정입니다. 최근 검토는 볼 수 있지만 새 수집은 실행할 수 없습니다.</p>}</>}
+   <div className="agent-consent"><FormControlLabel control={<Checkbox size="small" checked={consent} disabled={lockedForm} onChange={e=>setConsent(e.target.checked)} slotProps={{input:{'aria-describedby':'agent-data-details'}}}/>} label={isTeam?'공개 시험 검색·검색 기록 저장 및 허가한 경로의 자료 수집에 동의합니다. AI 분석은 별도로 실행합니다.':'공개 자료 검색·저장 및 외부 AI 분석에 동의합니다.'}/><details id="agent-data-details"><summary>데이터 처리 안내</summary>{isTeam?<><p>초기 시험 찾기는 ClinicalTrials.gov를 검색하고 별도 검색 기록을 저장합니다. 이후 조사는 위에서 저장 허가를 기록한 경로만 수집합니다. 민감 정보는 입력하지 마세요.</p><p>이 실행은 AI 분석·PDF 다운로드를 요청하지 않습니다. 수집 후 조회·전송 권리를 확인하는 동안에는 자료 본문 대신 이용조건 목록을 표시합니다.</p></>:<><p>입력한 약물명·시험번호로 공개 자료를 검색하고 결과를 이 기기에 저장합니다. 선택한 공개 자료의 발췌문은 대회 제공 AI API로 전송합니다. 민감 정보는 입력하지 마세요.</p><p>공개 PDF 최대 2개 처리, 조사 최대 2회와 원문 추출·반론 최대 2회, 총 최대 4회 모델 요청입니다. MOC는 실제 약물 추정치가 아닌 별도의 합성 가정 계산입니다.</p></>}</details></div>
+   <div className="auto-actions"><Button disabled={lockedForm} startIcon={<Paperclip size={17}/>} onClick={onIntake}>보유 자료로 검토</Button><Button size="large" variant="contained" type="submit" disabled={lockedForm||!consent||query.trim().length<2||isTeam&&!storagePermissions.length} endIcon={<ArrowRight size={18}/>}>{isTeam?'허가한 자료 수집':'에이전트 시작'}</Button></div>
   </form>}
-  {!pending&&!done&&!busy&&<div className="agent-start-path"><span><b>01</b> 공개 근거 수집</span><ArrowRight size={16}/><span><b>02</b> AI 검토·원문 대조</span><ArrowRight size={16}/><span><b>03</b> 판단 범위·질문 정리</span></div>}
+  {!pending&&!done&&!teamCollection&&!busy&&<div className="agent-start-path"><span><b>01</b> 공개 근거 수집</span><ArrowRight size={16}/><span><b>02</b> {isTeam?'자료 이용조건 확인':'AI 검토·원문 대조'}</span><ArrowRight size={16}/><span><b>03</b> {isTeam?'명시 동의 후 AI 검토':'판단 범위·질문 정리'}</span></div>}
   {error&&<Alert severity="warning">{error}</Alert>}
   {loadingRecord&&<Alert severity="info">검토 기록을 불러오는 중입니다.</Alert>}
-  {!loadingRecord&&(busy||events.length>0)&&(done||pending?<details className="auto-work-history">
+  {!loadingRecord&&(busy||events.length>0)&&(isTeam&&!done?<section className="source-policy-panel" aria-label="팀 자료 수집 진행"><h3>{busy?'허가한 자료를 수집하고 있습니다':teamCollection?'수집 실행 기록':pending?'검토 범위를 선택하세요':'수집 실행을 확인하세요'}</h3><p role="status">{events.at(-1)?.message}</p><p>{seconds}초 · AI 분석과 PDF 다운로드는 별도입니다.</p>{busy&&<Button onClick={()=>controller.current?.abort()}>수집 대기 중단</Button>}<details><summary>수집 단계 기록 ({events.length})</summary><ol>{events.map((e,i)=><li key={i}>{e.message}</li>)}</ol></details></section>:done||pending?<details className="auto-work-history">
    <summary>조사 과정 보기 · {seconds}초 · 작업 기록 {events.length}개</summary>
    <AgentActivity events={events} outcome={outcome} busy={false} seconds={seconds} query={query} onStop={()=>controller.current?.abort()}/></details>:
    <AgentActivity events={events} outcome={outcome} busy={busy} seconds={seconds} query={query} onStop={()=>controller.current?.abort()}/>)}
@@ -78,11 +94,13 @@ export default function AutoReview({locked,onBusy,onDetails,onManual,onIntake,on
    {scopes.find(([key])=>key===scopeKey)?.[1]&&<TrialStart candidate={scopes.find(([key])=>key===scopeKey)![1]}/>}
    <p className="auto-caption">검색 {pending.receipt.total_count}건 중 확보한 {pending.receipt.fetched_count}건의 등록 표현입니다. 같은 의미로 보이는 적응증도 자동으로 합치지 않습니다.</p>
    <p className="auto-caption">등록 적응증 표현을 사용합니다. 병용약·별칭은 임의로 같은 약물로 합치지 않습니다. 아직 AI 요청 0회.</p>
-   <p className="auto-caption">처음 동의한 조사 2회·원문 추출/반론 2회, 총 최대 4회 범위에서 이어갑니다.</p>
+   <p className="auto-caption">{isTeam?'허가한 경로에서 자료만 수집합니다. AI 분석은 별도로 동의한 뒤 실행합니다.':'처음 동의한 조사 2회·원문 추출/반론 2회, 총 최대 4회 범위에서 이어갑니다.'}</p>
    <div className="auto-actions"><Button variant="contained" disabled={lockedForm||!scopeKey||!consent} onClick={()=>void run(true)}>이 범위로 조사 계속</Button><Button disabled={busy} onClick={()=>{setOutcome(null);setEvents([]);setConsent(false);}}>입력으로 돌아가기</Button></div>
   </section>}
   {done&&<AutoBrief key={done.result.collection.id+openView} initialSection={openView} done={done} restored={restored} disabled={lockedForm} onDetails={onDetails} onContinue={onContinue} onNew={()=>{setOutcome(null);setEvents([]);setError('');setConsent(false);setQuery('');setScopeKey('');}}/>}
-  {!busy&&<ReviewTools history={history} disabled={lockedForm} onOpen={id=>void open(id)} onManual={onManual}/>}
+  {teamCollection&&<section className="source-policy-panel" aria-label="팀 자료 수집 기록"><h2>수집 기록을 저장했습니다</h2><p>{teamCollection.candidate.asset} · {teamCollection.candidate.study.nct_id} · {teamCollection.candidate.indication}</p><p>출처 {teamCollection.sources.sources.length}개 · 원본 연결 {teamCollection.raw.sources.reduce((n,s)=>n+s.snapshots.length,0)}건. 수집 범위 전체의 성공이나 임상 검증을 뜻하지 않습니다. AI 분석은 요청하지 않았습니다.</p><TeamReviewWorkflow runId={teamCollection.runId} disabled={busy||locked} onBusy={setTeamReviewBusy} onIntake={onSourceIntake}/><Button disabled={teamReviewBusy} onClick={()=>{setTeamCollection(null);setEvents([]);setQuery('');setConsent(false);setRawDrafts(emptyRawStorageDrafts());}}>다른 자료 수집</Button></section>}
+  {!busy&&<ReviewTools history={history} disabled={lockedForm} onOpen={id=>isTeam?setTeamRecord(id):void open(id)} onManual={onManual} onIntake={onSourceIntake}/>}
+  <Dialog open={Boolean(teamRecord)} onClose={()=>{if(!teamReviewBusy)setTeamRecord('');}} fullWidth maxWidth="lg"><DialogTitle>저장된 자료로 검토 이어가기</DialogTitle><DialogContent>{teamRecord&&<TeamReviewWorkflow key={teamRecord} runId={teamRecord} disabled={busy||locked} onBusy={setTeamReviewBusy} onIntake={context=>{setTeamRecord('');onSourceIntake?.(context);}}/>}</DialogContent><DialogActions><Button disabled={teamReviewBusy} onClick={()=>setTeamRecord('')}>닫기</Button></DialogActions></Dialog>
  </section>;
 }
 

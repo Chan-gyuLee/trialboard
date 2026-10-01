@@ -14,8 +14,10 @@ import { isMocSource } from "./moc-data";
 import { guardSessionExit } from "./session-exit";
 import PdfAgentRunner from "./PdfAgentRunner";
 import ProjectShelf from "./ProjectShelf";
-import {checkpointBody,projectFile,projectRequest,readProjectReceipt,validateProject,type ProjectBundle,type ProjectReceipt,type ProjectRecord,type RestoredProject,type ReviewCheckpoint} from "./project-checkpoint";
+import {checkpointBody,projectFile,projectRequest,readProjectReceipt,sourceVersionBody,validateProject,type ProjectAccessGrant,type ProjectBundle,type ProjectReceipt,type ProjectRecord,type ProjectSharingScope,type RestoredProject,type ReviewCheckpoint,type UsagePolicyAssertion} from "./project-checkpoint";
 import {loadResearchHandoff,type ResearchHandoff} from './research-handoff';
+import {useTeamSession} from './AccessShell';
+import TeamCollectedPdf from './TeamCollectedPdf';
 
 function PagePreview({ loaded, page, selected, onReady }: { loaded: LoadedPdf; page: number; selected: PdfSpan | null; onReady: (page: number | null) => void }) {
   const host = useRef<HTMLDivElement>(null);
@@ -64,6 +66,8 @@ function PagePreview({ loaded, page, selected, onReady }: { loaded: LoadedPdf; p
 }
 
 export default function PdfWorkspace({onAgentBusy,scoutContext,onResearch,reviewHandoff}:{reviewHandoff?:ResearchHandoff;scoutContext?:import("./evidence-scout").ScoutContext;onAgentBusy?:(busy:boolean)=>void;onResearch?:(context:import("./evidence-scout").ScoutContext)=>void}) {
+  const teamSession=useTeamSession();
+  const [collectedBusy,setCollectedBusy]=useState(false);
   const [loaded, setLoaded] = useState<LoadedPdf | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const current = useRef<LoadedPdf | null>(null);
@@ -84,6 +88,7 @@ export default function PdfWorkspace({onAgentBusy,scoutContext,onResearch,review
   const [pane, setPane] = useState<"text" | "agent" | "fields" | "design">("text");
   const [agentHandoff,setAgentHandoff]=useState<{raw:string;id:string}|null>(null);
   const [projectReceipt,setProjectReceipt]=useState<ProjectReceipt|null>(null);
+  const [projectAccessRevoked,setProjectAccessRevoked]=useState(false);
   const [initialProject,setInitialProject]=useState<RestoredProject|null>(null);
   const [projectContext,setProjectContext]=useState<typeof scoutContext>(undefined);
   const [projectBusy,setProjectBusy]=useState(false);
@@ -132,7 +137,7 @@ export default function PdfWorkspace({onAgentBusy,scoutContext,onResearch,review
       if(selection&&current.current?.source.sha256!==next.source.sha256){await next.destroy();throw Error('현재 원문과 페이지 선택 파일의 지문이 다릅니다.');}
       if (pending.current !== controller || controller.signal.aborted) { void next.destroy(); return; }
       const old = current.current; current.current = next;
-      setAgentHandoff(null);
+      setAgentHandoff(null);setProjectAccessRevoked(false);
       setProjectReceipt(null);setInitialProject(null);setWorkspaceVersion(v=>v+1);
       setNoteDirty(false);
       if(!selection)setProjectContext(scoutContext&&!isMocSource(next.source)?{...scoutContext,document:collected?scoutContext.document:undefined}:undefined);
@@ -155,6 +160,7 @@ export default function PdfWorkspace({onAgentBusy,scoutContext,onResearch,review
     setBusy(true);setError("");setNotice("등록된 공개 출처에서 PDF를 내려받고 로컬 DB에 보관합니다.");
     try {
       const response=await fetch(`/api/research/runs/${encodeURIComponent(document.runId)}/documents/${encodeURIComponent(document.sourceId)}`, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({consent:true}),signal:fetchController.signal});
+      if(response.status===403||response.status===409)throw Error("PDF 이용조건이나 파일 버전 확인이 필요합니다. 최근 조사 기록의 ‘PDF 이용조건’에서 저장 허가와 정확한 파일 버전을 확인하세요.");
       if(!response.ok || !response.headers.get("content-type")?.startsWith("application/pdf"))throw Error("공개 PDF를 확보하지 못했습니다. 접근 제한·5MB 초과일 수 있습니다. 출처에서 직접 확인하세요.");
       const blob=await response.blob();
       if(blob.size>5_000_000)throw Error("PDF가 5MB를 초과합니다.");
@@ -172,14 +178,16 @@ export default function PdfWorkspace({onAgentBusy,scoutContext,onResearch,review
     if (current.current && !window.confirm("이 탭의 PDF·원문 메모·필드 검토·설계 입력·비교 결과·KOL 회의 기록을 제거할까요? 내려받지 않은 기록은 복구할 수 없습니다. 원본 파일은 삭제하지 않습니다.")) return;
     cancel(); void current.current?.destroy().catch(() => {}); current.current = null;
     setLoaded(null); setPdfFile(null); setNotes([]); setSelected(null); setConfirmed(false); setError(""); setNotice(""); setReadyPage(null);
-    setProjectReceipt(null);setInitialProject(null);setProjectContext(undefined);setAgentHandoff(null);
+    setProjectReceipt(null);setProjectAccessRevoked(false);setInitialProject(null);setProjectContext(undefined);setAgentHandoff(null);
   }
-  async function saveProject(title:string,fork=false){
+  async function saveProject(title:string,fork=false,publicAuthorizedNonSensitive=false,sharingScope?:ProjectSharingScope,accessMembers:ProjectAccessGrant[]=[],sourceParent?:ProjectReceipt|null,usagePolicy?:UsagePolicyAssertion){
     if(!loaded||!pdfFile||!checkpoint.current||pending.current||agentBusy)throw Error("PDF와 검토 준비가 끝난 뒤 저장하세요.");
     if(noteDirty||confirmed)throw Error("원문 확인 메모의 미기록 입력을 먼저 추가하거나 다른 문구를 선택해 편집을 취소하세요.");
     const fields=await checkpoint.current();
     const bundle:ProjectBundle={schema:"trialboard-project/1",source:loaded.source,notes,...fields,context:projectContext??null};
-    const saved=readProjectReceipt(await projectRequest("/api/projects",await checkpointBody(title,pdfFile,bundle,fork?null:projectReceipt)));
+    const saved=readProjectReceipt(sourceParent
+      ?await projectRequest("/api/projects/source-versions",await sourceVersionBody(title,pdfFile,bundle,sourceParent,usagePolicy!))
+      :await projectRequest("/api/projects",await checkpointBody(title,pdfFile,bundle,fork?null:projectReceipt,publicAuthorizedNonSensitive,sharingScope,accessMembers,fork?projectReceipt:null,usagePolicy)));
     setProjectReceipt(saved);return saved;
   }
   async function restoreProject(record:ProjectRecord){
@@ -190,7 +198,7 @@ export default function PdfWorkspace({onAgentBusy,scoutContext,onResearch,review
       const restored=await validateProject(bundle,next.source);
       if(pending.current!==controller||controller.signal.aborted)throw Error("프로젝트 열기가 취소되었습니다.");
       const old=current.current;current.current=next;setLoaded(next);setPdfFile(file);next=null;
-      setInitialProject(restored);setProjectContext(bundle.context??undefined);setProjectReceipt(readProjectReceipt(record));setWorkspaceVersion(v=>v+1);
+      setInitialProject(restored);setProjectContext(bundle.context??undefined);setProjectReceipt(readProjectReceipt(record));setProjectAccessRevoked(false);setWorkspaceVersion(v=>v+1);
       setNoteDirty(false);
       setAgentHandoff(null);setNotes(bundle.notes);setSelected(null);setQuery("");setConfirmed(false);setComment("");setPage(bundle.source.pages[0].number);setReadyPage(null);setError("");setNotice("");setPane(restored.session?"design":"fields");
       if(old)void old.destroy().catch(()=>{});
@@ -212,14 +220,18 @@ export default function PdfWorkspace({onAgentBusy,scoutContext,onResearch,review
     } catch (e) { setError(e instanceof Error ? e.message : "메모를 저장하지 못했습니다."); }
   }
   const source = loaded?.source;
+  const restrictedDerivedBlocked=projectReceipt?.sharing_scope==="restricted";
   const visible = source?pdfPage(source,page)?.spans.filter(s => s.text.toLowerCase().includes(query.toLowerCase()))??[]:[];
   const canConfirm = selected?.box && readyPage === selected.page && !busy;
 return <div className="pdf-workspace">
-    <ProjectShelf available={!!loaded} locked={busy||agentBusy||reviewBusy} receipt={projectReceipt} onSave={saveProject} onRestore={restoreProject} onBusy={setProjectBusy}/>
+    {teamSession&&scoutContext?.document&&<TeamCollectedPdf key={`${scoutContext.document.runId}:${scoutContext.document.sourceId}`} runId={scoutContext.document.runId} sourceId={scoutContext.document.sourceId} disabled={busy||projectBusy||agentBusy||reviewBusy} onBusy={setCollectedBusy} onOpen={file=>accept(file,true)}/>}
+    <ProjectShelf available={!!loaded} locked={busy||collectedBusy||agentBusy||reviewBusy} receipt={projectReceipt} onSave={saveProject} onRestore={restoreProject} onBusy={setProjectBusy} onReceiptUpdate={setProjectReceipt} onAccessRevoked={()=>setProjectAccessRevoked(true)}/>
     {projectBusy&&<Alert severity="info">프로젝트 기록 처리 중 · PDF·검토·설계 연결을 확인하고 있습니다.</Alert>}
-    <div inert={projectBusy}>
+    <div inert={projectBusy||collectedBusy}>
+    {projectAccessRevoked&&<Alert severity="warning">현재 계정의 프로젝트 접근이 철회되었습니다. 이미 브라우저에 열린 내용은 회수할 수 없지만 저장·공동 검토·파생 작업은 잠겼습니다. 다른 PDF나 접근 가능한 프로젝트를 여세요.</Alert>}
+    {restrictedDerivedBlocked&&<Alert severity="warning">제한 프로젝트 내용은 권리·provenance 결속이 구현될 때까지 에이전트 검토, 설계 제안, 팀 전체 조사 이력으로 전달하지 않습니다. 원문 읽기와 프로젝트 내 공동 검토만 사용하세요.</Alert>}
     {loaded&&projectContext&&<Alert severity="info">검토 문맥: {projectContext.asset} · {projectContext.study} · {projectContext.indication}. 수집 기록 연결이며 PDF가 같은 시험·분석집단이라는 검증은 아닙니다.</Alert>}
-    {scoutContext?.document&&<Alert severity="info" action={<Button disabled={busy} onClick={()=>void openCollectedDocument()}>수집한 공개 PDF 열기</Button>}>{scoutContext.document.title}. 공개 출처에서 최대5MB를 내려받아 DB에 보관하고 원문을 엽니다. FDA 문서는 약물 단위이며 선택 시험과 같다는 뜻이 아닙니다. 최대200쪽을 탐색하고 한 번에 최대40쪽을 연결합니다.</Alert>}
+    {!teamSession&&scoutContext?.document&&<Alert severity="info" action={<Button disabled={busy} onClick={()=>void openCollectedDocument()}>수집한 공개 PDF 열기</Button>}>{scoutContext.document.title}. 공개 출처에서 최대5MB를 내려받아 DB에 보관하고 원문을 엽니다. FDA 문서는 약물 단위이며 선택 시험과 같다는 뜻이 아닙니다. 최대200쪽을 탐색하고 한 번에 최대40쪽을 연결합니다.</Alert>}
     {isMocSource(source) && <MocBadge detail="합성 PDF · 추출·확인 예제는 테스트 기록 · 계산은 실제 로컬 엔진" />}
     <div className="intake-heading"><span className="document-kicker">PDF에서 설계 회의까지</span><h1>원문을 확인하고, 검토를 이어가세요</h1><p>원문 선택 → 에이전트 검토 → 사람의 확인 → 설계 비교·회의. 모델 전송과 로컬 계산은 각각 동의 후 실행합니다.</p></div>
     <div className="pdf-file-bar"><FileText size={26} /><div><strong>{source?.name ?? "공개·사용 허가된 PDF 한 개"}</strong><p>{source ? `전체 ${pdfTotalPages(source)}쪽 · ${source.pages.length}쪽 연결 · 원문 메모 ${notes.length}개 · 파일 교체 시 검토·설계·회의 기록 초기화` : "최대 5 MB · 200쪽 탐색 · 최대40쪽 연결 · OCR·암호 PDF·HWPX 미지원"}</p></div>
@@ -235,9 +247,9 @@ return <div className="pdf-workspace">
       {source.status !== "TEXT_EXTRACTED" && <Alert severity="warning">{source.status === "NO_TEXT" ? "추출 가능한 텍스트가 없습니다. 스캔·이미지 문서 또는 빈 페이지일 수 있습니다. OCR을 수행하지 않았습니다." : "일부 페이지에 추출 가능한 텍스트가 없습니다. 나머지 문구가 문서 전체를 대표하지 않습니다."}</Alert>}
       <PdfPageNavigation source={source} page={page} disabled={busy||projectBusy||agentBusy||reviewBusy} onChange={changePage}/>
       <PdfScopeControl key={`${source.sha256}-${workspaceVersion}`} source={source} coverage={loaded.coverage} disabled={busy||projectBusy||agentBusy||reviewBusy} onSelect={selection=>accept(pdfFile??undefined,false,selection)}/>
-      <div className="field-tabs" role="group" aria-label="검토 방식"><Button variant={pane === "text" ? "contained" : "outlined"} onClick={() => setPane("text")}>01 원문 문구</Button><Button variant={pane === "agent" ? "contained" : "outlined"} onClick={() => setPane("agent")}>02 에이전트 검토</Button><Button variant={pane === "fields" ? "contained" : "outlined"} onClick={() => setPane("fields")}>03 필드 검토</Button><Button variant={pane === "design" ? "contained" : "outlined"} onClick={() => setPane("design")}>04 설계 비교·KOL</Button></div>
-      <div hidden={pane !== "agent"}><PdfAgentRunner scoutContext={projectContext} onReveal={span=>{choose(span);setPane("text");}} onBusy={setAgentBusy} key={`${source.sha256}-${workspaceVersion}`} source={source} notes={notes} active={pane === "agent" && !busy && !projectBusy} onHandoff={raw=>{setAgentHandoff({raw,id:crypto.randomUUID()});setPane("fields");}}/></div>
-      <div hidden={pane === "agent"} className={`pdf-review-grid${pane === "design" ? " pdf-design-view" : ""}`}><div><section hidden={pane === "text"} className="pdf-extracted"><FieldReviewPanel context={projectContext} key={`${source.sha256}-${workspaceVersion}`} checkpoint={checkpoint} onCheckpointBusy={setReviewBusy} initialProject={initialProject} source={source} pdf={pdfFile} agentHandoff={agentHandoff} selected={selected} readyPage={readyPage} disabled={busy||projectBusy} onChoose={choose} onText={() => setPane("text")} view={pane === "design" ? "design" : "fields"} onFields={() => setPane("fields")} onDesign={() => setPane("design")} /></section><section hidden={pane !== "text"} className="pdf-extracted" aria-label="페이지 추출 문구"><div className="pdf-pane-title"><strong>추출 문구</strong><span>읽기 순서·표 관계 미검증</span></div>
+      <div className="field-tabs" role="group" aria-label="검토 방식"><Button variant={pane === "text" ? "contained" : "outlined"} onClick={() => setPane("text")}>01 원문 문구</Button><Button disabled={restrictedDerivedBlocked||projectAccessRevoked} variant={pane === "agent" ? "contained" : "outlined"} onClick={() => setPane("agent")}>02 에이전트 검토</Button><Button disabled={restrictedDerivedBlocked||projectAccessRevoked} variant={pane === "fields" ? "contained" : "outlined"} onClick={() => setPane("fields")}>03 필드 검토</Button><Button disabled={restrictedDerivedBlocked||projectAccessRevoked} variant={pane === "design" ? "contained" : "outlined"} onClick={() => setPane("design")}>04 설계 비교·KOL</Button></div>
+      <div hidden={pane !== "agent"}><PdfAgentRunner projectReceipt={projectReceipt} scoutContext={projectContext} onReveal={span=>{choose(span);setPane("text");}} onBusy={setAgentBusy} key={`${source.sha256}-${workspaceVersion}`} source={source} notes={notes} active={pane === "agent" && !busy && !projectBusy && !restrictedDerivedBlocked && !projectAccessRevoked} onHandoff={raw=>{setAgentHandoff({raw,id:crypto.randomUUID()});setPane("fields");}}/></div>
+      <div hidden={pane === "agent"} className={`pdf-review-grid${pane === "design" ? " pdf-design-view" : ""}`}><div><section hidden={pane === "text"} className="pdf-extracted"><FieldReviewPanel projectReceipt={projectReceipt} context={projectContext} key={`${source.sha256}-${workspaceVersion}`} checkpoint={checkpoint} onCheckpointBusy={setReviewBusy} initialProject={initialProject} source={source} pdf={pdfFile} agentHandoff={agentHandoff} selected={selected} readyPage={readyPage} disabled={busy||projectBusy||restrictedDerivedBlocked||projectAccessRevoked} onChoose={choose} onText={() => setPane("text")} view={pane === "design" ? "design" : "fields"} onFields={() => setPane("fields")} onDesign={() => setPane("design")} /></section><section hidden={pane !== "text"} className="pdf-extracted" aria-label="페이지 추출 문구"><div className="pdf-pane-title"><strong>추출 문구</strong><span>읽기 순서·표 관계 미검증</span></div>
         <TextField fullWidth size="small" label="현재 페이지에서 찾기" value={query} onChange={e => setQuery(e.target.value)} />
         <div className="pdf-span-list">{visible.slice(0, 200).map(span => <button key={span.id} type="button" disabled={busy} onClick={() => choose(span)} aria-pressed={selected?.id === span.id}><span>{span.text}</span><small>{span.id}{!span.box && " · 위치 확인 불가"}{notes.some(n => n.spanId === span.id) && " · 메모 있음"}</small></button>)}
           {!visible.length && <p>{pdfPage(source,page)?.status === "NO_TEXT" ? "이 페이지에서 텍스트를 추출하지 못했습니다. 내용을 없다고 판단하지 마세요." : "검색한 문구가 없습니다."}</p>}

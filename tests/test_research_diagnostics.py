@@ -28,7 +28,7 @@ def test_rejected_plan_preserves_received_usage_without_claiming_validation(setu
             elif mode == "source":
                 value["priorities"] = [{"source_id": "missing", "reason": "MOC"}]
             else:
-                value["followup_terms"] = ["NCT00000002"]
+                value["followups"][0]["term"] = "NCT00000002"
             return Reply(value, "MOC-response", 11, 12)
 
     path, request, _ = setup

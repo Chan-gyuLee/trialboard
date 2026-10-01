@@ -2,6 +2,11 @@
 
 import json
 
+from fastapi import HTTPException
+
+from trialboard.api.team_auth import TeamDataPath
+from trialboard.research.models import Collection
+from trialboard.research.source_policy import existing_connection, require_content_con
 from trialboard.serialization import sha256_json
 
 
@@ -15,21 +20,36 @@ def denominators(entries, group_id):
 
 
 def registry_results(store, run_id, *, run=None):
-    run = run or store.get_run(run_id)
-    source = (
-        next((s for s in run.sources if s.id == f"registry_{run.request.nct_id}"), None)
-        if run
-        else None
-    )
-    if not source:
-        return None
-    con = store.connect()
+    team = isinstance(store.path, TeamDataPath)
+    con = existing_connection(store.path) if team else store.connect()
     try:
+        raw_context = None
+        if team:
+            con.execute("BEGIN")
+            raw_context = require_content_con(con, run_id)
+            stored = Collection.model_validate_json(
+                con.execute("SELECT data FROM research_runs WHERE id=?", (run_id,)).fetchone()[0]
+            )
+            if run is not None and run != stored:
+                raise HTTPException(409, "RESEARCH_SOURCE_VERSION_MISMATCH")
+            run = stored
+        else:
+            run = run or store.get_run(run_id)
+        source = (
+            next((s for s in run.sources if s.id == f"registry_{run.request.nct_id}"), None)
+            if run
+            else None
+        )
+        if not source:
+            return None
         records = []
         for digest in source.raw_snapshots:
-            row = con.execute("SELECT raw FROM snapshots WHERE digest=?", (digest,)).fetchone()
-            if row:
-                raw = json.loads(row[0])
+            if raw_context:
+                raw = raw_context.read((run_id, source.id, source.digest, digest))
+            else:
+                row = con.execute("SELECT raw FROM snapshots WHERE digest=?", (digest,)).fetchone()
+                raw = json.loads(row[0]) if row else None
+            if raw is not None:
                 if sha256_json(raw) != digest:
                     raise ValueError("REGISTRY_SNAPSHOT_MISMATCH")
                 for i, study in enumerate(raw.get("studies", [])):
@@ -45,6 +65,13 @@ def registry_results(store, run_id, *, run=None):
     finally:
         con.close()
     digest, study_index, record = records[0]
+    return build_registry_tables(
+        run_id, run.request.nct_id, source.url, digest, study_index, record
+    )
+
+
+def build_registry_tables(run_id, nct_id, source_url, digest, study_index, record):
+    """Pure transformation of an already authorized response; never reads stored material."""
     results = record.get("resultsSection", {})
     base = f"/studies/{study_index}/resultsSection"
     outcomes = []
@@ -131,9 +158,9 @@ def registry_results(store, run_id, *, run=None):
     packet = {
         "schema": "registry-result-tables/1",
         "runId": run_id,
-        "nctId": run.request.nct_id,
+        "nctId": nct_id,
         "snapshotDigest": digest,
-        "sourceUrl": source.url,
+        "sourceUrl": source_url,
         "outcomes": outcomes,
         "safety": safety,
         "clinicalVerified": False,

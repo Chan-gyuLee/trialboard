@@ -12,6 +12,11 @@ import uvicorn
 def main() -> None:
     parser = argparse.ArgumentParser(description="TrialBoard local synthetic review API")
     parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument(
+        "--access-mode", choices=["legacy_loopback", "team"], default="legacy_loopback"
+    )
+    parser.add_argument("--identity-db", type=Path)
+    parser.add_argument("--team-storage-root", type=Path)
     credentials = parser.add_mutually_exclusive_group()
     credentials.add_argument(
         "--prompt-dacon-key",
@@ -52,6 +57,10 @@ def main() -> None:
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("--port must be between 1 and 65535")
+    if args.access_mode == "team" and (not args.identity_db or not args.team_storage_root):
+        parser.error("TEAM mode requires --identity-db and --team-storage-root")
+    if args.access_mode != "team" and (args.identity_db or args.team_storage_root):
+        parser.error("TEAM storage arguments require --access-mode team")
     if args.dacon_key_file:
         if args.agent_provider != "dacon":
             parser.error("A competition key file requires the dacon provider")
@@ -73,14 +82,21 @@ def main() -> None:
         del key
     from trialboard.api.app import create_app
 
-    uvicorn.run(
-        create_app(
+    try:
+        application = create_app(
             enable_designs=args.enable_designs,
             enable_agent_demo=args.enable_agent_demo,
             enable_pdf_agent=args.enable_pdf_agent,
             enable_evidence_scout=args.enable_evidence_scout,
             agent_provider=args.agent_provider,
-        ),
+            access_mode=args.access_mode,
+            identity_db=args.identity_db,
+            team_storage_root=args.team_storage_root,
+        )
+    except ValueError as error:
+        parser.error(str(error))
+    uvicorn.run(
+        application,
         host="127.0.0.1",
         port=args.port,
         access_log=False,

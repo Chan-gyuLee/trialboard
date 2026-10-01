@@ -18,6 +18,11 @@ import AutoReview from "./AutoReview";
 import DecisionCaseWorkspace from './DecisionCaseWorkspace';
 import BrandLogo from './BrandLogo';
 import './product-polish.css';
+import AccessShell from './AccessShell';
+import {installAuthenticatedFetch} from './auth-client';
+
+const publicPreview=import.meta.env.VITE_PUBLIC_PREVIEW==="true";
+installAuthenticatedFetch({publicPreview});
 
 type Tab = "start" | "case" | "manual" | "decision" | "agent" | "intake" | "simulation" | "evidence" | "report";
 const navigation = [
@@ -118,7 +123,7 @@ function App() {
       <main id="workspace" className="workspace">
         {((researchBusy&&tab!=='manual')||(autoBusy&&tab!=='start'))&&<Alert severity="info" action={<Button onClick={()=>setTab(autoBusy?"start":"manual")}>조사 화면 열기</Button>}>공개 근거 조사 진행 중입니다. AI 작업은 설정된 실행 모델의 사용량을 소비합니다. 조사 화면에서 상태 확인·중단할 수 있습니다.</Alert>}
         {(pdfAgentBusy || fixedAgentBusy)&&<Alert severity="info" className="global-agent-status" action={<Button onClick={()=>setTab(pdfAgentBusy?'intake':'agent')}>작업 화면 열기</Button>}>{pdfAgentBusy?'PDF 문구':'고정 사례'} 에이전트가 실행 중입니다. 다른 메뉴를 보더라도 계정 사용량을 소비할 수 있습니다. 작업 화면에서 상태를 확인하거나 중단하세요.</Alert>}
-        <div hidden={tab !== "start"}><AutoReview locked={pdfAgentBusy||fixedAgentBusy||researchBusy} onBusy={setAutoBusy} onIntake={()=>setTab('case')} onManual={()=>setTab('manual')} onContinue={done=>{setReviewHandoff({token:crypto.randomUUID(),done});setScoutContext(undefined);setTab('intake');}} onDetails={result=>{const c=result.collection,s=c.sources[0];if(!s)return;setResearchResume({token:crypto.randomUUID(),context:{asset:c.request.asset,indication:c.request.indication,study:c.request.nct_id,question:'용량별 반응과 이상반응을 같은 조건에서 비교할 수 있는가?',receiptId:c.request.search_id,document:{runId:c.id,sourceId:s.id,title:s.title}}});setTab('manual');}}/></div>
+        <div hidden={tab !== "start"}><AutoReview locked={pdfAgentBusy||fixedAgentBusy||researchBusy} onBusy={setAutoBusy} onSourceIntake={context=>{setReviewHandoff(undefined);setScoutContext(context);setTab('intake');}} onIntake={()=>setTab('case')} onManual={()=>setTab('manual')} onContinue={done=>{setReviewHandoff({token:crypto.randomUUID(),done});setScoutContext(undefined);setTab('intake');}} onDetails={result=>{const c=result.collection,s=c.sources[0];if(!s)return;setResearchResume({token:crypto.randomUUID(),context:{asset:c.request.asset,indication:c.request.indication,study:c.request.nct_id,question:'용량별 반응과 이상반응을 같은 조건에서 비교할 수 있는가?',receiptId:c.request.search_id,document:{runId:c.id,sourceId:s.id,title:s.title}}});setTab('manual');}}/></div>
         <div hidden={tab !== "case"}><DecisionCaseWorkspace active={tab==="case"} onBack={()=>setTab("start")} onIntake={()=>{setScoutContext(undefined);setTab("intake");}}/></div>
         <div hidden={tab !== "manual"}><EvidenceScout resume={researchResume} onResearchBusy={setResearchBusy} locked={pdfAgentBusy || fixedAgentBusy || autoBusy} onIntake={context=>{setScoutContext(context);setTab("intake");}} /></div>
         <div hidden={tab !== "decision"}><DecisionBriefing active={tab === "decision"} onAgent={() => setTab("agent")} onIntake={() => setTab("intake")} /></div>
@@ -161,4 +166,4 @@ function DesignResult({ result: s, index, previous }: { result: Simulation; inde
 function ReviewIssues({ report, compact, onReport }: { report: Report; compact?: boolean; onReport?: () => void }) {
   return <section className={`review-status ${report.issues.length ? "has-issues" : ""}`}><div className="review-status-title"><div><span className="status-icon">{report.issues.length ? "!" : <Check size={16} />}</span><h3>{report.issues.length ? `판단을 보류한 항목 ${report.issues.length}개` : "합성 레코드 대조 완료"}</h3></div>{compact && <Button size="small" onClick={onReport} endIcon={<ChevronRight size={14} />}>검토 기록</Button>}</div>{!report.issues.length ? <p>이 예제의 수치 대조 오류는 없습니다. 실제 자료의 충분성이나 임상적 타당성은 별도 검토가 필요합니다.</p> : report.issues.map((issue, i) => <div className="issue" key={`${issue.code}-${i}`}><strong>{issue.message}</strong><p><span>다시 판단하려면</span> {issue.needed}</p>{!compact && <><p><span>보류할 판단</span> {issue.affected_decision}</p><p className="meta">{issue.owner} · {issue.code}</p></>}</div>)}</section>;
 }
-createRoot(document.getElementById("root")!).render(<React.StrictMode><ThemeProvider theme={theme}><CssBaseline /><App /></ThemeProvider></React.StrictMode>);
+createRoot(document.getElementById("root")!).render(<React.StrictMode><ThemeProvider theme={theme}><CssBaseline /><AccessShell publicPreview={publicPreview}>{workspaceKey=><App key={workspaceKey}/>}</AccessShell></ThemeProvider></React.StrictMode>);

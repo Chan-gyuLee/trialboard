@@ -6,7 +6,10 @@ from datetime import UTC, datetime
 from importlib.metadata import version
 from pathlib import Path
 
+from trialboard.api.team_auth import TeamDataPath
+from trialboard.research.models import Collection
 from trialboard.research.result_tables import registry_results
+from trialboard.research.source_policy import existing_connection, require_content_con, tables
 from trialboard.research.store import ResearchStore
 from trialboard.review.engine import simulate
 from trialboard.review.models import Design, Scenario
@@ -103,8 +106,14 @@ class ExplorationStore(ResearchStore):
         return con
 
     def get(self, run_id):
-        con = self.connect()
+        team = isinstance(self.path, TeamDataPath)
+        con = existing_connection(self.path) if team else self.connect()
         try:
+            if team:
+                con.execute("BEGIN")
+                require_content_con(con, run_id)
+                if "research_exploration" not in tables(con):
+                    return None
             row = con.execute(
                 "SELECT digest, data FROM research_exploration WHERE run_id=?", (run_id,)
             ).fetchone()
@@ -129,6 +138,13 @@ class ExplorationStore(ResearchStore):
         con = self.connect()
         try:
             with con:
+                if isinstance(self.path, TeamDataPath):
+                    con.execute("BEGIN IMMEDIATE")
+                    require_content_con(con, run_id)
+                    current = Collection.model_validate_json(con.execute(
+                        "SELECT data FROM research_runs WHERE id=?", (run_id,)).fetchone()[0])
+                    if current != run:
+                        raise ValueError("EXPLORATION_VERSION_MISMATCH")
                 con.execute(
                     "INSERT OR IGNORE INTO research_exploration VALUES (?,?,?)",
                     (

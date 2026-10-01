@@ -26,7 +26,15 @@ from trialboard.agent.public_case import public_input
 from trialboard.agent.revalidate import read_json
 from trialboard.agent.runtime import runtime_provider
 from trialboard.api.boundary import DEV_ORIGINS
+from trialboard.api.model_policy import (
+    GatedProvider,
+    IdentityGatedProvider,
+    ModelPolicyDenied,
+    ProjectModelBinding,
+    team_model_gate,
+)
 from trialboard.api.models import MAX_BODY_BYTES
+from trialboard.api.team_auth import TeamIdentity, current_access_scope
 
 CASE_LIMITS = {
     "public": {"max_calls": 2, "max_repairs": 0},
@@ -51,12 +59,21 @@ class PdfAgentRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     input: AgentInput
     consent: Literal[True]
+    public_authorized_non_sensitive: Literal[True] | None = None
+    model_binding: ProjectModelBinding | None = None
 
     @field_validator("consent", mode="before")
     @classmethod
     def explicit_consent(cls, value):
         if value is not True:
             raise ValueError("EXPLICIT_CONSENT_REQUIRED")
+        return value
+
+    @field_validator("public_authorized_non_sensitive", mode="before")
+    @classmethod
+    def explicit_public_authorization(cls, value):
+        if value is not None and value is not True:
+            raise ValueError("EXPLICIT_PUBLIC_AUTHORIZATION_REQUIRED")
         return value
 
     @field_validator("input")
@@ -78,12 +95,19 @@ def demo_router(
     enable_pdf: bool = False,
     enable_fixed: bool = True,
     model_slot: BoundedSemaphore | None = None,
+    restricted_source: Callable[[str], bool] | None = None,
+    identity: TeamIdentity | None = None,
+    data_path=None,
 ) -> APIRouter:
     router = APIRouter()
     running = False
     slot = model_slot or BoundedSemaphore(1)
 
     async def execute(payload: DemoRequest, request: Request):
+        if identity is not None and payload.case == "public":
+            return JSONResponse(
+                {"error": {"code": "MODEL_PROJECT_BINDING_REQUIRED"}}, status_code=403
+            )
         return await execute_data(
             public_input() if payload.case == "public" else demo_input(),
             request,
@@ -104,15 +128,42 @@ def demo_router(
                 )
             except (ValueError, TypeError):
                 return JSONResponse({"error": {"code": "INVALID_PDF_AGENT_INPUT"}}, 422)
+            digest = payload.input.spans[0].source_digest
+            if restricted_source is not None and restricted_source(digest):
+                return JSONResponse(
+                    {"error": {"code": "PRIVATE_PROJECT_DERIVED_ACTIONS_DISABLED"}}, 403
+                )
+            try:
+                gate = team_model_gate(
+                    identity=identity,
+                    data_path=data_path,
+                    access=current_access_scope(),
+                    binding=payload.model_binding,
+                    purpose="pdf_agent",
+                    input_data=payload.input,
+                )
+                if identity is not None and payload.public_authorized_non_sensitive is not True:
+                    raise ModelPolicyDenied("PUBLIC_NONSENSITIVE_ATTESTATION_REQUIRED")
+            except ModelPolicyDenied as error:
+                return JSONResponse({"error": {"code": str(error)}}, status_code=403)
             return await execute_data(
-                payload.input, request, "pdf", {"max_calls": 4, "max_repairs": 1}
+                payload.input,
+                request,
+                "pdf",
+                {"max_calls": 4, "max_repairs": 1},
+                gate=gate,
             )
 
-    async def execute_data(data: AgentInput, request: Request, case: str, case_limits: dict):
+    async def execute_data(
+        data: AgentInput, request: Request, case: str, case_limits: dict, *, gate=None
+    ):
         nonlocal running
         # Require explicit browser Origin even for local callers; no cross-site form trigger.
         if request.headers.get("origin") not in DEV_ORIGINS:
             return JSONResponse({"error": {"code": "LOCAL_BROWSER_ORIGIN_REQUIRED"}}, 403)
+        access = current_access_scope()
+        if identity is not None and (access is None or identity.revalidate(access) is None):
+            return JSONResponse({"error": {"code": "MODEL_IDENTITY_INVALIDATED"}}, 403)
         if running or not slot.acquire(blocking=False):
             return JSONResponse({"error": {"code": "AGENT_DEMO_BUSY"}}, 429)
         running = True  # Atomic in this single-process event loop, before any await.
@@ -137,6 +188,10 @@ def demo_router(
         async def worker():
             try:
                 provider = provider_factory()
+                if gate is not None:
+                    provider = GatedProvider(provider, gate)
+                elif identity is not None and access is not None:
+                    provider = IdentityGatedProvider(provider, identity, access)
                 send("started", case=case, execution_mode=provider.mode)
                 report = await run_agent(
                     data,

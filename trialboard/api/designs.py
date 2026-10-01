@@ -3,6 +3,7 @@
 import base64
 import binascii
 import json
+from collections.abc import Callable
 
 from pydantic import Field
 
@@ -31,7 +32,7 @@ class DesignExecution(Contract):
     context: Context | None = None
 
 
-def execute_design(raw: bytes):
+def execute_design(raw: bytes, restricted_source: Callable[[str], bool] | None = None):
     # The ASGI boundary bounds bytes before parsing. Reuse the duplicate-key,
     # depth, finite-number and surrogate checks on the decoded envelope.
     if len(raw) > DESIGN_BODY_BYTES:
@@ -46,6 +47,13 @@ def execute_design(raw: bytes):
         raise ValueError("INVALID_PDF_ENCODING") from exc
     if len(pdf) > PDF_LIMIT:
         raise ValueError("PDF_TOO_LARGE")
+    source = read_json(payload.source_json.encode(), limit=JSON_LIMIT)
+    source_record = source.get("source") if isinstance(source, dict) else None
+    source_digest = source_record.get("sha256") if isinstance(source_record, dict) else None
+    if restricted_source is not None and isinstance(source_digest, str) and restricted_source(
+        source_digest
+    ):
+        raise PermissionError("PRIVATE_PROJECT_DERIVED_ACTIONS_DISABLED")
     return compare_designs(
         json.dumps(payload.brief.model_dump(), ensure_ascii=False).encode(),
         payload.review_json.encode(),

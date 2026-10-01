@@ -10,8 +10,12 @@ import type {LiveProgress} from "./agent-live";
 import {LiveWorkbench} from "./LiveWorkbench";
 import RuntimeNotice from "./RuntimeNotice";
 import PdfInputCheck from './PdfInputCheck';
+import {useTeamSession} from './AccessShell';
+import {projectModelBinding,type ProjectReceipt} from './project-checkpoint';
 import "./agent-briefing.css";
-export default function PdfAgentRunner({source,notes,active,onHandoff,onBusy,scoutContext,onReveal}:{scoutContext?:import("./evidence-scout").ScoutContext;source:PdfSource;notes:EvidenceNote[];active:boolean;onHandoff:(raw:string)=>void;onBusy?:(busy:boolean)=>void;onReveal?:(span:PdfSpan)=>void}) {
+export default function PdfAgentRunner({source,notes,active,onHandoff,onBusy,scoutContext,onReveal,projectReceipt}:{scoutContext?:import("./evidence-scout").ScoutContext;source:PdfSource;notes:EvidenceNote[];active:boolean;onHandoff:(raw:string)=>void;onBusy?:(busy:boolean)=>void;onReveal?:(span:PdfSpan)=>void;projectReceipt:ProjectReceipt|null}) {
+ const session=useTeamSession(),binding=projectModelBinding(projectReceipt);
+ const policyBlocked=!!session&&!binding;
  const [context,setContext]=useState<PdfAgentContext>({asset:"",indication:"",study:"",question:"용량별 반응과 이상반응을 같은 조건에서 비교할 수 있는가?"});
  const [consent,setConsent]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(""),[seconds,setSeconds]=useState(0);
  const [events,setEvents]=useState<LiveProgress[]>([]),[raw,setRaw]=useState(""),[complete,setComplete]=useState<string|null>(null);
@@ -25,15 +29,16 @@ export default function PdfAgentRunner({source,notes,active,onHandoff,onBusy,sco
  useEffect(()=>()=>onBusy?.(false),[onBusy]);
  const controller=useRef<AbortController|null>(null),ticket=useRef(0);
  const inputKey=canonical({source,notes,context,selectionMode,candidateIds,contextRadius});
- useEffect(()=>{ticket.current++;controller.current?.abort();setConsent(false);setRaw("");setComplete(null);setEvents([]);setBusy(false);return()=>{ticket.current++;controller.current?.abort();};},[inputKey]);
+ const bindingKey=canonical({binding,sharingScope:projectReceipt?.sharing_scope??null,aclRevision:projectReceipt?.acl_revision??null,accessSource:projectReceipt?.access_source??null});
+ useEffect(()=>{ticket.current++;controller.current?.abort();controller.current=null;setConsent(false);setRaw("");setComplete(null);setEvents([]);setBusy(false);setError("");return()=>{ticket.current++;controller.current?.abort();};},[inputKey,bindingKey]);
  useEffect(()=>{if(!active) controller.current?.abort();},[active]);
  let input:ReturnType<typeof pdfAgentInput>|null=null,inputError="";
  try {input=selectionMode==='notes'?pdfAgentInput(source,notes,context):pdfCandidateInput(source,candidateIds,context,contextRadius);} catch(e) {inputError=e instanceof Error?e.message:"입력 확인 필요";}
  async function run() {
-  if(!input || !consent || busy || controller.current) return;
+  if(!input || !consent || busy || controller.current || policyBlocked) return;
   const c=new AbortController(),id=++ticket.current;controller.current=c;setBusy(true);setError("");setEvents([]);setRaw("");setComplete(null);setConsent(false);setSeconds(0);
   const start=performance.now(),timer=setTimeout(()=>c.abort(),135000),ticker=setInterval(()=>setSeconds(Math.floor((performance.now()-start)/1000)),500);
-  try {const result=await executePdfAgent(input,true,c.signal,e=>{if(id===ticket.current)setEvents(es=>[...es,e]);});if(id===ticket.current && !c.signal.aborted){setRaw(result);setComplete(JSON.parse(result).status);}}
+  try {const result=await executePdfAgent(input,true,c.signal,e=>{if(id===ticket.current)setEvents(es=>[...es,e]);},window.location,fetch,binding??undefined);if(id===ticket.current && !c.signal.aborted){setRaw(result);setComplete(JSON.parse(result).status);}}
   catch(e){if(id===ticket.current)setError(c.signal.aborted?"실행 대기를 중단했습니다. 결과를 인계하지 않았습니다.":e instanceof Error?e.message:"실행 실패");}
   finally {clearTimeout(timer);clearInterval(ticker);if(controller.current===c)controller.current=null;if(id===ticket.current)setBusy(false);}
  }
@@ -51,8 +56,9 @@ export default function PdfAgentRunner({source,notes,active,onHandoff,onBusy,sco
  {inputError?<Alert severity="info">{inputError}</Alert>:<details><summary>모델에 전송할 문구 {input!.spans.length}개 확인</summary>{input!.spans.map(s=><blockquote key={s.id}><strong>p.{s.page} · {s.id}</strong><p>{s.text}</p></blockquote>)}</details>}
  {input&&<PdfInputCheck input={input} disabled={busy||!onReveal} onReveal={id=>{const span=source.pages.flatMap(p=>p.spans).find(s=>s.id===id);if(span)onReveal?.(span);}}/>}
  <RuntimeNotice/>
- <FormControlLabel control={<Checkbox checked={consent} disabled={busy || !input} onChange={e=>setConsent(e.target.checked)}/>} label="공개·사용 허가된 비민감 자료임을 확인했고, 위 문구·문맥·질문을 위에 표시된 실행 모델에 전송하여 해당 모델 사용량을 소비하는 데 동의합니다."/>
- <div className="design-toolbar"><Button variant="contained" disabled={busy || !input || !consent || !import.meta.env.DEV} onClick={()=>void run()}>{busy?'에이전트 검토 중':'이 원문으로 에이전트 실행'}</Button>{busy&&<Button onClick={()=>controller.current?.abort()}>실행 중단</Button>}{raw&&<Button onClick={()=>downloadText('trialboard-pdf-agent.json',raw,'application/json')}>원본 실행 JSON 저장</Button>}</div>
+ {policyBlocked&&<Alert severity="warning">{!projectReceipt?'TEAM 모드에서는 현재 PDF를 프로젝트에 저장한 뒤 외부 AI 이용조건을 ALLOW로 기록해야 합니다.':projectReceipt.sharing_scope==='restricted'?'제한 공유 프로젝트의 내용은 현재 외부 AI 파생 작업에 사용할 수 없습니다. 팀 전체 공유로 바꿔도 실행 전에 최신 권한과 이용조건을 다시 확인합니다.':`현재 프로젝트의 외부 AI 이용조건이 ${projectReceipt.usage_policy?.external_ai??'UNKNOWN'}입니다. 프로젝트 이용조건에서 근거와 함께 ALLOW를 기록해야 실행할 수 있습니다.`}</Alert>}
+ <FormControlLabel control={<Checkbox checked={consent} disabled={busy || !input || policyBlocked} onChange={e=>setConsent(e.target.checked)}/>} label="공개·사용 허가된 비민감 자료임을 확인했고, 위 문구·문맥·질문을 위에 표시된 실행 모델에 전송하여 해당 모델 사용량을 소비하는 데 동의합니다."/>
+ <div className="design-toolbar"><Button variant="contained" disabled={busy || !input || !consent || policyBlocked || !import.meta.env.DEV} onClick={()=>void run()}>{busy?'에이전트 검토 중':'이 원문으로 에이전트 실행'}</Button>{busy&&<Button onClick={()=>controller.current?.abort()}>실행 중단</Button>}{raw&&<Button onClick={()=>downloadText('trialboard-pdf-agent.json',raw,'application/json')}>원본 실행 JSON 저장</Button>}</div>
  {(busy || events.length>0 || error)&&<><Button onClick={()=>setFocus(true)}>작업 보드 크게 보기</Button>{!focus&&board}</>}
  <Dialog fullScreen open={focus} onClose={()=>setFocus(false)} aria-labelledby="live-focus-title"><DialogTitle id="live-focus-title">TrialBoard · 실시간 에이전트 작업</DialogTitle><DialogContent className="live-focus-content"><p>{context.asset} / {context.study} · {context.question}</p>{board}</DialogContent><DialogActions className="live-focus-actions"><span>{isMocSource(source)?'MOC · 합성 PDF / 실제 모델 실행 / 전문가 승인 아님':'선택 원문 기반 · 임상 승인 아님'}</span>{busy&&<Button onClick={()=>controller.current?.abort()}>실행 중단</Button>}{raw&&<Button onClick={()=>downloadText('trialboard-pdf-agent.json',raw,'application/json')}>원본 실행 JSON 저장</Button>}<Button variant="outlined" onClick={()=>setFocus(false)}>작업 화면으로 돌아가기</Button></DialogActions></Dialog>
  {error&&<Alert severity="error">{error}</Alert>}

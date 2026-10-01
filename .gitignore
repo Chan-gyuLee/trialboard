@@ -25,6 +25,7 @@ dacon-api-key
 web/node_modules/
 # Demo film is managed locally; product-only GitHub handoff.
 /video/
+/.remotion/
 video/node_modules/
 video/build/
 video/public/audio/

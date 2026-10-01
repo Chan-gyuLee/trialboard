@@ -8,8 +8,13 @@ from trialboard.agent.provider import ModelError
 from trialboard.research.models import ResearchReview, SearchPlan
 from trialboard.research.relevance import rank_sources, selection_record
 
-RESEARCH_CONTRACT_VERSION = "source-bound/1"
+RESEARCH_CONTRACT_VERSION = "source-bound/2"
 FOLLOWUP_PATTERN = r"^[A-Za-z0-9 -]{2,80}$"
+CONTRARIAN_PATTERN = re.compile(
+    r"\b(?:failure|failed|adverse|negative|discontinu(?:ation|ed)|toxicity|"
+    r"intolerability|withdrawal|termination)\b",
+    re.I,
+)
 
 
 class ResearchValidationError(ValueError):
@@ -24,13 +29,10 @@ def source_bound_schema(contract, source_ids):
     ids = sorted(set(source_ids))
     if contract is SearchPlan:
         definition, field = "Priority", "priorities"
-        schema["properties"]["followup_terms"]["items"].update(
+        term = schema["$defs"]["PlannedFollowup"]["properties"]["term"]
+        term.update(
             pattern=FOLLOWUP_PATTERN,
-            description=(
-                "Short English keywords only: ASCII letters, digits, spaces and hyphens; "
-                "2–80 characters. No trial IDs, quotes, parentheses, URLs or query syntax. "
-                "The application adds the selected drug anchor."
-            ),
+            description="Short English keywords only; no IDs, URLs or query syntax.",
         )
     elif contract is ResearchReview:
         definition, field = "Insight", "findings"
@@ -75,9 +77,22 @@ def validate_plan(value, source_ids):
         not re.fullmatch(FOLLOWUP_PATTERN, term)
         or not term.strip()
         or re.search(r"\bNCT\d+\b", term, re.I)
-        for term in plan.followup_terms
+        for item in plan.followups
+        for term in [item.term]
     ):
         raise ResearchValidationError("INVALID_FOLLOWUP_TERMS", "followup_terms")
+    contrarian = [item for item in plan.followups if CONTRARIAN_PATTERN.search(item.term)]
+    if (
+        not contrarian
+        or plan.followups[0].intent != "CONTRARIAN"
+        or any(item.intent != "CONTRARIAN" for item in contrarian)
+    ):
+        raise ResearchValidationError("INVALID_FOLLOWUP_INTENT", "followups.intent")
+    if any(
+        item.intent == "CONTRARIAN" and not CONTRARIAN_PATTERN.search(item.term)
+        for item in plan.followups
+    ):
+        raise ResearchValidationError("INVALID_FOLLOWUP_INTENT", "followups.intent")
     return plan
 
 
@@ -116,11 +131,21 @@ def research_failure_code(error):
     if isinstance(error, ValueError) and str(error) in {
         "UNKNOWN_PRIORITY_SOURCE",
         "INVALID_FOLLOWUP_TERMS",
+        "INVALID_FOLLOWUP_INTENT",
         "UNSUPPORTED_REVIEW_CITATION",
         "CONTRADICTED_ALLOCATION_CLAIM",
     }:
         return str(error)
     if isinstance(error, ModelError) and str(error) in {
+        "MODEL_IDENTITY_INVALIDATED",
+        "MODEL_RESEARCH_EXTERNAL_AI_NOT_ALLOWED",
+        "MODEL_RESEARCH_POLICY_CHANGED",
+        "MODEL_RESEARCH_VERSION_MISMATCH",
+        "MODEL_RESEARCH_BINDING_MISMATCH",
+        "MODEL_RESEARCH_PAYLOAD_MISMATCH",
+        "MODEL_RESEARCH_PAYLOAD_LIMIT",
+        "MODEL_RESEARCH_POLICY_UNAVAILABLE",
+        "MODEL_RESEARCH_NOT_FOUND",
         "DACON_AUTH_FAILED",
         "DACON_REQUEST_REJECTED",
         "DACON_MODEL_OR_ENDPOINT_UNAVAILABLE",
@@ -147,6 +172,7 @@ def validation_details(error):
         fields = {
             "priorities.source_id",
             "followup_terms",
+            "followups.intent",
             "findings.source_id_or_quote",
             "findings.anchor_id",
         }
@@ -157,6 +183,9 @@ def validation_details(error):
         return []
     names = {
         "followup_terms",
+        "followups",
+        "term",
+        "intent",
         "priorities",
         "missing_evidence",
         "source_id",

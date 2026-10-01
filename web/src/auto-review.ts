@@ -1,7 +1,7 @@
 /** One consent-bound workflow using the real collector/agent APIs. No synthetic fallback. */
 import {isLocalDemo} from './agent-live.ts';
 import {readScoutReceipt,readScoutStream,type Receipt,type Study} from './evidence-scout.ts';
-import {readResearchResult,readResearchStream,type ResearchResult,type ResearchEvent} from './research.ts';
+import {planFollowups,readResearchResult,readResearchStream,type ResearchResult,type ResearchEvent} from './research.ts';
 import {trialPriority,type TrialPriority} from './trial-priority.ts';
 import {prepareAutoDocument,type AutoDocument} from './auto-document.ts';
 import {extractAutomatically,loadAutoSaved,type AutoSaved} from './auto-extraction.ts';
@@ -57,7 +57,7 @@ export function autoWorkStates(events:AutoEvent[],outcome:AutoOutcome|null,busy:
  return [
   searched?'done':busy?'running':events.length?'partial':'waiting',
   collectFinished?(failedCollection?'partial':'done'):researching?(busy?'running':'partial'):'waiting',
-  plan?(plan.followup_terms.length===0?'skipped':reviewStarted||c?(failedCollection?'partial':'done'):busy?'running':'partial'):planStarted?(busy?'running':'partial'):'waiting',
+  plan?(planFollowups(plan).length===0?'skipped':reviewStarted||c?(failedCollection?'partial':'done'):busy?'running':'partial'):planStarted?(busy?'running':'partial'):'waiting',
   review?'done':reviewStarted?(busy?'running':'partial'):'waiting',
  ];
 }

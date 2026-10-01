@@ -17,6 +17,10 @@ print(json.dumps({'source': f['source']['source'], 'report':run(f)}))
 `], { cwd:root, encoding:"utf8", timeout:30000, maxBuffer:2_000_000 }));
 const review = restoreReview(JSON.stringify(f.report.revalidation.review), f.source);
 const result = await readDesignResult(JSON.stringify(f.report), review, f.source);
+const legacyReport = structuredClone(f.report);
+legacyReport.schema_version = "design-comparison/1";
+for (const question of legacyReport.kol_questions) { delete question.urgency_score; delete question.urgency_reasons; }
+const legacyResult = await readDesignResult(JSON.stringify(legacyReport), review, f.source);
 const input = { status:"FOLLOW_UP", answer:"Not yet confirmed", owner:"Team member", nextAction:"Ask a statistician", reason:"Need independent review" };
 const at = "2026-09-14T01:00:00.000Z";
 test("one meeting packet restores review, design and note history using only the same PDF", async () => {
@@ -65,10 +69,28 @@ test("meeting JSON fully restores a version-bound comparison plus notes", async 
   const continued = recordNote(restored.notes, restored.result, "statistics", {...input, reason:"Next meeting"}, "2026-09-14T02:00:00.000Z");
   assert.equal(continued.revisions[1].revision, 2);
 });
+test("legacy /1 report and existing kol-meeting-notes/1 history restore with original hash binding", async () => {
+  const notes = recordNote(newMeeting(legacyResult), legacyResult, "statistics", input, at);
+  const before = structuredClone(legacyReport), restored = await restorePacket(packetJson(legacyResult, notes), review, f.source);
+  assert.equal(restored.result.reportKey, legacyResult.reportKey);
+  assert.deepEqual(restored.notes, notes);
+  assert.ok(restored.result.questions.every(q => q.urgency_score === undefined));
+  assert.deepEqual(legacyReport, before);
+  assert.ok(packetMarkdown(restored.result, notes).includes("이전 /1 보고서에 기록 없음"));
+});
 test("meeting packet includes citations, all assumptions, MC errors and unanswered questions", () => {
   const md = packetMarkdown(result, newMeeting(result));
+  const plain = md.replaceAll("\\", "");
   for (const text of ["PDF p.1", "원문 연결 근거", "가정한 이상반응 한계", "Monte Carlo", "미답변", "가정별 계산 결과", "수정 이력", result.briefDigest, result.reportKey]) assert.ok(md.includes(text), text);
   assert.ok(md.includes("AI 재검토: 미제공"));
+  let previous = -1;
+  for (const question of result.questions) {
+    const index = plain.indexOf(question.question);
+    assert.ok(index > previous, `question export order: ${question.id}`);
+    previous = index;
+    assert.ok(md.includes(`규칙 기반 우선순위 점수: ${question.urgency_score}`));
+    for (const reason of question.urgency_reasons) assert.ok(plain.includes(reason), reason);
+  }
 });
 test("user-entered HTML, Markdown links and tables cannot become executable packet markup", () => {
   const notes = recordNote(newMeeting(result), result, "statistics", { ...input, answer:'<script>alert(1)</script> [link](javascript:alert(1)) | new\n# header', reason:'<img src=x onerror=alert(1)>' }, at);
@@ -108,5 +130,9 @@ test("meeting packet approval and changed result are rejected", async () => {
   const raw = JSON.parse(packetJson(result, newMeeting(result))); raw.clinical_approval = true;
   await assert.rejects(restorePacket(JSON.stringify(raw), review, f.source));
   raw.clinical_approval = false; raw.report.run_id = "a-different-execution";
+  await assert.rejects(restorePacket(JSON.stringify(raw), review, f.source));
+});
+test("meeting packet rejects unknown top-level fields", async () => {
+  const raw = JSON.parse(packetJson(result, newMeeting(result))); raw.urgency_override = true;
   await assert.rejects(restorePacket(JSON.stringify(raw), review, f.source));
 });

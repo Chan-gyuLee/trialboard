@@ -23,7 +23,7 @@ def test_wire_schema_binds_both_stages_without_mutating_stored_contracts():
     old = SearchPlan.model_json_schema()
     schema = source_bound_schema(SearchPlan, ["paper_2", "paper_1", "paper_2"])
     assert schema["$defs"]["Priority"]["properties"]["source_id"]["enum"] == ["paper_1", "paper_2"]
-    assert schema["properties"]["followup_terms"]["items"]["pattern"] == FOLLOWUP_PATTERN
+    assert schema["$defs"]["PlannedFollowup"]["properties"]["term"]["pattern"] == FOLLOWUP_PATTERN
     assert SearchPlan.model_json_schema() == old
     review = source_bound_schema(ResearchReview, ["paper_3"])
     assert review["$defs"]["Insight"]["properties"]["source_id"]["enum"] == ["paper_3"]
@@ -54,13 +54,54 @@ def test_no_sources_means_no_cited_items(contract, field):
 def test_invalid_search_syntax_is_visible_in_schema_and_rejected_locally(term):
     assert re.fullmatch(FOLLOWUP_PATTERN, term) is None
     with pytest.raises(ValueError, match="INVALID_FOLLOWUP_TERMS"):
-        validate_plan({"priorities": [], "missing_evidence": [], "followup_terms": [term]}, set())
+        validate_plan(
+            {
+                "priorities": [],
+                "missing_evidence": [],
+                "followups": [{"term": term, "intent": "CONTRARIAN"}],
+            },
+            set(),
+        )
 
 
 @pytest.mark.parametrize("term", ["NCT00000001", "  "])
 def test_semantic_query_checks_remain_after_schema(term):
     with pytest.raises(ValueError, match="INVALID_FOLLOWUP_TERMS"):
-        validate_plan({"priorities": [], "missing_evidence": [], "followup_terms": [term]}, set())
+        validate_plan(
+            {
+                "priorities": [],
+                "missing_evidence": [],
+                "followups": [{"term": term, "intent": "CONTRARIAN"}],
+            },
+            set(),
+        )
+
+
+@pytest.mark.parametrize(
+    "followups",
+    [
+        [{"term": "dose comparison", "intent": "EVIDENCE_GAP"}],
+        [{"term": "adverse events", "intent": "EVIDENCE_GAP"}],
+        [{"term": "dose comparison", "intent": "CONTRARIAN"}],
+    ],
+)
+def test_missing_or_mislabeled_contrarian_intent_is_rejected(followups):
+    with pytest.raises(ValueError, match="INVALID_FOLLOWUP_INTENT"):
+        validate_plan({"priorities": [], "missing_evidence": [], "followups": followups}, set())
+
+
+def test_missing_intent_field_is_schema_rejected():
+    with pytest.raises(ValidationError):
+        validate_plan(
+            {"priorities": [], "missing_evidence": [], "followups": [{"term": "adverse"}]},
+            set(),
+        )
+
+
+@pytest.mark.parametrize("followups", [[], [{"term": "adverse", "intent": "CONTRARIAN"}] * 3])
+def test_followup_budget_requires_one_and_allows_at_most_two(followups):
+    with pytest.raises(ValidationError):
+        validate_plan({"priorities": [], "missing_evidence": [], "followups": followups}, set())
 
 
 def test_unknown_ids_and_quotes_are_not_repaired():
@@ -69,7 +110,7 @@ def test_unknown_ids_and_quotes_are_not_repaired():
             {
                 "priorities": [{"source_id": "other", "reason": "MOC"}],
                 "missing_evidence": [],
-                "followup_terms": [],
+                "followups": [{"term": "adverse events", "intent": "CONTRARIAN"}],
             },
             {"paper_1"},
         )
@@ -89,11 +130,16 @@ def test_unknown_ids_and_quotes_are_not_repaired():
 def test_safe_schema_details_do_not_leak_extra_keys_values_or_messages():
     try:
         SearchPlan.model_validate(
-            {"followup_terms": ["secret-value"] * 3, "private-key-as-field": "private-value"}
+            {
+                "followups": [
+                    {"term": "secret-value", "intent": "CONTRARIAN"}
+                ] * 3,
+                "private-key-as-field": "private-value",
+            }
         )
     except ValidationError as error:
         details = validation_details(error)
-    assert any(d["field"] == "followup_terms" and d["type"] == "too_long" for d in details)
+    assert any(d["field"] == "followups" and d["type"] == "too_long" for d in details)
     assert any(d["field"] == "unknown_field" for d in details)
     assert not any(x in str(details) for x in ["secret-value", "private-key", "private-value"])
 
@@ -117,4 +163,4 @@ def test_live_engine_passes_each_calls_actual_source_ids_and_contract_version(se
         segment["anchor_id"] for s in call["payload"]["sources"] for segment in s["segments"]
     }
     assert len(run.calls) == 2 and all(c["validation"] == "PASSED" for c in run.calls)
-    assert [c["contract_version"] for c in run.calls] == ["source-bound/1", "source-spans/2"]
+    assert [c["contract_version"] for c in run.calls] == ["source-bound/2", "source-spans/2"]

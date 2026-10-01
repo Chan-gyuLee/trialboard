@@ -111,7 +111,10 @@ export function packetMarkdown(result: DesignResult, notes: MeetingNotes): strin
   lines.push("", "## KOL 질문과 사용자 회의 메모 — 전문가 답변 인증 아님", "");
   for (const q of result.questions) {
     const note = latestNote(notes, q.id);
-    lines.push(`### ${escape(q.question)}`, "", `우선순위: ${q.priority} · ${note ? NOTE_STATUS[note.status] : "미답변"}`, `연결 맥락: ${escape(canonical(q.trigger))}`, "");
+    const urgencyLabel = q.urgency_score === undefined ? "규칙 기반 우선순위 점수: 이전 /1 보고서에 기록 없음" : `규칙 기반 우선순위 점수: ${q.urgency_score} · 측정 위험 아님`;
+    lines.push(`### ${escape(q.question)}`, "", `우선순위: ${q.priority} · ${note ? NOTE_STATUS[note.status] : "미답변"}`, urgencyLabel);
+    for (const reason of q.urgency_reasons ?? []) lines.push(`긴급도 이유: ${escape(reason)}`);
+    lines.push(`연결 맥락: ${escape(canonical(q.trigger))}`, "");
     if (note) lines.push(`답변 메모: ${escape(note.answer || "없음")}`, `담당자(사용자 기재): ${escape(note.owner || "미정")}`, `다음 행동: ${escape(note.nextAction || "미정")}`, `변경 사유: ${escape(note.reason)}`, "");
   }
   lines.push("## 회의 기록 수정 이력", "");

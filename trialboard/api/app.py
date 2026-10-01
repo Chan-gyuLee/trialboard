@@ -25,6 +25,15 @@ from trialboard.api.models import (
     ExecutionInput,
     ExecutionOutput,
 )
+from trialboard.api.team_auth import (
+    AccessMode,
+    TeamAccessBoundary,
+    TeamDataPath,
+    TeamIdentity,
+    assert_route_policy_complete,
+    auth_router,
+    validate_team_configuration,
+)
 from trialboard.review.engine import run_review
 from trialboard.review.example import make_example
 from trialboard.review.report import to_markdown
@@ -40,11 +49,26 @@ def create_app(
     enable_evidence_scout: bool = False,
     agent_provider: str = "dacon",
     evidence_db: Path = Path("output/evidence/trialboard.sqlite3"),
+    access_mode: AccessMode | str = AccessMode.LEGACY_LOOPBACK,
+    identity_db: Path | None = None,
+    team_storage_root: Path | None = None,
 ) -> FastAPI:
     from trialboard.agent.runtime import runtime_metadata, runtime_provider
 
     metadata = runtime_metadata(agent_provider)
     provider_factory = lambda: runtime_provider(agent_provider)  # noqa: E731
+    access_mode = AccessMode(access_mode)
+    if access_mode is AccessMode.TEAM:
+        if identity_db is None or team_storage_root is None:
+            raise ValueError("TEAM_REQUIRES_IDENTITY_AND_STORAGE")
+        validate_team_configuration(identity_db, team_storage_root, evidence_db)
+        routed_evidence_db = TeamDataPath(team_storage_root, forbidden_path=evidence_db)
+        identity = TeamIdentity(identity_db)
+    else:
+        if identity_db is not None or team_storage_root is not None:
+            raise ValueError("TEAM_CONFIGURATION_REQUIRES_TEAM_MODE")
+        routed_evidence_db = evidence_db
+        identity = None
     app = FastAPI(
         title="TrialBoard local review API",
         version="0.1.0",
@@ -54,9 +78,19 @@ def create_app(
             "별도 opt-in 에이전트는 설정된 대회 API 또는 명시적으로 선택한 Codex로 실행. "
             "입력 확률은 근거에서 추정하지 않은 사용자의 가정입니다."
         ),
+        docs_url=None if access_mode is AccessMode.TEAM else "/docs",
+        redoc_url=None if access_mode is AccessMode.TEAM else "/redoc",
+        openapi_url=None if access_mode is AccessMode.TEAM else "/openapi.json",
     )
     slots = BoundedSemaphore(MAX_CONCURRENT_RUNS)
     model_slot = BoundedSemaphore(1)
+
+    def restricted_source(digest: str) -> bool:
+        if access_mode is not AccessMode.TEAM or not enable_evidence_scout:
+            return False
+        from trialboard.api.projects import restricted_project_digest
+
+        return restricted_project_digest(routed_evidence_db, digest)
 
     @app.get("/api/design-proposals/capabilities")
     async def proposal_capabilities() -> dict:
@@ -72,7 +106,15 @@ def create_app(
     if enable_designs and enable_pdf_agent:
         from trialboard.api.proposals import proposal_router
 
-        app.include_router(proposal_router(model_slot, provider_factory))
+        app.include_router(
+            proposal_router(
+                model_slot,
+                provider_factory,
+                restricted_source,
+                identity=identity,
+                data_path=routed_evidence_db,
+            )
+        )
 
     @app.get("/api/evidence-scout/capabilities")
     async def scout_capabilities() -> dict:
@@ -85,21 +127,39 @@ def create_app(
         }
 
     if enable_evidence_scout:
+        from trialboard.api.prepared_pdf_review import prepared_pdf_review_router
         from trialboard.api.projects import project_router
         from trialboard.api.research import research_router
+        from trialboard.api.saved_review import saved_review_router
         from trialboard.api.scout import scout_router
 
-        app.include_router(scout_router(evidence_db))
-        app.include_router(research_router(evidence_db, model_slot, provider_factory))
-        app.include_router(project_router(evidence_db))
+        app.include_router(scout_router(routed_evidence_db, identity=identity))
+        app.include_router(research_router(
+            routed_evidence_db, model_slot, provider_factory, identity=identity
+        ))
+        app.include_router(saved_review_router(
+            routed_evidence_db, model_slot, provider_factory, identity
+        ))
+        app.include_router(prepared_pdf_review_router(
+            routed_evidence_db, model_slot, provider_factory, identity
+        ))
+        app.include_router(
+            project_router(
+                routed_evidence_db,
+                collaboration=access_mode is AccessMode.TEAM,
+                member_resolver=(
+                    identity.active_team_members if access_mode is AccessMode.TEAM else None
+                ),
+            )
+        )
         if enable_designs:
             from trialboard.api.exploration import exploration_router
 
-            app.include_router(exploration_router(evidence_db, slots))
+            app.include_router(exploration_router(routed_evidence_db, slots))
         if enable_pdf_agent:
             from trialboard.api.automation import automation_router
 
-            app.include_router(automation_router(evidence_db, model_slot, provider_factory))
+            app.include_router(automation_router(routed_evidence_db, model_slot, provider_factory))
 
     @app.get("/api/agent-demo/capabilities")
     async def agent_capabilities() -> dict:
@@ -130,6 +190,9 @@ def create_app(
                 enable_fixed=enable_agent_demo,
                 model_slot=model_slot,
                 provider_factory=provider_factory,
+                restricted_source=restricted_source,
+                identity=identity,
+                data_path=routed_evidence_db,
             )
         )
 
@@ -145,7 +208,17 @@ def create_app(
             "status": "ok",
             "evidence_mode": "LOCAL_PDF_OPT_IN" if enable_designs else "SYNTHETIC_ONLY",
             "persisted": enable_evidence_scout,
+            "access_mode": access_mode,
         }
+
+    if access_mode is AccessMode.LEGACY_LOOPBACK:
+
+        @app.get("/api/access-mode")
+        async def legacy_access_mode() -> dict:
+            return {"mode": access_mode, "tls": False, "production_ready": False}
+    else:
+        assert identity is not None
+        app.include_router(auth_router(identity))
 
     @app.get("/api/design-comparisons/capabilities")
     async def design_capabilities() -> dict:
@@ -164,7 +237,12 @@ def create_app(
             if not slots.acquire(blocking=False):
                 return JSONResponse({"error": {"code": "RUN_CAPACITY_REACHED"}}, status_code=429)
             try:
-                return execute_design(raw)
+                return execute_design(raw, restricted_source)
+            except PermissionError:
+                return JSONResponse(
+                    {"error": {"code": "PRIVATE_PROJECT_DERIVED_ACTIONS_DISABLED"}},
+                    status_code=403,
+                )
             except (ValueError, TypeError, AttributeError):
                 return JSONResponse({"error": {"code": "DESIGN_INPUT_MISMATCH"}}, status_code=422)
             except Exception:
@@ -237,9 +315,14 @@ def create_app(
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(DEV_ORIGINS),
-        allow_methods=["GET", "POST"],
-        allow_headers=["Content-Type"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+        allow_headers=["Content-Type", "X-CSRF-Token", "X-TrialBoard-Session-Context"],
+        allow_credentials=access_mode is AccessMode.TEAM,
     )
+    if access_mode is AccessMode.TEAM:
+        assert identity is not None
+        assert_route_policy_complete(app.routes)
+        app.add_middleware(TeamAccessBoundary, identity=identity, routes=app.routes)
     from trialboard.api.projects import PROJECT_BODY_BYTES
 
     app.add_middleware(

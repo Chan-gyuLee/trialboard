@@ -51,7 +51,7 @@ class LocalBoundary:
                 ]
             await send(message)
 
-        if scope["method"] != "POST":
+        if scope["method"] not in {"POST", "PUT", "PATCH", "DELETE"}:
             await self.app(scope, receive, safe_send)
             return
         body_limit = (
@@ -60,7 +60,12 @@ class LocalBoundary:
             and self.design_body_bytes is not None
             else MAX_BODY_BYTES
         )
-        if scope.get("path") == "/api/projects" and self.project_body_bytes is not None:
+        if scope.get("path") in {
+            "/api/projects",
+            "/api/projects/source-versions",
+            "/api/projects/import/preview",
+            "/api/projects/import/commit",
+        } and self.project_body_bytes is not None:
             body_limit = self.project_body_bytes
         if (
             self.project_body_bytes is not None

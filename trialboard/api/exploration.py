@@ -1,15 +1,19 @@
 """Bounded, opt-in local synthetic exploration; no model or external requests."""
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
 
 from trialboard.api.boundary import DEV_ORIGINS
 from trialboard.research.exploration import ExplorationStore
+from trialboard.research.source_policy import require_content
 
 
 def exploration_router(path, slots):
     store = ExplorationStore(path)
-    router = APIRouter(prefix="/api/research/runs")
+    def content_gate(run_id: str):
+        require_content(path, run_id)
+
+    router = APIRouter(prefix="/api/research/runs", dependencies=[Depends(content_gate)])
 
     @router.get("/{run_id}/exploration")
     async def read(run_id: str):

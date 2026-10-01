@@ -38,6 +38,17 @@ test('parallel requests retain individual receipts; totals are never summed',()=
  assert.equal(state.requests.length,2);assert.equal(state.requests.find(r=>r.query==='NCT').receipt.total,23);
  assert.equal(state.requests.find(r=>r.query==='drug').receipt.status,'FAILED');assert.equal(state.inventory,undefined);
 });
+test('followup intent is linked to its actual request without turning failure into success',()=>{
+ const query='TITLE_ABS:"MOC" AND (adverse discontinuation) AND SRC:MED';
+ const followup={term:'adverse discontinuation',intent:'CONTRARIAN',origin:'MODEL',query,coverage_index:1,status:'FAILED',attempted:true};
+ const receipt={channel:'Europe PMC / PubMed',query,status:'FAILED',total:null,fetched:0,limited:false};
+ const es=[event('SEARCH',1,{channel:'AI 추가 PubMed',query}),event('GAP',2,{channel:'AI 추가 PubMed',query,coverage:receipt}),event('FOLLOWUP_RECORDED',3,{channel:'AI 추가 PubMed',query,followup})];
+ const state=researchProgress(es.map(research=>({stage:'RESEARCH',research})));
+ assert.equal(state.requests[0].followup.intent,'CONTRARIAN');
+ assert.equal(state.requests[0].receipt.status,'FAILED');
+ assert.equal(researchTelemetry(es[2]).followup.attempted,true);
+ for(const changed of [{intent:'EVIDENCE_GAP'},{term:'NCT00000001'},{query:'TITLE_ABS:"MOC" AND (positive) AND SRC:MED'},{status:'SKIPPED'}])assert.throws(()=>researchTelemetry({...es[2],followup:{...followup,...changed}}));
+});
 test('live stream fails closed on invalid receipt',async()=>{
  const es=[event('STARTED',1),event('SOURCE',2,{inventory:{...inventory,total:0}}),event('COMPLETE',3)];
  await assert.rejects(readResearchStream(new Response(es.map(e=>'data: '+JSON.stringify(e)+'\n\n').join(''),{headers:{'content-type':'text/event-stream'}}),()=>{}));

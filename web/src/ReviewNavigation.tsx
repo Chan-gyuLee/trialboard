@@ -2,7 +2,12 @@ import {useId,useState} from 'react';
 import {Button,Collapse} from '@mui/material';
 import {ArrowRight,ChevronDown,History,SlidersHorizontal} from 'lucide-react';
 import BrandLogo from './BrandLogo';
+import SourcePolicyManager from './SourcePolicyManager';
+import SavedResearchReview from './SavedResearchReview';
+import ResearchPdfPolicy from './ResearchPdfPolicy';
+import ResearchRawPolicy from './ResearchRawPolicy';
 import type {Collection} from './research';
+import type {ScoutContext} from './evidence-scout';
 import styles from './ReviewNavigation.module.css';
 
 export function ReviewHeader({step}:{step:0|1|2}){
@@ -16,7 +21,7 @@ export function ReviewHeader({step}:{step:0|1|2}){
 
 const statusLabels:Record<string,string>={COMPLETE:'완료',PARTIAL:'부분 완료',FAILED:'실패',CANCELLED:'중단',RUNNING:'진행 중'};
 type SavedReview=Pick<Collection,'id'|'request'|'status'|'created_at'>;
-export function ReviewTools({history,disabled,onOpen,onManual}:{history:SavedReview[];disabled:boolean;onOpen:(id:string)=>void;onManual:()=>void}){
+export function ReviewTools({history,disabled,onOpen,onManual,onIntake}:{history:SavedReview[];disabled:boolean;onOpen:(id:string)=>void;onManual:()=>void;onIntake?:(context:ScoutContext)=>void}){
  const [expanded,setExpanded]=useState(false),panelId=useId();
  return <section className={styles.tools} aria-label="검토 기록과 상세 검색">
   <div className={styles.toolbar}>
@@ -31,7 +36,7 @@ export function ReviewTools({history,disabled,onOpen,onManual}:{history:SavedRev
      <span className={styles.recordTitle}><strong>{h.request.asset}</strong><span>{h.request.nct_id}</span></span>
      <span className={styles.recordMeta}><span className={styles.status} data-status={h.status}>{statusLabels[h.status]??h.status}</span><time dateTime={h.created_at}>{new Date(h.created_at).toLocaleString('ko-KR',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})}</time></span>
      <ArrowRight size={17} className={styles.openIcon} aria-hidden="true"/>
-    </button></li>)}
+    </button><SourcePolicyManager runId={h.id} disabled={disabled}/><SavedResearchReview runId={h.id} disabled={disabled} onIntake={onIntake}/><ResearchPdfPolicy runId={h.id} disabled={disabled}/><ResearchRawPolicy runId={h.id} disabled={disabled}/></li>)}
    </ul>
   </Collapse>
  </section>;

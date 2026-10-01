@@ -1,6 +1,7 @@
 import { canonical, digest } from "./field-review.ts";
 import { consumeAgentStream, isLocalDemo, type LiveProgress } from "./agent-live.ts";
 import type { PdfSource, EvidenceNote } from "./pdf-contract.ts";
+import type {ProjectModelBinding} from "./project-checkpoint.ts";
 export type PdfAgentContext={asset:string;indication:string;study:string;question:string};
 /** User selects text candidates without asserting a visual/clinical review. Never invent notes. */
 export function pdfCandidateInput(source:Pick<PdfSource,'pages'|'sha256'>,spanIds:string[],context:PdfAgentContext,contextRadius:2|6=2){
@@ -30,9 +31,9 @@ export function pdfAgentInput(source:PdfSource,notes:EvidenceNote[],context:PdfA
  if(!spans.length || spans.length>40 || spans.some(s=>s.text.length>2000) || new TextEncoder().encode(spans.map(s=>s.text).join('')).length>24000) throw new Error("선택 문구와 앞뒤 문맥이 한도를 넘습니다. 원문 메모 범위를 줄여 주세요.");
  return {...context,spans,provenance:"user_pdf_export_unverified"};
 }
-export async function executePdfAgent(input:ReturnType<typeof pdfAgentInput>,consent:boolean,signal:AbortSignal,onProgress:(p:LiveProgress)=>void,location:Pick<Location,"hostname"|"port"|"protocol">=window.location,fetcher:typeof fetch=fetch) {
+export async function executePdfAgent(input:ReturnType<typeof pdfAgentInput>,consent:boolean,signal:AbortSignal,onProgress:(p:LiveProgress)=>void,location:Pick<Location,"hostname"|"port"|"protocol">=window.location,fetcher:typeof fetch=fetch,modelBinding?:ProjectModelBinding) {
  if(!consent || !isLocalDemo(location)) throw new Error("로컬 화면에서 선택 문구의 모델 전송에 동의해야 합니다.");
- const body=JSON.stringify({input,consent:true});if(new TextEncoder().encode(body).length>32768) throw new Error("전송 요청이 32 KiB를 넘습니다. 문구 또는 질문 범위를 줄여 주세요.");
+ const body=JSON.stringify({input,consent:true,...(modelBinding?{public_authorized_non_sensitive:true,model_binding:modelBinding}:{})});if(new TextEncoder().encode(body).length>32768) throw new Error("전송 요청이 32 KiB를 넘습니다. 문구 또는 질문 범위를 줄여 주세요.");
  const expected=await digest(canonical(input));
  const caps=await fetcher('/api/agent-demo/capabilities',{signal,cache:'no-store',credentials:'omit',redirect:'error'});
  if(!caps.ok) throw new Error("로컬 실행 설정을 확인하지 못했습니다.");

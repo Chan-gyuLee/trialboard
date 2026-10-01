@@ -14,6 +14,9 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from trialboard.api.team_auth import TeamDataPath, current_access_scope, resolve_database_path
+from trialboard.serialization import sha256_json
+
 API = "https://clinicaltrials.gov/api/v2/studies"
 MAX_BYTES = 4_000_000
 LIMIT = 20
@@ -55,7 +58,11 @@ async def fetch_registry(query: str) -> dict:
             raw.extend(chunk)
             if len(raw) > MAX_BYTES:
                 raise ValueError("Registry response too large")
-    data = json.loads(raw)
+    from trialboard.agent.provider import parse_json
+
+    data = parse_json(raw)
+    if not isinstance(data, dict):
+        raise ValueError("INVALID_REGISTRY_RESPONSE")
     return {"studies": [data], "totalCount": 1} if nct else data
 
 
@@ -143,12 +150,13 @@ def normalize(data: dict) -> list[dict]:
 class EvidenceStore:
     """Append-only search receipts and content-addressed public snapshots, local only."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path | TeamDataPath):
         self.path = path
 
     def connect(self):
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        con = sqlite3.connect(self.path, timeout=5)
+        path = resolve_database_path(self.path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        con = sqlite3.connect(path, timeout=5)
         con.execute("PRAGMA foreign_keys = ON")
         con.execute(
             "CREATE TABLE IF NOT EXISTS snapshots (digest TEXT PRIMARY KEY, raw TEXT NOT NULL)"
@@ -159,7 +167,7 @@ class EvidenceStore:
         con.execute("CREATE INDEX IF NOT EXISTS idx_searches_created ON searches(created_at)")
         return con
 
-    def save(self, query: str, data: dict, rows: list[dict]) -> dict:
+    def save(self, query: str, data: dict, rows: list[dict], *, authorize=None) -> dict:
         raw = json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         digest = hashlib.sha256(raw.encode()).hexdigest()
         total = data.get("totalCount", len(rows))
@@ -181,6 +189,16 @@ class EvidenceStore:
         con = self.connect()
         try:
             with con:
+                con.execute("BEGIN IMMEDIATE")
+                if authorize:
+                    authorize()
+                con.execute("""CREATE TABLE IF NOT EXISTS search_receipt_integrity (
+                    search_id TEXT PRIMARY KEY,receipt_digest TEXT NOT NULL)""")
+                for operation in ("UPDATE", "DELETE"):
+                    trigger = "search_integrity_no_" + operation.lower()
+                    con.execute(f"""CREATE TRIGGER IF NOT EXISTS {trigger}
+                        BEFORE {operation} ON search_receipt_integrity
+                        BEGIN SELECT RAISE(ABORT,'IMMUTABLE_SEARCH_RECEIPT'); END""")
                 con.execute("INSERT OR IGNORE INTO snapshots VALUES (?, ?)", (digest, raw))
                 con.execute(
                     "INSERT INTO searches VALUES (?, ?, ?, ?)",
@@ -191,38 +209,162 @@ class EvidenceStore:
                         json.dumps(receipt, ensure_ascii=False),
                     ),
                 )
+                con.execute(
+                    "INSERT INTO search_receipt_integrity VALUES (?,?)",
+                    (receipt["id"], sha256_json(receipt)),
+                )
+                self._verified_receipt(
+                    con,
+                    (
+                        receipt["id"],
+                        receipt["created_at"],
+                        digest,
+                        len(json.dumps(receipt, ensure_ascii=False).encode()),
+                    ),
+                    {"search_receipt_integrity"},
+                )
+                if authorize:
+                    authorize()
         finally:
             con.close()
         return receipt
 
     def read(self, run_id: str | None = None):
-        if not self.path.exists():
+        path = self.path.lookup() if isinstance(self.path, TeamDataPath) else self.path
+        if path is None or not path.exists():
             return None if run_id else []
-        con = self.connect()
+        con = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
         try:
+            con.execute("BEGIN")
+            tables = {
+                r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            }
+            if not {"searches", "snapshots"}.issubset(tables):
+                return None if run_id else []
             if run_id:
-                row = con.execute("SELECT receipt FROM searches WHERE id = ?", (run_id,)).fetchone()
-                return json.loads(row[0]) if row else None
+                row = con.execute(
+                    "SELECT id,created_at,digest,length(CAST(receipt AS BLOB)) "
+                    "FROM searches WHERE id=?",
+                    (run_id,),
+                ).fetchone()
+                return self._verified_receipt(con, row, tables) if row else None
             rows = con.execute(
-                "SELECT receipt FROM searches ORDER BY created_at DESC LIMIT 20"
+                "SELECT id,created_at,digest,length(CAST(receipt AS BLOB)) "
+                "FROM searches ORDER BY created_at DESC LIMIT 20"
             ).fetchall()
-            return [{k: v for k, v in json.loads(r[0]).items() if k != "studies"} for r in rows]
+            return [
+                {
+                    k: v
+                    for k, v in self._verified_receipt(con, row, tables).items()
+                    if k != "studies"
+                }
+                for row in rows
+            ]
         finally:
             con.close()
 
+    @staticmethod
+    def _verified_receipt(con, row, tables):
+        from trialboard.agent.provider import parse_json
 
-def scout_router(path: Path) -> APIRouter:
+        sid, created, digest, receipt_size = row
+        size = con.execute(
+            "SELECT length(CAST(raw AS BLOB)) FROM snapshots WHERE digest=?", (digest,)
+        ).fetchone()
+        if not size or not 0 < size[0] <= 5_000_000 or not 0 < receipt_size <= 5_000_000:
+            raise ValueError("SEARCH_SNAPSHOT_INTEGRITY_FAILED")
+        raw = parse_json(
+            con.execute("SELECT raw FROM snapshots WHERE digest=?", (digest,)).fetchone()[0]
+        )
+        receipt = parse_json(
+            con.execute("SELECT receipt FROM searches WHERE id=?", (sid,)).fetchone()[0]
+        )
+        if (
+            not isinstance(raw, dict)
+            or sha256_json(raw) != digest
+            or not isinstance(receipt, dict)
+            or receipt.get("id") != sid
+            or receipt.get("created_at") != created
+            or receipt.get("digest") != digest
+        ):
+            raise ValueError("SEARCH_SNAPSHOT_INTEGRITY_FAILED")
+        integrity = (
+            con.execute(
+                "SELECT receipt_digest FROM search_receipt_integrity WHERE search_id=?", (sid,)
+            ).fetchone()
+            if "search_receipt_integrity" in tables
+            else None
+        )
+        if integrity:
+            if sha256_json(receipt) != integrity[0]:
+                raise ValueError("SEARCH_RECEIPT_INTEGRITY_FAILED")
+        else:
+            rows = normalize(raw)
+            total = raw.get("totalCount", len(rows))
+            expected = {
+                "id": sid,
+                "created_at": created,
+                "digest": digest,
+                "query": receipt.get("query"),
+                "source": "ClinicalTrials.gov API v2",
+                "mode": "LIVE_PUBLIC",
+                "total_count": total,
+                "fetched_count": len(rows),
+                "truncated": bool(raw.get("nextPageToken")) or total > len(rows),
+                "studies": rows,
+                "clinical_verified": False,
+            }
+            SearchInput(query=receipt.get("query"), public_query_confirmed=True)
+            if (
+                type(total) is not int
+                or total < len(rows)
+                or receipt != expected
+                or type(receipt.get("total_count")) is not int
+                or type(receipt.get("fetched_count")) is not int
+                or type(receipt.get("truncated")) is not bool
+                or receipt.get("clinical_verified") is not False
+            ):
+                raise ValueError("SEARCH_RECEIPT_INTEGRITY_FAILED")
+        return receipt
+
+
+def scout_router(path: Path, *, identity=None) -> APIRouter:
     router = APIRouter(prefix="/api/evidence-scout")
     store = EvidenceStore(path)
     lock = asyncio.Lock()
 
+    def authority(access, *, write):
+        if not isinstance(path, TeamDataPath):
+            return
+        fresh = identity.revalidate(access) if identity and access else None
+        if (
+            fresh is None
+            or (write and fresh.role not in ("admin", "reviewer"))
+            or (fresh.subject_id, fresh.team_id, fresh.role)
+            != (access.subject_id, access.team_id, access.role)
+        ):
+            raise HTTPException(403, "SCOUT_IDENTITY_INVALIDATED")
+
     @router.get("/searches")
     async def history():
-        return await asyncio.to_thread(store.read)
+        access = current_access_scope()
+        authority(access, write=False)
+        try:
+            result = await asyncio.to_thread(store.read)
+        except (ValueError, KeyError, TypeError, sqlite3.Error):
+            raise HTTPException(409, "SEARCH_RECEIPT_INTEGRITY_FAILED") from None
+        authority(access, write=False)
+        return result
 
     @router.get("/searches/{run_id}")
     async def saved(run_id: str):
-        result = await asyncio.to_thread(store.read, run_id)
+        access = current_access_scope()
+        authority(access, write=False)
+        try:
+            result = await asyncio.to_thread(store.read, run_id)
+        except (ValueError, KeyError, TypeError, sqlite3.Error):
+            raise HTTPException(409, "SEARCH_RECEIPT_INTEGRITY_FAILED") from None
+        authority(access, write=False)
         if result is None:
             raise HTTPException(404, "SEARCH_NOT_FOUND")
         return result
@@ -234,6 +376,14 @@ def scout_router(path: Path) -> APIRouter:
         if lock.locked():
             raise HTTPException(409, "SCOUT_BUSY")
         await lock.acquire()
+        access = current_access_scope()
+
+        def check():
+            authority(access, write=True)
+
+        def save(data, rows):
+            check()
+            return store.save(body.query, data, rows, authorize=check)
 
         async def stream():
             def event(stage: str, **payload):
@@ -241,15 +391,23 @@ def scout_router(path: Path) -> APIRouter:
 
             try:
                 yield event("SEARCHING", message="공개 등록정보 검색 요청 · 최대 20건")
+                check()
                 data = await fetch_registry(body.query)
+                check()
                 rows = normalize(data)
+                if re.fullmatch(r"NCT\d{8}", body.query.upper()) and any(
+                    row["nct_id"] != body.query.upper() for row in rows
+                ):
+                    raise ValueError("TRIAL_ID_MISMATCH")
                 yield event(
                     "COLLECTED", message=f"등록정보 {len(rows)}건 수신·구조화", count=len(rows)
                 )
                 yield event("SAVING", message="원본 스냅샷·출처·수집 시각을 로컬 DB에 저장 중")
-                receipt = await asyncio.to_thread(store.save, body.query, data, rows)
+                receipt = await asyncio.to_thread(save, data, rows)
+                check()
                 yield event("COMPLETE", receipt=receipt)
             except (
+                HTTPException,
                 httpx.HTTPError,
                 TimeoutError,
                 ValueError,

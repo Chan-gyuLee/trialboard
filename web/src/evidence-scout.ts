@@ -2,6 +2,7 @@ export type Study = { nct_id: string; title: string; url: string; conditions: st
 export type Receipt = { id: string; query: string; created_at: string; digest: string; total_count: number; fetched_count: number; truncated: boolean; studies: Study[]; mode: "LIVE_PUBLIC"; clinical_verified: false };
 export type ScoutContext = {asset: string; indication: string; study: string; question: string; receiptId: string; document?: {runId:string;sourceId:string;title:string}};
 export type ScoutEvent = {stage: string; message?: string; receipt?: Receipt};
+import {strictJson} from './field-review.ts';
 const object = (x: unknown): x is Record<string, unknown> => !!x && typeof x === "object" && !Array.isArray(x);
 const strings = (x: unknown): x is string[] => Array.isArray(x) && x.every(s=>typeof s === "string");
 const rows = (x: unknown, key: string) => Array.isArray(x) && x.every(s=>object(s) && typeof s[key] === "string");
@@ -16,10 +17,10 @@ export function readScoutReceipt(input: unknown): Receipt {
     !Number.isSafeInteger(r.total_count) || !Number.isSafeInteger(r.fetched_count) || typeof r.truncated !== "boolean" ||
     !Array.isArray(r.studies) || r.studies.length > 20 || r.fetched_count !== r.studies.length || (r.total_count as number) < r.studies.length ||
     ((r.total_count as number)>r.studies.length && !r.truncated)) return bad();
-  const seen = new Set<string>();
+  const seen = new Set<string>(),exactNct=/^NCT\d{8}$/i.test(r.query)?r.query.toUpperCase():null;
   for (const s of r.studies) {
     if (!object(s) || typeof s.nct_id !== "string" || !/^NCT\d{8}$/.test(s.nct_id) || seen.has(s.nct_id) ||
-      s.url !== `https://clinicaltrials.gov/study/${s.nct_id}` || typeof s.title !== "string" || !strings(s.conditions) || !strings(s.phases) ||
+      (exactNct!==null&&s.nct_id!==exactNct) || s.url !== `https://clinicaltrials.gov/study/${s.nct_id}` || typeof s.title !== "string" || !strings(s.conditions) || !strings(s.phases) ||
       typeof s.status !== "string" || !(s.updated === null || typeof s.updated === "string") || !(s.sponsor === null || typeof s.sponsor === "string") ||
       !(s.enrollment === null || object(s.enrollment) && Number.isSafeInteger(s.enrollment.count) && (s.enrollment.count as number)>=0 && typeof s.enrollment.type === "string") ||
       !rows(s.interventions,"name") || !rows(s.interventions,"type") || !rows(s.arms,"label") || !rows(s.primary_outcomes,"measure") ||
@@ -44,7 +45,7 @@ export async function readScoutStream(response: Response, query: string, onEvent
       buffer += decoder.decode(value,{stream:!done}); let newline:number;
       while ((newline=buffer.indexOf("\n"))>=0) {
         const line=buffer.slice(0,newline);buffer=buffer.slice(newline+1);if(!line.trim())continue;
-        const event:unknown=JSON.parse(line);
+        const event:unknown=strictJson(line,5_000_000);
         if(!object(event)) throw new Error("수집 이벤트 형식 오류");
         if(event.stage==="ERROR") throw new Error("공개 자료 수집·저장 실패. 기존 저장 기록은 유지됩니다.");
         if(event.stage!==stages[index++] || (event.message!==undefined && typeof event.message!=="string")) throw new Error("수집 이벤트 순서 오류");

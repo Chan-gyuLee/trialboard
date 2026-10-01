@@ -1,18 +1,21 @@
 """Local append-only source versions; independently recoverable collection runs."""
 
 import json
+import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
 from trialboard.api.scout import EvidenceStore
+from trialboard.api.team_auth import TeamDataPath, current_access_scope, resolve_database_path
 from trialboard.research.models import Collection, CurationInput, ResearchRequest
 from trialboard.serialization import sha256_json
 
 
 class ResearchStore(EvidenceStore):
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, *, capture_guard=None):
         super().__init__(path)
+        self.capture_guard = capture_guard
 
     def connect(self):
         con = super().connect()
@@ -49,6 +52,12 @@ class ResearchStore(EvidenceStore):
         try:
             with con:
                 con.execute("BEGIN IMMEDIATE")
+                if isinstance(self.path, TeamDataPath):
+                    from trialboard.research.source_policy import require_content_con
+
+                    context = require_content_con(con, run_id)
+                    if context.sources.get(item.id) != item:
+                        raise ValueError("RESEARCH_SOURCE_VERSION_MISMATCH")
                 revision = con.execute(
                     "SELECT COALESCE(MAX(revision), 0) FROM research_curation "
                     "WHERE run_id=? AND source_id=?",
@@ -84,8 +93,20 @@ class ResearchStore(EvidenceStore):
             con.close()
 
     def curation(self, run_id: str, source_id: str | None = None) -> list[dict]:
-        con = self.connect()
+        from trialboard.research.source_policy import (
+            existing_connection,
+            require_content_con,
+            tables,
+        )
+
+        team = isinstance(self.path, TeamDataPath)
+        con = existing_connection(self.path) if team else self.connect()
         try:
+            if team:
+                con.execute("BEGIN")
+                require_content_con(con, run_id)
+                if "research_curation" not in tables(con):
+                    return []
             if source_id:
                 rows = con.execute(
                     "SELECT data FROM research_curation WHERE run_id=? AND source_id=? "
@@ -125,14 +146,16 @@ class ResearchStore(EvidenceStore):
             coverage=[],
             events=[],
         )
-        self.save_run(run)
+        self.save_run(run, record_new_owner=True)
         return run
 
-    def save_run(self, run: Collection):
+    def save_run(self, run: Collection, *, record_new_owner: bool = False):
         con = self.connect()
         try:
             with con:
                 con.execute("BEGIN IMMEDIATE")
+                if self.capture_guard:
+                    self.capture_guard.check(run, con)
                 previous = con.execute(
                     "SELECT data FROM research_runs WHERE id=?", (run.id,)
                 ).fetchone()
@@ -140,12 +163,25 @@ class ResearchStore(EvidenceStore):
                     e.get("stage") == "RECOVERED" for e in json.loads(previous[0])["events"]
                 ):
                     raise ValueError("RECOVERED_RUN_IS_CLOSED")
+                if record_new_owner and isinstance(self.path, TeamDataPath):
+                    from trialboard.research.source_policy import initialize
+
+                    if previous:
+                        raise ValueError("RESEARCH_RUN_ALREADY_EXISTS")
+                    initialize(con)
+                    con.execute("INSERT INTO research_run_owners VALUES (?,?)",
+                                (run.id, current_access_scope().subject_id))
                 con.execute(
                     """INSERT INTO research_runs VALUES (?, ?, ?, ?)
                     ON CONFLICT(id) DO UPDATE SET data=excluded.data""",
                     (run.id, run.project_id, run.created_at, run.model_dump_json()),
                 )
                 for source in run.sources:
+                    from trialboard.research.source_binding import record
+
+                    record(con, run, source)
+                    if self.capture_guard:
+                        self.capture_guard.bind(con, run, source)
                     inserted = con.execute(
                         "INSERT OR IGNORE INTO source_versions VALUES (?, ?, ?)",
                         (source.id, source.digest, source.model_dump_json()),
@@ -180,6 +216,124 @@ class ResearchStore(EvidenceStore):
         finally:
             con.close()
 
+    def recorded_direct_impact(self, run_id: str, source_id: str, source_digest: str) -> dict:
+        """Find exact-version source references in other saved runs of this project.
+
+        This deliberately opens SQLite in read-only mode and does not treat source
+        inventory membership or ``research_links`` provenance as a dependency edge.
+        """
+        caveats = [
+            "저장된 조사 실행의 검토 입력 우선순위와 검토 finding에 기록된 "
+            "직접 source ID 참조만 포함합니다.",
+            "같은 자료가 출처 인벤토리에만 있는 실행은 기록된 사용 후보가 아닙니다.",
+            "research_links는 설명용 provenance이며 완전한 의존성 그래프로 사용하지 않았습니다.",
+            "다운스트림 문서 프로젝트·설계·회의 산출물과 저장되지 않은 의존성은 추적하지 않습니다.",
+            "프로젝트·실행 범위 필터는 인증이나 테넌트 격리가 아닙니다.",
+            "source_digest는 저장된 SOURCE RECORD 지문이며 PDF 바이트 지문이 아닙니다.",
+        ]
+        path = resolve_database_path(self.path)
+        if not path.exists():
+            raise ValueError("RESEARCH_NOT_FOUND")
+        try:
+            con = sqlite3.connect(f"{path.resolve().as_uri()}?mode=ro", uri=True)
+        except sqlite3.Error as error:
+            raise ValueError("IMPACT_LOOKUP_FAILED") from error
+        try:
+            anchor = con.execute(
+                "SELECT project_id, data FROM research_runs WHERE id=?", (run_id,)
+            ).fetchone()
+            if not anchor:
+                raise ValueError("RESEARCH_NOT_FOUND")
+            source = con.execute(
+                "SELECT digest FROM research_sources WHERE run_id=? AND source_id=?",
+                (run_id, source_id),
+            ).fetchone()
+            if not source:
+                raise ValueError("RESEARCH_SOURCE_NOT_FOUND")
+            if source[0] != source_digest:
+                raise ValueError("RESEARCH_SOURCE_VERSION_MISMATCH")
+            rows = con.execute(
+                """SELECT rr.id, rr.project_id, rr.created_at, rr.data
+                FROM research_runs rr
+                JOIN research_sources rs ON rs.run_id=rr.id
+                WHERE rr.project_id=? AND rr.id<>?
+                    AND rs.source_id=? AND rs.digest=?
+                ORDER BY rr.created_at, rr.id LIMIT 101""",
+                (anchor[0], run_id, source_id, source_digest),
+            ).fetchall()
+            if len(rows) > 100:
+                raise ValueError("IMPACT_LOOKUP_LIMIT")
+
+            candidates = []
+            for stored_id, stored_project, stored_created, raw in rows:
+                try:
+                    candidate = Collection.model_validate_json(raw)
+                except (TypeError, ValueError) as error:
+                    raise ValueError("IMPACT_LOOKUP_FAILED") from error
+                if (
+                    candidate.id != stored_id
+                    or candidate.project_id != stored_project
+                    or candidate.created_at != stored_created
+                ):
+                    raise ValueError("IMPACT_LOOKUP_FAILED")
+                exact_source = next(
+                    (
+                        item
+                        for item in candidate.sources
+                        if item.id == source_id and item.digest == source_digest
+                    ),
+                    None,
+                )
+                if not exact_source:
+                    raise ValueError("IMPACT_LOOKUP_FAILED")
+                finding_count = (
+                    sum(finding.source_id == source_id for finding in candidate.review.findings)
+                    if candidate.review
+                    else 0
+                )
+                priority_count = (
+                    sum(priority.source_id == source_id for priority in candidate.plan.priorities)
+                    if candidate.plan
+                    else 0
+                )
+                uses = []
+                if finding_count:
+                    uses.append({"kind": "REVIEW_FINDING", "reference_count": finding_count})
+                if priority_count:
+                    uses.append(
+                        {"kind": "REVIEW_INPUT_PRIORITY", "reference_count": priority_count}
+                    )
+                if not uses:
+                    continue
+                candidates.append(
+                    {
+                        "run_id": candidate.id,
+                        "created_at": candidate.created_at,
+                        "status": candidate.status,
+                        "asset": candidate.request.asset,
+                        "nct_id": candidate.request.nct_id,
+                        "source_title": exact_source.title,
+                        "uses": uses,
+                    }
+                )
+            return {
+                "schema": "research-source-impact/1",
+                "scope": "RECORDED_DIRECT_ONLY",
+                "anchor": {
+                    "run_id": run_id,
+                    "project_id": anchor[0],
+                    "source_id": source_id,
+                    "source_digest": source_digest,
+                },
+                "candidate_count": len(candidates),
+                "candidates": candidates,
+                "caveats": caveats,
+            }
+        except sqlite3.Error as error:
+            raise ValueError("IMPACT_LOOKUP_FAILED") from error
+        finally:
+            con.close()
+
     def recover_run(self, run_id: str, *, now: datetime | None = None) -> Collection:
         """Explicitly close an expired run; preserve partial data and fence late writers.
 
@@ -192,6 +346,10 @@ class ResearchStore(EvidenceStore):
         try:
             with con:
                 con.execute("BEGIN IMMEDIATE")
+                if isinstance(self.path, TeamDataPath):
+                    from trialboard.research.source_policy import require_content_con
+
+                    require_content_con(con, run_id)
                 row = con.execute("SELECT data FROM research_runs WHERE id=?", (run_id,)).fetchone()
                 if not row:
                     raise ValueError("RESEARCH_NOT_FOUND")
@@ -228,10 +386,15 @@ class ResearchStore(EvidenceStore):
             con.close()
 
     def list_runs(self) -> list[dict]:
-        if not self.path.exists():
+        path = self.path.lookup() if isinstance(self.path, TeamDataPath) else self.path
+        if path is None or not path.exists():
             return []
-        con = self.connect()
+        con = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
         try:
+            if not con.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='research_runs'"
+            ).fetchone():
+                return []
             rows = con.execute(
                 "SELECT data FROM research_runs ORDER BY created_at DESC LIMIT 30"
             ).fetchall()
@@ -247,6 +410,8 @@ class ResearchStore(EvidenceStore):
             con.close()
 
     def snapshot(self, data: dict) -> str:
+        if isinstance(self.path, TeamDataPath):
+            raise ValueError("RAW_CAPTURE_RECEIPT_REQUIRED")
         raw = json.dumps(data, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
         digest = sha256_json(data)
         con = self.connect()
@@ -287,15 +452,32 @@ class ResearchStore(EvidenceStore):
         if not terms:
             return []
         match = " AND ".join('"' + term + '"' for term in terms)
-        con = self.connect()
+        from trialboard.research.source_policy import existing_connection, searchable_sources
+
+        con = (
+            existing_connection(self.path)
+            if isinstance(self.path, TeamDataPath) else self.connect()
+        )
         try:
+            policy_clause = ""
+            parameters = [run_id, match]
+            if isinstance(self.path, TeamDataPath):
+                con.execute("BEGIN")
+                allowed = searchable_sources(con, run_id)
+                if not allowed:
+                    return []
+                policy_clause = " AND (" + " OR ".join(
+                    "(rs.source_id=? AND rs.digest=?)" for _ in allowed
+                ) + ")"
+                parameters.extend(value for pair in allowed for value in pair)
             rows = con.execute(
                 """SELECT source_fts.source_id, source_fts.title,
                 snippet(source_fts, 3, '[', ']', '…', 24) FROM source_fts
                 JOIN research_sources rs ON rs.source_id=source_fts.source_id
                     AND rs.digest=source_fts.digest
-                WHERE rs.run_id=? AND source_fts MATCH ? ORDER BY rank LIMIT 20""",
-                (run_id, match),
+                WHERE rs.run_id=? AND source_fts MATCH ?"""
+                + policy_clause + " ORDER BY rank LIMIT 20",
+                parameters,
             ).fetchall()
             return [{"source_id": r[0], "title": r[1], "snippet": r[2]} for r in rows]
         finally:

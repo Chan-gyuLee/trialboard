@@ -18,11 +18,11 @@ import { PACKET_BYTES, restoreMeetingSession, type MeetingSession } from "./meet
 import RowReview from "./RowReview";
 import SupportingCitations from './SupportingCitations';
 import RateNormalization from './RateNormalization';
-import type {Capture,DesignCheckpoint,ReviewCheckpoint,RestoredProject} from "./project-checkpoint";
+import type {Capture,DesignCheckpoint,ProjectReceipt,ReviewCheckpoint,RestoredProject} from "./project-checkpoint";
 import ReviewProgress from './ReviewProgress';
 
 const STATUS = { unreviewed: "미확인", confirmed: "사용자 확인", corrected: "사용자 수정", held: "보류" } as const;
-export default function FieldReviewPanel({ source, pdf, selected, readyPage, disabled, onChoose, onText, view = "fields", onFields, onDesign, agentHandoff, initialProject, checkpoint, onCheckpointBusy, context }: {
+export default function FieldReviewPanel({ source, pdf, selected, readyPage, disabled, onChoose, onText, view = "fields", onFields, onDesign, agentHandoff, initialProject, checkpoint, onCheckpointBusy, context, projectReceipt }: {
   source: PdfSource; selected: PdfSpan | null; readyPage: number | null; disabled: boolean;
   onChoose: (span: PdfSpan) => void; onText: () => void;
   view?: "fields" | "design"; onFields?: () => void; onDesign?: () => void;
@@ -32,6 +32,7 @@ export default function FieldReviewPanel({ source, pdf, selected, readyPage, dis
   checkpoint?: Capture<ReviewCheckpoint>;
   onCheckpointBusy?:(busy:boolean)=>void;
   context?:ScoutContext;
+  projectReceipt:ProjectReceipt|null;
 }) {
   const [review, setReview] = useState<FieldReview>(() => newReview(source));
   const [rowId, setRowId] = useState("");
@@ -170,7 +171,7 @@ export default function FieldReviewPanel({ source, pdf, selected, readyPage, dis
       <Alert severity="warning">이 기록은 사용자 확인 초안입니다. 결과 가져오기는 AI 실행·설계 계산·임상 승인이 아닙니다.</Alert>
     </>}
     </div>
-    <div hidden={view !== "design"}><DesignPanel context={context} key={sessionVersion} initialSession={meetingSession} initialDraft={useProjectDraft?initialProject?.draft:undefined} checkpoint={designCheckpoint} onCheckpointBusy={setDesignBusy} originalAgentRaw={originalAgentRaw} review={review} source={source} pdf={pdf} disabled={locked} hasDraft={Boolean(touched || reason.trim())} onSelectRow={(id,key="dose") => {
+    <div hidden={view !== "design"}><DesignPanel projectReceipt={projectReceipt} context={context} key={sessionVersion} initialSession={meetingSession} initialDraft={useProjectDraft?initialProject?.draft:undefined} checkpoint={designCheckpoint} onCheckpointBusy={setDesignBusy} originalAgentRaw={originalAgentRaw} review={review} source={source} pdf={pdf} disabled={locked} hasDraft={Boolean(touched || reason.trim())} onSelectRow={(id,key="dose") => {
       if (selectField(id, key, true)) { onFields?.(); requestAnimationFrame(() => { editor.current?.focus(); editor.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }); }
     }} /></div>
   </section>;

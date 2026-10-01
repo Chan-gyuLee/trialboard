@@ -6,7 +6,7 @@ import pytest
 from test_research import FakeModel, execute, setup  # noqa: F401
 from test_research_citations import source
 
-from trialboard.research.models import Collection, ResearchRequest, SearchPlan
+from trialboard.research.models import Collection, LegacySearchPlan, ResearchRequest
 from trialboard.research.relevance import (
     rank_sources,
     select_review_sources,
@@ -49,7 +49,7 @@ def run_with(items, preferred=()):
         sources=items,
         coverage=[],
         events=[],
-        plan=SearchPlan(
+        plan=LegacySearchPlan(
             priorities=[{"source_id": p, "reason": "MOC"} for p in preferred],
             followup_terms=[],
             missing_evidence=[],

@@ -64,7 +64,7 @@ async def probe_plan(run, provider):
         )
         plan = validate_plan(reply.value, ids)
         report.update(
-            validation="PASSED", priorities=len(plan.priorities), followups=len(plan.followup_terms)
+            validation="PASSED", priorities=len(plan.priorities), followups=len(plan.followups)
         )
     except Exception as error:
         report.update(

@@ -16,6 +16,11 @@ from test_design_compare import brief_for, run, ai_result, prior_limited_sample
 from test_field_revalidation import sample, revise, encode
 f = sample()
 normal = run(f)
+legacy = json.loads(json.dumps(normal))
+legacy['schema_version'] = 'design-comparison/1'
+for question in legacy['kol_questions']:
+    question.pop('urgency_score')
+    question.pop('urgency_reasons')
 b = brief_for(f)
 b['scenarios'][0]['response'] = [0.0, 1e-7]
 b['scenarios'][0]['adverse_event_penalty'] = 0.0
@@ -25,7 +30,7 @@ concern = {'scope':'comparison_limitation', 'observation_ids':['obs-0'], 'span_i
 limited = run(f, ai=encode(ai_result(f, [concern])))
 revise(f['review']['rows'][0]['fields']['reported_rate'], decision='held')
 blocked = run(f)
-print(json.dumps({'source':f['source']['source'], 'normal':normal, 'edge':edge, 'ai':ai, 'limited':limited, 'blocked':blocked, 'prior':run(prior_limited_sample())}, ensure_ascii=False))
+print(json.dumps({'source':f['source']['source'], 'normal':normal, 'legacy':legacy, 'edge':edge, 'ai':ai, 'limited':limited, 'blocked':blocked, 'prior':run(prior_limited_sample())}, ensure_ascii=False))
 `], { cwd: root, encoding: "utf8", timeout: 30000, maxBuffer: 8_000_000 }));
 export const source = produced.source;
 export function fixture(name = "normal") {
@@ -60,6 +65,13 @@ for (const name of ["normal", "edge", "ai", "limited", "blocked"]) test(`Python 
   assert.equal(r.questions.length, raw.kol_questions.length); assert.deepEqual(review, before);
   assert.equal(r.ai?.mode ?? null, ["ai", "limited"].includes(name) ? "SCRIPTED_TEST_DOUBLE" : null);
   assert.ok(isDesignCurrent(r, review, source, raw.brief)); assert.equal(isDesignCurrent(r, review, source, raw.brief, true), false);
+});
+test("exact legacy /1 report remains readable without synthesized urgency metadata or raw mutation", async () => {
+  const { raw, review } = fixture("legacy"), before = structuredClone(raw), expectedKey = await digest(canonical(raw));
+  const result = await read(raw, review);
+  assert.equal(result.reportKey, expectedKey);
+  assert.ok(result.questions.every(q => !("urgency_score" in q) && !("urgency_reasons" in q)));
+  assert.deepEqual(raw, before);
 });
 test("blank form has no probabilities or sample-size recommendations", () => {
   const d = newDraft(); assert.deepEqual(d.arms, []); assert.ok(d.plans.every(p => p.per_arm === ""));
@@ -110,6 +122,10 @@ const mutations = {
   questionDuplicate: r => r.kol_questions[1].id = r.kol_questions[0].id,
   missingQuestion: r => r.kol_questions.pop(),
   questionTrigger: r => r.kol_questions.at(-1).trigger.additional_participants = 999,
+  urgencyScore: r => r.kol_questions[0].urgency_score += 100,
+  urgencyReason: r => r.kol_questions[0].urgency_reasons[0] = "Altered reason",
+  urgencyOrder: r => [r.kol_questions[0], r.kol_questions[1]] = [r.kol_questions[1], r.kol_questions[0]],
+  urgencyUnknown: r => r.kol_questions[0].urgency_confidence = .99,
   aiStatus: r => r.ai_status = "COMPLETED",
 };
 for (const [name, mutate] of Object.entries(mutations)) test(`reject inconsistent design report: ${name}`, async () => {

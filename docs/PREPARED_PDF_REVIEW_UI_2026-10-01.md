@@ -1,0 +1,26 @@
+# 서버 준비 PDF 검토 화면 · 2026-10-01
+
+개인 계정 개발. 대회 API·실제 모델·실제 PDF 파서 호출 없이 임시 DB/합성 provider와 브라우저 API 가로채기로 검증했다. 영상·실 DB·배포·commit 변경 없음.
+
+## 구현
+
+- PDF 이용조건 → 서버 본문 준비 → 검증된 준비본 확인 → 별도 전송 동의 → REVIEW-only 모델 1회 → 실제 페이지 텍스트와 결속한 인용 표시.
+- `PreparedPdfReview.tsx`, `prepared-pdf-review.ts`: 준비본 ID/지문/출처/PDF/요청한 현재 정책 이력 결속. 서버 준비 시점 이력 1과 나중 전송 이력 2는 구분한다.
+- 브라우저는 서버가 저장한 준비본의 정규 JSON SHA를 검증한 뒤, PDF 검토 결과의 페이지·Unicode 문자 위치·1,000자 단위 anchor SHA·실제 인용문을 대조한다. 임의 인용·좌표·중복 anchor·다른 준비본/출처는 거부한다.
+- 서버 인용 복사는 인용 대상의 동일성 검증이며, 해석의 임상적 타당성이나 PDF 표 구조 검증은 아니다.
+- 실행 이력은 선택한 준비본만 표시. 사용량은 이 조사의 모든 PDF 검토만 집계하고 SOURCE_TEXT 재검토·계정 한도·청구액과 분리한다.
+- 명시 전송 동의/검토자 이상 권한/현재 PDF external_ai 허가가 없으면 실행 비활성. 중단·권한 회수·오래된 비동기 응답은 결과를 남기지 않고 자동 재시도하지 않는다. 이미 전송한 호출의 비용 취소를 보장하지 않는다.
+- 종료 기록 없는 시도는 호출·토큰 미확정으로 표시하고 0회 완료처럼 취급하지 않는다.
+
+## 검증
+
+- 부모 독립 Python 신규 API/core/metadata **54개 통과**, 기존 FastAPI 관련 경고 2개.
+- PDF reader 7개 + 기존 SOURCE reader 6개 = **13개 통과**. 실제 TEAM 임시 DB의 합성 준비→정책 2→fake provider 1회→SSE/결과/준비별 이력/별도 사용량을 TypeScript reader로 검증했다. SOURCE 사용량은 0으로 보존.
+- TypeScript 검사 통과.
+- `check-prepared-pdf-review-ui.mjs`: 실제 TEAM context/StrictMode 컴포넌트, 1440/390 화면 각각 전송허가 없는 상태·명시 동의·409·성공·만들어낸 인용 거부·403 결과 제거·중단 뒤 응답 무시·미확정 이력·viewer 비활성 검증. 합성 POST 3회(충돌/성공/대기중단), 실제 provider 호출 0. SOURCE 사용량 API 호출 0, 가로 넘침 0, 페이지 오류 0.
+- QA 출력: `/var/folders/nq/5rr31cs56rsgsvvmxnnmzffw0000gn/T/trialboard-pdf-review-ui-RDMbkm`. 모바일 결과 스크린샷을 직접 열어 인용/질문/사용량 구분을 확인했다.
+- 부모 전체 Python **958개 통과/기존 경고 2개(114.70초)**, 웹 **1,095개 통과/1개 건너뜀**, TypeScript/Vite 빌드 통과. 기존 SOURCE 검토 및 서버 PDF 준비 화면 1440/390 회귀도 통과했다. 이후 RAW 기능 추가 전 시점의 전체 결과다.
+
+## 남은 경계
+
+현재 macOS에서는 hard-memory 제한을 확인할 수 없어 새 서버 PDF 본문 준비가 차단된다. 실제 Linux 파싱 성공과 실제 대회 모델 호출은 아직 검증하지 않았다. PDF 검토 연결 완료를 운영·임상 검증 완료로 해석하지 않는다. 기존 TEAM 임의 브라우저 본문 기반 숫자 자동화 차단은 그대로이며, 이 기능은 별도 서버 준비 텍스트 REVIEW 경로다.

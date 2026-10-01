@@ -17,6 +17,7 @@ dependencies = [
 trialboard = "trialboard.review.__main__:main"
 trialboard-api = "trialboard.api.__main__:main"
 trialboard-agent = "trialboard.agent.__main__:main"
+trialboard-bootstrap-team = "trialboard.api.team_bootstrap:main"
 
 [dependency-groups]
 dev = [

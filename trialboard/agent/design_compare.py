@@ -25,6 +25,114 @@ from trialboard.serialization import sha256_json
 
 Probability = Annotated[float, Field(ge=0, le=1)]
 
+PROTOCOL_QUESTION_ORDER = (
+    "dose_schedule",
+    "endpoint",
+    "assumptions",
+    "decision_rule",
+    "feasibility",
+    "statistics",
+    "sample_size_tradeoff",
+)
+BLOCKER_URGENCY = {
+    "OBSERVATION_WITHHELD": (400, "필수 원문 관측값이 보류·제외되어 비교에 사용할 수 없습니다."),
+    "SOURCE_DOSE_MISMATCH": (400, "설계 용량과 원문 용량 연결이 일치하지 않습니다."),
+    "ONE_ENDPOINT_ROW_REQUIRED": (
+        400,
+        "용량별 필수 반응·이상반응 근거가 하나로 확정되지 않았습니다.",
+    ),
+    "ENDPOINT_MISSING": (400, "용량 비교에 필요한 평가변수 근거가 없습니다."),
+    "SECOND_DOSE_MISSING": (400, "두 번째 용량의 비교 근거가 없습니다."),
+    "COMPARISON_CONTEXT_MISMATCH": (300, "용량군 사이의 비교 문맥이 일치하지 않습니다."),
+    "ENDPOINT_SUBTYPE_MISMATCH": (300, "용량군 사이의 세부 평가변수가 일치하지 않습니다."),
+    "COMPARISON_CONTEXT_MISSING": (300, "비교에 필요한 집단·기간·정의 문맥이 보고되지 않았습니다."),
+}
+PROTOCOL_URGENCY_REASON = {
+    "dose_schedule": "프로토콜 확정 전에 투여·감량·중단 규칙을 확인할 의제입니다.",
+    "endpoint": "프로토콜 확정 전에 평가변수와 분석 시점을 확인할 의제입니다.",
+    "assumptions": "프로토콜 확정 전에 사용자 지정 가정과 민감도 범위를 확인할 의제입니다.",
+    "decision_rule": "프로토콜 확정 전에 효용·안전 한계와 보류 규칙을 확인할 의제입니다.",
+    "feasibility": "프로토콜 확정 전에 모집·관찰·결측과 운영 가능성을 확인할 의제입니다.",
+    "statistics": "프로토콜 확정 전에 별도 확증 통계 설계 필요성을 확인할 의제입니다.",
+    "sample_size_tradeoff": "프로토콜 확정 전에 표본수 차이와 가정 계산 차이를 검토할 의제입니다.",
+}
+
+
+def _frequency_count(value, repetitions):
+    """Recover the integer Monte Carlo frequency without ranking raw floats."""
+    return math.floor(value * repetitions + 0.5)
+
+
+def _urgency(question, simulations, repetitions):
+    if question["priority"] == "BEFORE_COMPARISON":
+        code = question["trigger"]["code"]
+        score, detail = BLOCKER_URGENCY.get(
+            code, (200, "비교 근거에 대한 검토 한계가 해결되지 않았습니다.")
+        )
+        return score, ["비교 계산 전 해결해야 하는 근거 차단 항목입니다.", detail]
+    reasons = [PROTOCOL_URGENCY_REASON[question["category"]]]
+    if question["category"] == "decision_rule" and simulations:
+        unsafe = max(
+            _frequency_count(s["selects_true_unsafe_probability"], repetitions)
+            for s in simulations
+        )
+        abstained = max(
+            _frequency_count(s["no_selection_probability"], repetitions) for s in simulations
+        )
+        reasons.append(
+            f"가정 시뮬레이션에서 한계 초과 군 선택은 최대 {unsafe}/{repetitions}회, "
+            f"선택 보류는 최대 {abstained}/{repetitions}회였습니다. "
+            "측정 위험이 아닌 입력 가정 결과입니다."
+        )
+    if question["category"] == "sample_size_tradeoff":
+        trigger = question["trigger"]
+        reference = next(
+            s
+            for s in simulations
+            if s["scenario"]["id"] == trigger["scenario_id"]
+            and s["design"]["id"] == trigger["reference_plan_id"]
+        )
+        alternative = next(
+            s
+            for s in simulations
+            if s["scenario"]["id"] == trigger["scenario_id"]
+            and s["design"]["id"] == trigger["alternative_plan_id"]
+        )
+        unsafe_delta = _frequency_count(
+            alternative["selects_true_unsafe_probability"], repetitions
+        ) - _frequency_count(reference["selects_true_unsafe_probability"], repetitions)
+        abstention_delta = _frequency_count(
+            alternative["no_selection_probability"], repetitions
+        ) - _frequency_count(reference["no_selection_probability"], repetitions)
+        reasons.append(
+            f"이 가정 비교의 한계 초과 군 선택 빈도 차이는 {unsafe_delta:+d}/{repetitions}회, "
+            f"선택 보류 빈도 차이는 {abstention_delta:+d}/{repetitions}회입니다."
+        )
+    return 100, reasons
+
+
+def _question_tie_key(question):
+    category = question["category"]
+    category_rank = (
+        -1 if category == "evidence_gap" else PROTOCOL_QUESTION_ORDER.index(category)
+    )
+    prefix, separator, suffix = question["id"].rpartition("-")
+    id_key = (prefix, int(suffix)) if separator and suffix.isdigit() else (question["id"], -1)
+    return category_rank, id_key
+
+
+def _prioritize_questions(questions, simulations, repetitions):
+    prioritized = []
+    for question in questions:
+        score, reasons = _urgency(question, simulations, repetitions)
+        prioritized.append(
+            {**question, "urgency_score": score, "urgency_reasons": reasons}
+        )
+    return sorted(
+        prioritized,
+        key=lambda question: (-question["urgency_score"], *_question_tie_key(question)),
+    )
+
 
 class Arm(Contract):
     id: Id
@@ -378,8 +486,9 @@ def compare_designs(
                     "answer_status": "UNANSWERED",
                 }
             )
+    questions = _prioritize_questions(questions, simulations, brief.repetitions)
     return {
-        "schema_version": "design-comparison/1",
+        "schema_version": "design-comparison/2",
         "run_id": str(uuid4()),
         "status": "BLOCKED_EVIDENCE_LINK" if blockers else "HYPOTHETICAL_COMPARISON_ONLY",
         "clinical_approval": False,
@@ -431,6 +540,8 @@ def compare_designs(
             "설계 차이의 Monte Carlo SE는 독립 난수 스트림 기준입니다. "
             "모수 불확실성을 포함하지 않습니다.",
             "KOL 질문은 규칙 기반의 미답변 검토 의제이며 전문가 의견이나 AI 실행 결과가 아닙니다.",
+            "KOL 긴급도 400/300/200/100은 근거 차단 유형과 의제 단계를 구분하는 "
+            "우선순위 관례이며 측정 위험·신뢰도·임상적으로 검증된 점수가 아닙니다.",
             "근거 링크와 내부 일관성이 임상적 비교 가능성을 증명하지 않습니다. "
             "최종안은 선택하지 않습니다.",
         ],
@@ -485,7 +596,12 @@ def markdown(r):
     if not r["simulations"]:
         lines.append("근거 연결 쟁점으로 계산하지 않았습니다. 아래 선결 질문을 확인하세요.")
     lines += ["", "## KOL 검토 질문 — 답변 미확보", ""]
-    lines += [f"- [{q['priority']}] {escaped(q['question'])}" for q in r["kol_questions"]]
+    for q in r["kol_questions"]:
+        lines.append(
+            f"- [{q['priority']}] 규칙 기반 우선순위 {q['urgency_score']} · "
+            f"{escaped(q['question'])}"
+        )
+        lines.extend(f"  - 이유: {escaped(reason)}" for reason in q["urgency_reasons"])
     lines += ["", "## 한계", "", *[f"- {s}" for s in r["limitations"]], ""]
     return "\n".join(lines)
 

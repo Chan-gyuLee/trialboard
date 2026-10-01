@@ -1,10 +1,24 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
+
+
+class RawStoragePermission(Contract):
+    collector: Literal["REGISTRY", "LITERATURE", "REGULATORY"]
+    original_storage: Literal["ALLOW"]
+    evidence_reference: str = Field(min_length=1, max_length=2000)
+    reason: str = Field(min_length=1, max_length=4000)
+
+    @field_validator("evidence_reference", "reason")
+    @classmethod
+    def nonblank(cls, value):
+        if not value.strip():
+            raise ValueError("RAW_STORAGE_EVIDENCE_REQUIRED")
+        return value.strip()
 
 
 class ResearchRequest(Contract):
@@ -14,6 +28,14 @@ class ResearchRequest(Contract):
     indication: str = Field(min_length=1, max_length=300)
     public_consent: Literal[True]
     model_consent: bool = False
+    raw_storage_permissions: list[RawStoragePermission] = Field(default_factory=list, max_length=3)
+
+    @model_validator(mode="after")
+    def unique_collectors(self):
+        names = [p.collector for p in self.raw_storage_permissions]
+        if len(names) != len(set(names)):
+            raise ValueError("DUPLICATE_RAW_STORAGE_PERMISSION")
+        return self
 
     @field_validator("asset", "indication")
     @classmethod
@@ -33,6 +55,11 @@ class ResearchRequest(Contract):
 class Priority(Contract):
     source_id: str
     reason: str = Field(min_length=1, max_length=400)
+
+
+class PlannedFollowup(Contract):
+    term: str
+    intent: Literal["CONTRARIAN", "EVIDENCE_GAP"]
 
 
 class CurationInput(Contract):
@@ -57,10 +84,26 @@ class CurationInput(Contract):
         return value
 
 
-class SearchPlan(Contract):
+class LegacySearchPlan(Contract):
     followup_terms: list[str] = Field(max_length=2)
     priorities: list[Priority] = Field(max_length=6)
     missing_evidence: list[str] = Field(max_length=6)
+
+
+class SearchPlan(Contract):
+    followups: list[PlannedFollowup] = Field(min_length=1, max_length=2)
+    priorities: list[Priority] = Field(max_length=6)
+    missing_evidence: list[str] = Field(max_length=6)
+
+
+class FollowupExecution(Contract):
+    term: str
+    intent: Literal["CONTRARIAN", "EVIDENCE_GAP"]
+    origin: Literal["MODEL", "APPLICATION_POLICY"]
+    query: str
+    coverage_index: int = Field(ge=0)
+    status: Literal["OK", "EMPTY", "FAILED", "SKIPPED"]
+    attempted: bool
 
 
 class Insight(Contract):
@@ -121,10 +164,50 @@ class Collection(Contract):
     sources: list[Source]
     coverage: list[Coverage]
     events: list[dict]
-    plan: SearchPlan | None = None
+    plan: SearchPlan | LegacySearchPlan | None = None
+    followup_executions: list[FollowupExecution] = Field(default_factory=list, max_length=2)
     review: ResearchReview | None = None
     calls: list[dict] = Field(default_factory=list)
     notices: list[str] = Field(default_factory=list)
     execution_mode: Literal[
         "COLLECTORS_ONLY", "CODEX_CHATGPT", "DACON_RESPONSES", "SCRIPTED_TEST_DOUBLE"
     ] = "COLLECTORS_ONLY"
+
+    @model_validator(mode="after")
+    def consistent_followup_provenance(self):
+        if not self.request.model_consent and self.followup_executions:
+            raise ValueError("FOLLOWUP_WITHOUT_MODEL_CONSENT")
+        if isinstance(self.plan, LegacySearchPlan):
+            if self.followup_executions:
+                raise ValueError("LEGACY_PLAN_HAS_NEW_EXECUTION_PROVENANCE")
+            return self
+        if self.plan is None:
+            if self.followup_executions:
+                raise ValueError("FOLLOWUP_WITHOUT_PLAN")
+            return self
+        if len(self.followup_executions) > len(self.plan.followups):
+            raise ValueError("FOLLOWUP_PLAN_EXECUTION_MISMATCH")
+        for planned, execution in zip(self.plan.followups, self.followup_executions, strict=False):
+            if (planned.term, planned.intent) != (execution.term, execution.intent):
+                raise ValueError("FOLLOWUP_PLAN_EXECUTION_MISMATCH")
+            if execution.coverage_index >= len(self.coverage):
+                raise ValueError("FOLLOWUP_COVERAGE_MISMATCH")
+            receipt = self.coverage[execution.coverage_index]
+            expected_query = (
+                f'TITLE_ABS:"{self.request.asset.strip()}" AND ({execution.term}) AND SRC:MED'
+            )
+            if (
+                receipt.channel != "Europe PMC / PubMed"
+                or execution.query != expected_query
+                or receipt.query != execution.query
+                or receipt.status != execution.status
+                or execution.attempted != (execution.status != "SKIPPED")
+            ):
+                raise ValueError("FOLLOWUP_COVERAGE_MISMATCH")
+        if self.status == "COMPLETE" and self.review is not None:
+            if len(self.followup_executions) != len(self.plan.followups) or not any(
+                item.intent == "CONTRARIAN" and item.attempted
+                for item in self.followup_executions
+            ):
+                raise ValueError("FOLLOWUP_EXECUTION_INCOMPLETE")
+        return self

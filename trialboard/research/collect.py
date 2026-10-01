@@ -12,6 +12,7 @@ import httpx
 
 from trialboard.api.scout import fetch_registry
 from trialboard.research.models import Collection, Coverage, Source
+from trialboard.research.raw_capture import capture, permitted
 from trialboard.serialization import sha256_json
 
 EPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
@@ -83,9 +84,9 @@ async def get_json(url: str, params: dict) -> dict:
             raw.extend(chunk)
             if len(raw) > 4_000_000:
                 raise ValueError("SOURCE_RESPONSE_TOO_LARGE")
-    import json
+    from trialboard.agent.provider import parse_json
 
-    value = json.loads(raw)
+    value = parse_json(raw.decode("utf-8"))
     if not isinstance(value, dict):
         raise ValueError("INVALID_SOURCE_RESPONSE")
     return value
@@ -103,6 +104,8 @@ def source(**values) -> Source:
 def add_source(run: Collection, item: Source):
     previous = next((s for s in run.sources if s.id == item.id), None)
     if previous:
+        if previous.digest != item.digest:
+            raise ValueError("SOURCE_CONTENT_CHANGED_DURING_COLLECTION")
         previous.link_basis = sorted(set(previous.link_basis + item.link_basis))
         previous.raw_snapshots = sorted(set(previous.raw_snapshots + item.raw_snapshots))
         return
@@ -113,14 +116,18 @@ def add_source(run: Collection, item: Source):
 
 
 async def registry(run: Collection, store):
+    if not permitted(store, run, "REGISTRY", "ClinicalTrials.gov", run.request.nct_id):
+        return {}
     data = await fetch_registry(run.request.nct_id)
     if not data["studies"]:
         raise ValueError("TRIAL_NO_LONGER_AVAILABLE")
-    raw_digest = store.snapshot(data)
     record = data["studies"][0]
     protocol = record["protocolSection"]
     if protocol["identificationModule"]["nctId"] != run.request.nct_id:
         raise ValueError("TRIAL_ID_MISMATCH")
+    if not isinstance(protocol["identificationModule"]["briefTitle"], str):
+        raise ValueError("INVALID_REGISTRY_RESPONSE")
+    raw_digest = capture(store, run, "REGISTRY", run.request.nct_id, data)
     nct = run.request.nct_id
     text = "\n".join(
         [
@@ -161,9 +168,10 @@ async def registry(run: Collection, store):
             raw_snapshots=[raw_digest],
         ),
     )
-    from trialboard.research.result_tables import registry_results
+    from trialboard.research.result_tables import build_registry_tables
 
-    tables = registry_results(store, run.id, run=run)
+    tables = build_registry_tables(run.id, nct, f"https://clinicaltrials.gov/study/{nct}",
+                                   raw_digest, 0, record)
     if tables and (tables["outcomes"] or tables["safety"]):
         from trialboard.research.result_context import result_pages
 
@@ -232,6 +240,8 @@ def literature_page_limit(basis: str) -> int:
 
 
 async def literature(run: Collection, query: str, basis: str, store, refs: dict, on_page=None):
+    if not permitted(store, run, "LITERATURE", "Europe PMC / PubMed", query):
+        return
     limit = literature_page_limit(basis)
     cursor, pages, fetched, total = "*", 0, 0, None
     seen_cursors, seen_records = set(), set()
@@ -239,6 +249,8 @@ async def literature(run: Collection, query: str, basis: str, store, refs: dict,
     while pages < limit and len(run.sources) < 100:
         seen_cursors.add(cursor)
         try:
+            if not permitted(store, run, "LITERATURE", "Europe PMC / PubMed", query):
+                return
             data = await get_json(
                 EPMC,
                 {
@@ -256,10 +268,11 @@ async def literature(run: Collection, query: str, basis: str, store, refs: dict,
                 or len(hits) > 20
                 or type(page_total) is not int
                 or page_total < fetched + len(hits)
-                or any(not isinstance(p, dict) for p in hits)
+                or any(not isinstance(p, dict) or not isinstance(p.get("title"), str)
+                       or not isinstance(p.get("abstractText", ""), str) for p in hits)
             ):
                 raise ValueError("INVALID_LITERATURE_RESPONSE")
-            raw_digest = store.snapshot(data)
+            raw_digest = capture(store, run, "LITERATURE", query, data)
             keys = {(str(p.get("source", "")), str(p.get("id", p.get("pmid", "")))) for p in hits}
             new_records = keys - seen_records
             seen_records.update(keys)
@@ -359,9 +372,16 @@ def _store_papers(run, hits, basis, refs, raw_digest):
 
 async def regulatory(run: Collection, store):
     query = f'products.active_ingredients.name:"{run.request.asset.strip()}"'
+    if not permitted(store, run, "REGULATORY", "Drugs@FDA", query):
+        return
     data = await get_json(FDA, {"search": query, "limit": 3})
-    raw_digest = store.snapshot(data)
     applications = data["results"]
+    total = data.get("meta", {}).get("results", {}).get("total", len(applications))
+    if (not isinstance(applications, list) or len(applications) > 3
+            or any(not isinstance(app, dict) for app in applications)
+            or type(total) is not int or total < len(applications)):
+        raise ValueError("INVALID_REGULATORY_RESPONSE")
+    raw_digest = capture(store, run, "REGULATORY", query, data)
     documents_limited = False
     for app in applications[:3]:
         app_id = app.get("application_number", "")

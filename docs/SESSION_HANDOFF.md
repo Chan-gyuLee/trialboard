@@ -5,6 +5,365 @@
 
 ## 가장 최근 사용자 요청과 확인
 
+2026-10-01 **Git 전달 스냅샷 검증 완료**: 제품207개변경파일을선별, 전체index548파일약6.9MB/비밀정보·금지자료경로감사통과. 별도indexcheckout에서제품import경로확인, Python1049+5skip/기존2경고153.11초·웹1120+4skip·전체Ruff·TSVite통과. 선택참고PDF가없어기존로컬1054/1123과차이, 의존성은재사용/신규설치·Linux미검증. README첫링크는CHANGYU_DEPLOYMENT_HANDOFF. 기존main=origin/main에서제품소스·테스트·문서만commit/push하는범위이며영상33경로는로컬보존. 실제커밋과원격반영은git log/status로확인한다.
+
+2026-10-01 **찬규 배포 인수인계 Git 공유 승인**: 사용자가 지금까지 구현·남은 작업·찬규 담당을 정리해 Git에 올리라고 명시했다. 이번 범위는 제품 코드·테스트·문서 commit/push이며 과거 commit금지 기록을 이 전달에 한해 대체한다. **배포/도메인 구매/실DB/대회API실호출 승인은 아님**. `CHANGYU_DEPLOYMENT_HANDOFF_2026-10-01.md`가 배포 담당 첫 문서. 영상·개인자료·비밀정보 제외, 기존 main을 기준으로 원격 상태 확인과 업로드 스냅샷 검증 후 공유한다. 남은 로컬 전용 공개 실행 보완을 완료로 위장하지 않는다.
+
+2026-10-01 **80% 한도 내 흐름 묶음 완료**: 마지막주간75%(RPC1790847615), 새큰개발없이검증·인계마무리. 부모전체Python1054/기존2경고146.87초,웹1123+1skip/TSViteRuffdiff통과. 공통선택·허가→저장AI검토→현재권리handoff→KOL메모Markdown→exactcachedPDF→실제PDF.js/필드·설계탭 연결, 신규/기존3화면1440·390합성회귀통과. 개인자식1서버·테스트/읽기감사종료;부모잠금3경계보완. `TEAM_REVIEW_FLOW_2026-10-01.md`와PERSONAL_PROGRESS최상단우선. 배포·도메인찬규담당/영상·실DB·대회실호출·commit0. **원격계산은아직localhost/LOOPBACK_ONLY,macOS서버PDF미지원**: 공개배포모든기능완료라주장금지,별도호스팅연결남음. 세부큐·조건캐시·다문서·OCR/실서비스·임상평가보류. 제품계획79±10%p와계정80%상한혼동금지. 아래69/70은이력.
+
+2026-10-01 **80%까지 재개 / 기능 흐름 완성 우선**: 최신사용자 ‘80퍼까지더개발,배포·도메인은찬규,세세한것남겨도됨,흐름완성’. 마지막69%(RPC1790846178),기존개인agent1+부모로이어가되78작은마무리/80또는조회실패중단. 수집→검토→결과확인→원문/설계/KOL 연결을우선,배포·실인프라·영상·실DB·대회실호출없이합성정상흐름검증. 기존1036/웹1113+1skip기준선. 기존권리검사완화금지하되새미세정책/큐/OCR확장후순위. 아래69%종료는이번지시로재개.
+
+2026-10-01 **70% 상한 전 최종 종료 / 마지막 주간69%(RPC1790841063)**: 개인부모+동일자식1 개발을 마쳤으며 자식종료/새개발없음. 부모 최종 전체Python **1036통과/기존2경고143.05초**, 웹 **1113통과/1skip**, TypeScript/Vite/Ruff/diff통과. C3B1준비UI/C3B2서버준비문1call검토·인용/RAW R1권리+R2명시저장capture·반복수집결속·TEAM2단계UI/초기scout세션·NCT·기록무결성 보완 완료. 실제TEAM+합성수집·모델→TS왕복/6개화면1440·390회귀통과. 초기전체1034통과/2실패는편집전fixture폴더권한을이미로드한실행이며시험설정만보정후최종전체1036재통과,제품검사완화0. 개발 중 대회실호출·실DB·영상·배포·commit0. 실제Linux PDF/외부서비스·임상검증,scout목적별권리,예약큐·조건캐시·다문서·OCR·운영평가미완료. macOS미지원파서차단유지/기존실서버설정변경없음. 전체계획79±10%p유지. 다음은 PERSONAL_DEVELOPMENT_PROGRESS의 재개지점과새사용량·승인범위확인; 이번종료를전체제품완성으로표현금지. 아래68/65%는검증중이력이다.
+
+2026-10-01 **주간65% / R2 연결·독립검수 통과, 최종 회귀 중**: 사전RAW저장허가·fetch전후실세션/요청권한·불변capture receipt·본문과run provenance분리·정상등록결과표를 구현했다. 부모 전체Python1015/기존2경고141.07초, 이후취소보정포함R2신규23독립통과. 웹1109+1skip/TSVite통과,실제TEAM+가짜수집→SSE/metadata/허가후본문TS왕복통과. 수동UI 지연취소COMPLETE·예상밖AI이벤트를공통streamguard로거부하고신규9웹tests+1440/390실컴포넌트QA통과. 전체최종재실행중. 개인동일agent1은초기scout권리남은경계읽기전용감사,부모검수/문서. 대회실호출·실DB·영상·배포0. 68작은마무리/70또는조회실패중단. 상세 PERSONAL_DEVELOPMENT_PROGRESS / TEAM_COLLECTION_UI / DEVELOPMENT_PERSONAL_C4. 아래61%는이전경과다.
+
+2026-10-01 **주간61% / RAW R1 전체검증 후 R2 개발 중**: 부모전체Python994/기존2경고131.49초, RAW28/Ruff 및 웹R1시점1099+1skip 통과. R1 exactRAW정책→fullread/FTS/결과표/저장derived/선택재검토·PLAN/REVIEW게이트 연결, 같은SQLite snapshot/모델revision핀. 자식R2collector 사전저장+exactcapture+정상postedresults보존/재수집provenance분리작업중. 부모TEAM2단계UI(AutoReview/ResearchPanel)+raw_storage_permissions+collection-onlyhelper,기존legacy자동흐름보존. 26/32부분tests·초기1440·390UI통과, 수동UI확대/실R2연결은아직검증전. `TEAM_COLLECTION_UI_2026-10-01.md`. raw원본수집R2미완료를R1완료와혼동금지. 개인계정/동일agent1/68작은마무리70중단/영상·실API·실DB·배포0.
+
+2026-10-01 **주간57% / RAW R1 UI·계약검증**: PDF후 전체부모Python958/웹1095+1skip/TSVite/기존SOURCE·PDF준비화면1440·390회귀통과. 이어RAW metadata/CAS/commonreader 자식진행중; 부모RAW엄격reader4tests(실TEAM fake metadata→정책→TS포함)/UI1440·390/모바일직접검토통과. 같은SHA 두출처권리확산0,자동모델0. `RAW_POLICY_UI_2026-10-01.md`. 서버aggregate원본한도/이력정합검토후파생조회·검색·전송게이트연결예정,R2사전저장미완료. 아래55%는직전이력. 영상·실대회API·실DB·배포0/70상한유지.
+
+2026-10-01 **70% 지속 / PDF 서버 준비→검토 UI 연결**: 현재 개인 주간55%(RPC1790837805), secondary미제공. C3B2 서버전용1call/append-only/현재권리/Unicode인용/별도usage + 부모 준비·검토 UI 연결. 자식133관련회귀/부모54독립 Python·13웹 reader(실TEAM fake API→TS)·TS·1440/390 TEAM컴포넌트QA·모바일 직접검토 통과. 전체Python/web와기존UI회귀 실행중. [화면기록](PREPARED_PDF_REVIEW_UI_2026-10-01.md). macOS실파서는여전히UNSUPPORTED_SANDBOX,실Linux/실모델미검증. 같은개인agent1에 RAW R1 metadata/CAS/commonreader 다음묶음 위임,부모UI담당; R2사전저장허가는후속. 68%부터작은마무리/70%또는조회실패중단,영상·실DB·실대회API·배포0.
+
+2026-10-01 **최신 사용자70%까지 개발 재개 승인**: ‘아냐70퍼까지 쭉 써도돼. 개발만 완벽하게 해놔’. 앞선50% 종료는 즉시 대체한다. 마지막 계정RPC1790836155 주간50%, secondary 미제공. 개인 부모1+기존 personal_product_c1 재개,68%부터작은묶음/70%이상 또는조회실패중단. 직전 검증 Python904/웹1084+1skip/TS/Vite/Ruff/diff 통과. 다음 C3B2 서버 준비 artifact 기반 PDF 모델 전송 정상 경로 및 C3B1 준비 UI, 이어 RAW_SNAPSHOT 권리. macOS hard-memory 미지원 차단은 유지하고 안전성을 우회하지 않는다. 실제Linux/외부인프라/임상검증 없는 부분은 분리. 영상·실DB·배포·commit·실대회API호출 금지 유지.
+
+2026-10-01 **50% 상한 직전 최종 묶음 마무리**: 마지막 계정RPC1790836090은 ChatGPT/codex 주간49%, secondary 미제공, 조회 모델호출0. 작업 결과 정리까지의 집계 지연 때문에 새 묶음은 시작하지 않는다. personal_product_c1 종료, 실행 중인 개발 작업 없음. 부모 최종 전체 Python **904 통과/기존경고2(75.56초)**, 웹 **1084 통과/1건너뜀**, TypeScript/Vite/Ruff/diff 검사 통과. 저장자료 권리·재검토·PDF exact 다운로드·관측 사용량 UI 교차 검수 완료. C3B1은 서버 준비 기반만이며 현재 macOS 파서는 미지원 차단; PDF 모델 연결/raw권리/예약큐 등은 미완료. 다음 재개는 PERSONAL_DEVELOPMENT_PROGRESS의 재개 지점과 새 사용량을 확인한다. 개인 계정 개발, 대회 API 실호출0, 영상·실DB·배포·commit 변경0.
+
+2026-10-01 **개인 개발 후속 검수 / 주간46%**: C3A PDF exact 다운로드·클라이언트5MB 제한 스트림, C3B1 서버 PDF 텍스트 준비 기반, 저장 재검토 mode별 관측 사용량 API/UI 구현. 부모 전체 Python900 통과/기존 경고2, 신규 사용량4웹tests(실제TEAM fake API→TS 포함), 1440/390 실컴포넌트 QA 및 모바일 직접 확인. 같은 자식 personal_product_c1이 부모 사용량 UI 교차 검수 중. C3B1은 현재 macOS에서 실제 UNSUPPORTED_SANDBOX/parser0/artifact0, Linux 정상 추출은 미검증. PDF 모델 자동화는 여전히 차단. raw 권리 감사 문서 작성만, 미구현. 사용자 ‘50퍼까지 계속해’에 따라46%에서 계속하며48%부터작은단위/50%또는조회실패중단. 상세 PERSONAL_DEVELOPMENT_PROGRESS와 SAVED_REVIEW_USAGE_UI 참조. 영상·실DB·대회호출·배포·commit0.
+
+2026-10-01 **사용률50%까지 지속으로 중단기준 수정**: 최신사용자 ‘50퍼까지 계속해’. 기존45%안전중단은이력으로대체,보고window50%이상/조회실패때신규개발중단.48%부터작은수정·검증단위와잦은조회로마무리하며집계지연하드보장금지. 현재약40%,같은개인agent1+부모,대회호출0. C3A PDF권리backend전체852pass와부모독립관련47pass(신규PDF14/저장검토18/연구모델15),PDF UI4tests(실서버fake다운로드→TS reader포함)/StrictMode1440·390·CAS·권한·sha검증/직접시각확인 통과. 자식이부모UI교차검수/복수PDF버전실제원문보기경로보완중,부모전체web/build/문서검수. 다음안전한남은단계계속. 아래45%중단지시는이력.
+
+2026-10-01 **C2/저장자료 재검토 완료 → C3A PDF권리 진행**: 개인 agent1+부모 분업. C2매호출권리/FTSsnapshot, 저장자료 REVIEW-only 모델1회/선택8출처/부모Collection불변/별도append-only시도/metadataSSE/권리GET 구현. 자식전체Python838통과(기존경고2)/ruff/diff, 부모관련33통과/실서버→TS reader포함새6웹tests/전체웹1071+1skip/TSbuild/실컴포넌트1440·390 QA/직접스틸 통과. [UI기록](SAVED_REVIEW_UI_2026-10-01.md), [서버기록](DEVELOPMENT_PERSONAL_C2_2026-10-01.md). 과대본문 test413/422 불일치수정 후 재통과, 중간실패보존. 마지막주간38%(RPC1790833156),secondary없음. 동일agent1에 C3A exactPDF_BYTES정책·metadata/CAS·캐시조회/사전다운로드허가backend위임,부모UI담당예정;contract 먼저확정. PDF모델자동화C3B와raw수집권리는미완료로분리. 사용자재승인없이45%전까지계속/조회실패중단,15분검수체크포인트. 제품계획79±10%p유지/영상·실DB·Dacon호출·배포0.
+
+2026-10-01 **개인 개발 지속 승인 / 전송권리 단계 진행**: 사용자 ‘이어서 진행해 / 사용량50퍼 전까지 쭉해 너가 최대한’. 이제 사용자 재개 지시를 매묶음 요구하지 말고 부모 검수 후 동일 agent1에 후속을 보낸다. 보고window45%선제중단/조회실패중단,15분은 검수체크포인트. 최신 부모RPC1790831612 주간32%/secondary미제공. personal_product_c1에 C1 FTS snapshot 보완 및 조사/자동화 모델호출 전 권한·정확source정책 재검증 맡김; 신규 raw/PDF 권리는 별도확인, 정책ALLOW자동추정금지. 새 상세문서 DEVELOPMENT_PERSONAL_C2_2026-10-01.md. 부모 C1 UI독립검수: 계약/auth18tests통과, check-source-policy-ui.mjs exec22996 exit0 1440/390 CAS입력보존·키보드·지연응답·권한회수·401통과/overflow0/pageerror0, 생성2화면 직접검토. 서버805·웹1065는 이전자식 전체보고, 부모관련독립회귀 통과. Dacon0/영상·실DB·배포보존/추정79±10%p유지.
+
+2026-10-01 **개인 개발 후속 재개 승인 / C1 UI 진행**: 사용자 ‘계속 진행해. 너가 개발하는거지 내 계정으로?’에 따라 기존 `/root/personal_product_c1` 1개를 재개했다. 이전 서버 체크포인트는 에이전트 보고 Python805통과/주간30%, 부모가 source_policy·라우트·FTS 구현을 읽고 독립 관련회귀를 실행 중. 이번 자식 범위는 C1 관리화면·엄격 client reader·합성 웹검증만, 서버 변경 필요시 부모 협의. 부모와 자식 모두 Dacon개발·추가에이전트·영상·실DB·배포·commit 금지. 부모 최신 계정RPC timestamp1790830008 ChatGPT/codex 주간30%/secondary미제공/모델호출0. 45%선제중단·조회실패중단·작은작업마다조회, 자식 이번묶음15분 체크포인트. C2/C3 raw/PDF/외부전송 게이트는 아직 미완료이며 사용자입력 external_ai 필드만으로 구현완료 주장 금지. 디스크257MiB, 설치/대형출력금지. 제품 추정79±10%p 유지. 상세는 DEVELOPMENT_PERSONAL_C1_2026-10-01.md.
+
+2026-10-01 **v14 영상 최종완료 → 개인 개발 C1 시작**: [영상상태](PRESENTER_CLEAN_V14_2026-10-01.md). output/video/presenter-clean-v14/trialboard-full-v14.mp4 13:05.100/119MiB. 27장면하단보조문구삭제/오프닝음악브리지, 최종QA exec31543 exit0,87시각검사(문구밖최대MAE.3323)/33음성상관최소.9992928/원래자막·색·프레임/전체decode/−18.03LUFS·−1.40dBTP 통과. 사용자2스크린샷 대응 focus/cookie 직접확인. 기존v13/원본보존. 이후 `/root/personal_product_c1` 내장개인계정에이전트1개에PART C1만15분제한위임,추가자식/Dacon호출금지. parent usage 주간28%(timestamp1790825806),45%선제중단·조회실패중단·최대60초주기확인. 에이전트별상태문서 DEVELOPMENT_PERSONAL_C1_2026-10-01.md, 완료시부모독립검수/후속. async상한질문답변없음,5시간window미제공상태정직고지. 디스크약280MiB:대형산출물금지. 아래영상진행중/개발미시작은이력.
+
+2026-10-01 **v14 영상 후 개인 개발 에이전트1 승인**: 사용자 요청 '영상 끝나면 개발 이어서 / 우리 계정 / 사용률50프로 이하'. 아직 개발 에이전트 미기동, 영상우선. scripts/read_codex_usage.py 신규 읽기전용 account/rateLimits/read로 ChatGPT 주간(10080분) used26%, secondary없음 확인(timestamp1790825326/모델0). 5시간·주간 둘다50%인지 async질문 대기, 확인되는주간상한 기준 보수적중단·불명시무제한진행금지. 대회API크레딧저녁반영은제품전용, worker차단유지. 다음 구현은 조사source권리 PART C1부터 현재코드·docs/DEVELOPMENT_REMAINING_STATUS 대조.
+
+2026-10-01 **v14 하단보조문구 제거 + 음악전환 수정 중**: output/video/presenter-clean-v14. 사용자 스크린샷 '실제 예측 결과 아님', '작동 원리를 설명하는 예시' 포함, 본편·쿠키 footnote만삭제/대사·본문유지. 새 Remotion entry는 최신v7/v8/v9/v10 소스를 매핑해 y860~960 clean strip와 DOM실측마스크를 렌더, 기존영상의 해당 문구영역만합성. focus확인PNG 육안정상. renderer exec59476(render-all.log), assembler exec57134(assemble.log) 진행. exec23283/13885는종료실패(첫ENOSPC/다음mediaCache최소240MB위반), 캐시240MB·동시1로보정후이어감. 디스크약400MiB/시스템swap13GB, 중복분할완성본은생략하고 full-v14만예정. 원본/완성v13삭제없음. music-bridge-v14.py 완료: 대사없는4.5~21.5초만드럼감쇄/lowpass/원음delaytail/Warmphase연결, 모든대사PCM동일. music-bridge-preview40초생성·공유. 전체조립후 qa-clean-v14.py 실행필수, 아직최종완료아님.
+
+2026-10-01 **음악 v13 완료/전달 가능**: [상태](PRESENTER_MUSIC_V13_2026-10-01.md). `output/video/presenter-music-v13/` 본편7:19.433/쿠키5:45.667/합본13:05.100 + music-transition-preview40초. Polished→Warm 2초 연결, 대사음악작게/쿠키초반Polished짧게. 최종 exec36785 exit0,3검증JSON통과, 영상stream hash/색/프레임/자막/원본보존,66음성무지연상관최소.9994335/합본−18.03LUFS·−1.41dBTP. 기존입모양0.25초조정/32실음성 유지, 대회API0. 다음 사용자 청감피드백. 아래 QA진행중 문구는 이력.
+
+2026-10-01 **음악 교체 v13 조립 완료·최종 오디오QA 중**: [상태](PRESENTER_MUSIC_V13_2026-10-01.md). 사용자 '음원 교체 다 되면 알려줘'에 따라 로컬 작업 재개. output/video/presenter-music-v13 본편/쿠키/합본 생성,3영상 stream hash v12 동일/전체decode/원본보존/32실음성 복원·최소음악대비20.78dB 통과(qa.json). qa-music-v13.py exec36785에서 인코딩 음성·피크·자막·40초프리뷰 최종 검사 중. finish-status=qa-passed 확인 전 완료 선언 금지. 대회API호출0; 사용자는 크레딧 저녁 반영 예정이라고 안내, 자동 재확인/개발재개 아님.
+
+2026-10-01 **대회 API 제품 런타임 전용으로 변경**: [최신 정책/확인](API_USAGE_POLICY_2026-10-01.md). 개발은 개인 계정, 과거 Dacon 개발 지속/자동재개 승인 철회. 최소 요청1회 HTTP403/총잔여추정0/TPM1050788/RPM299, 추가 할당 반영 여부 운영진 확인 필요. 반복 호출 없음. 개발 worker 실행 차단, 활성 worker 없음. 기존 포트8000은 dacon/terra이나 키 미설정·모델실행 비활성, 아직 실제 제품 연결 성공 아님. 음악2곡 준비만, 교체 미완료. 제품79±10%p 유지.
+
+2026-10-01 **사용자승인0.25초오프닝 전체반영 v12 완료**: [상태](PRESENTER_APPROVED_V12_2026-10-01.md). output/video/presenter-approved-v12 본편13183f/쿠키10370f/합본23553f(13:05.100) 조립·QA완료. hook만승인프리뷰로교체,뒤32씬음성/영상/음악유지,쿠키바이트동일. QA exec54142 exit0/qa-passed,3decode/승인hook7화면·유지32씬동일성/PCM·자막·원본보존통과. 신규Suno `/Users/ryul/Downloads/Polished Product Demo.mp3` 129.96초 수령/메타·음량확인만,음악미교체. 사용자설명용프롬프트요청. 제품/API0.
+
+2026-10-01 **오프닝0.25초추가프리뷰완료**: 사용자요청 ‘0.25초당겨’. output/video/presenter-hook-offset-v12-250ms/hook-lead-250ms.mp4,135f/4.5초. 얼굴시계만7.5f앞당김,배속/음성/자막/타이틀유지. TS+7tests/QA exec94838 exit0,112인물프레임/스틸8/음성상관.999785/정지0f/구파일보존통과. **합본v11미변경**,다음사용자시작점피드백. [상태](PRESENTER_HOOK_OFFSET_V12_2026-10-01.md). 제품/API작업0.
+
+2026-10-01 **v12 오프닝 시작점 비교 프리뷰 완료/사용자선택대기**: [상태](PRESENTER_HOOK_OFFSET_V12_2026-10-01.md). 사용자 ‘소리가 먼저, 입이 늦게’ 확인. 배속변경안미적용, 카메라만0.1/0.2초앞당긴 두 MP4를 output/video/presenter-hook-offset-v12에출력. 음성/자막/타이틀그대로, 끝무음만3/6f축소. TS+6tests/두파일decode/프레임오프셋/음성상관.999785/정지0f/구출력SHA보존 통과,qa.json passed. **v11합본은그대로**. 다음100ms/200ms 중사용자피드백. 추가음악질문: 모션오프닝score-v4.wav/대사score-pitch.wav 둘다sound.mjs 코드합성112BPM,이미대사BGM존재. 음악변경없음,제품API0.
+
+2026-10-01 **v11 찬규 인트로 재녹음·마무리 반영/최종QA 완료**: [상태](PRESENTER_RERECORD_V11_2026-10-01.md). 새2m4a 실제내용 확인→hook/outro 교체, 마지막TTS 제거. 문장/구절 기준 카메라 재타이밍, 목소리1x·기존31씬 영상/음성/자막 보존. 원본참고음성ASR불신뢰로 육안입모양 근사정렬, 완벽phonetic sync 주장금지. TS176tests/전체4파일decode/새20화면/Apple4/얼굴274표본정지0초/31씬·18SHA보존 통과. exec99665 exit0, qa/finish-status=passed. output/video/presenter-rerecord-v11 프리뷰18.233초/합본13:05.333 전달가능. 제품·대회API0, 디스크여유271MiB. 다음 사용자 정상속도입모양피드백.
+
+2026-10-01 **v10 출력/기술QA 완료·전달 가능**: [상태](PRESENTER_MOTION_V10_2026-10-01.md). 본편focus/product/research/citation/meeting5씬 UI크롭·초점이동·인용클릭→펼침·구절강조·사진단계전개 보강. exec82237 exit0;3전체decode/3AAC동일성/32스틸(최대1.9712)/10Apple(.7963)/인물469표본(1.3266)/28유지씬/13산출물보존/자막동일성 통과,TS172tests. output/video/presenter-motion-v10: 프리뷰61.5초,본편7:20.067,쿠키5:45.333(바이트동일),합본13:05.400. 원본·v9·음성/싱크/쿠키보존/제품·대회API0. 다음사용자미감/정상속도피드백. Studio localhost3017(exec33182) 열린상태; public/base-main-v9-readonly.mp4 hard link에쓰기금지. 디스크여유약660MiB. 아래진행중기록은이력.
+
+2026-10-01 **v10 UI 강조/사진 서사 보강 진행**: [상태](PRESENTER_MOTION_V10_2026-10-01.md). 사용자 시연UI 강조+생성사진 정적시간 개선 요청으로 focus/product/research/citation/meeting 본편5씬 구현·렌더 완료(exec2566), 조립QA exec82237. 실제UI타깃 확대/클릭→인용펼침/문구강조, 사진은 관찰범위→새조건→검증 및 후속회의문서로 전개. 인물구간은 v9 본편 연속재생, 음성/자막시각/쿠키 보존. TS172tests,32스틸검토; 최종QA대기. `video/public/presenter-motion-v10/base-main-v9-readonly.mp4`는 v9 원본 hard link이므로 쓰기/덮어쓰기 금지(준비/렌더는 읽기만). 원본·v9·제품보존/대회API0. 디스크여유약641MiB 조립전 확인.
+
+2026-10-01 **v9 전달 가능/최종 기술QA 완료**: [v9 상세](PRESENTER_SYNC_V9_2026-10-01.md). 찬규10장면 수정, 얼굴18구간 반복정지0초 확인; 자기소개4~6초 정지 오류 제거. 구간별 카메라속도0.78~1.25x 정렬, 별도더빙 발음별 완전일치 보장 아님. JPEG중간출력의 full/limited-range 혼합 Apple명암문제도 실제sample변환으로 해결. exec35634 종료0, 전체디코드/155스틸/14Apple(최대1.02325)/72보존체크/3AAC동일성/7native-tail검사 통과, TS166tests. `output/video/presenter-sync-v9/` 프리뷰85.966초/본편7:20.067/쿠키5:45.333/합본13:05.400; finish-status=qa-passed. 다음사용자정상속도입모양확인/찬규outro더빙수령(TTS유지). 원본·v8·제품보존/대회API0/제품79±10%p불변. 아래진행중은이력.
+
+2026-10-01 v9 사용자 실제재생피드백 ‘찬규자기소개후멈춤/입모양불일치’ 수정: [v9 상태](PRESENTER_SYNC_V9_2026-10-01.md). v8정적/디코드QA가연속얼굴정지를놓쳤음. 원인절대sourceFrame을Freeze로전달→Remotion현재composition범위clamp. v9는Freeze0+Video trimBefore로분리,구간별음향타이밍에맞춰0.78~1.25x카메라재생/오디오와자막시각보존. 원본작은참고음성전사정확도낮아완벽phonetic sync주장금지(hook/cookie는길이정렬만). 자기소개실제얼굴정지4~6초→0초확인,34.1초중간프리뷰공유. TS165tests. PNG임시디스크ENOSPC회수후JPEG98중간으로재개,exec50301 10씬렌더/exec59672조립QA대기. 원본/v8/제품보존,개인로컬작업/대회API0. 다음최종qa.json+motion-sync-qa.json+finish-status 확인.
+
+2026-10-01 **v8 전달 가능/최종QA 완료**: [상태](PRESENTER_DUBBING_V8_2026-10-01.md). `output/video/presenter-dubbing-v8/` 본편7:20.067/쿠키5:45.333/합본13:05.400 + voice-balance-preview61초. 신규8음성모두반영,찬규outro만TTS. 전체디코드/155화면/6Apple재생/원본보존/음성상관최소.9996439 통과;실제출력40표본추가육안검토. 인코딩후32대사장면 LUFS차.74, 합본 -18.05LUFS/-1.42dBTP, audio QA exec93954 exit0. TS/160tests pass(exec45174). 원본·구판·제품보존,대회API0/제품중지79±10%p불변. 다음은사용자정상속도재생피드백/찬규끝인사수령. 아래v8진행중문구는이력.
+
+2026-10-01 이률 쿠키8개 방배동.m4a~방배동8 수령, [v8 음량통일/매핑](PRESENTER_DUBBING_V8_2026-10-01.md) 우선. 로컬전사·발화보존·저역/피크완만보정, 신규8개 -18.07~-17.93LUFS; 촬영6+찬규17+신규8=31실음성 음량차0.73LU. 남은더빙은 찬규outro1뿐. v7 큰인물/무반복/색감/본편그대로보존, 쿠키8씬실음성에재타이밍. v8 본편13202/쿠키10360/합본23562프레임 조립완료,159tests/TS/40스틸검토통과; 최종QA exec8317 진행(qa.json/audio-qa.json 확인). v7 최종QA는exec83429 exit0/115화면/음성최소.9996439. 제품·대회API0/중지/79±10%p불변.
+
+2026-10-01 v7 수정 진행: [최신 상태/내용매핑](PRESENTER_DUBBING_V7_2026-10-01.md). `/Users/ryul/Downloads/찬규 녹음`17m4a 수령, 라벨 전부 내용과 어긋나 있어 로컬전사로 재매핑(본편9/쿠키8). COOKIE_09 마지막인사=실제로hook. 남은음성은 이률쿠키8+찬규outro1, 사용자에게이미고지. 이률설명6파트큰인물/중간/기능화면전환, 팀리액션12~최대19초한번+경력23~28초5초만/무반복. exec57354 렌더진행, 음성·유지조각exec48101완료; 조립/최종QA아직남음. 새경로output/video/presenter-dubbing-v7, 중간ryul-large-first-look.mp4공유. 원본·v6보존/제품대회API0/79±10%p불변.
+
+2026-10-01 이률 실촬영 v6 출력·기술QA 완료. [상태/선별표](PRESENTER_RYUL_FOOTAGE_2026-10-01.md). 사용자 확정대로 첫도입찬규영상유지. 본편6파트NG제외/정면·측면·실음성1x, 팀/경력임시사진→무대사리액션, 경력작은창유지. `output/video/ryul-footage-v6/`의 `ryul-preview.mp4`25.6초, `trialboard-main-real-voice.mp4`447.133초, `trialboard-full-real-voice.mp4`788.633초. 찬규/쿠키는더빙미수령으로TTS유지. TS148tests/전체디코드/원본27SHA/38화면/24색/6Apple재생/18싱크검사통과. AAC합본접합지연검출후샘플단위PCM연결로수정,음성상관최소.999599;합본6영상표본차0. 최종QA exec69718 exit0. 대회/외부API사용0, 제품개발중지/79±10%p불변. 정상속도사용자재생검토/남은더빙수령후후속. 아래진행중문구는과거이력.
+
+2026-10-01 이률 촬영27MOV 수령/NG선별/두구도삽입 승인. 최신 [영상상태](PRESENTER_RYUL_FOOTAGE_2026-10-01.md). 후속확정:첫도입찬규기존영상유지. 고유25(2중복),본편6완주+2295리액션확인,쿠키더빙없으므로TTS유지. 로컬Whisper전사/두카메라파형싱크/HDRApple네이티브변환,새v6경로;원본/v4/v5보존. 문제/조사/수치/KOL/평가/마무리실제음성자연속도,그래픽만의미별재타이밍. 준비·렌더진행중/전체완료아님. TS146tests통과,첫스틸직접확인. 제품/Dacon호출0/할당중지불변.
+
+2026-09-30 이률 소개 인물 축소 완료: 사용자 경력소개에서너무크다/무대사때무엇할지 요청. 개인 부모 영상작업, 대회호출0/제품중지불변. `output/video/ryul-intro-small-v5/`에19.1초 `ryul-intro-preview.mp4`, 본편 `trialboard-main-tts.mp4`, 합본 `trialboard-full-tts.mp4`. 기존 v4 기준 global1223..1675(수학/광학/코딩/풀스택15.1초)만240×290우하단작은창으로축소. 첫팀공동소개/찬규/쿠키/나머지컷불변; 이률은실촬영미수령이라기존임시사진유지. `render-ryul-intro-small.mjs`가v4 splice03만교체하고나머지재압축없이재사용한다. 옛v4렌더러만돌리면이률구간은원본재사용되므로v5전용스크립트와새결과우선. TypeScript+144tests/본편13045·합본23290프레임/전체decode/음성패킷완전동일/기존5자산SHA보존통과. 미변경7표본픽셀차0,변경5표본320×180평균오차최대1.936/255(<4). 대표스틸5개직접시각검토. 무대사촬영은RYUL_EXTRA_01_팀소개리액션_T01.mov약60초,중앙상반신/렌즈보기/작은미소·한두번끄덕임/입모양흉내없음. v2이률MD추가안내반영,기존ZIP은재생성하지않음. 제품추정79±10%p불변.
+
+2026-09-30 최신 ‘다시 개발 api로 시작해’: 부모가 승인된 비밀 파일을 명시 사용해 gpt-5.6-sol 최소 요청 1회 재확인. HTTP403, quota_exceeded=true, x-team-remaining-quota-tokens=0, TPM잔여1050788/RPM잔여299, Retry-After=7991257. 본문/키 출력 없음. 단순 네트워크/속도제한이 아니라 현재 총할당 차단으로, 새 개발 worker는 시작하지 않았다. 추가 반복호출/개인fallback 없음. 운영진의 team-03 할당 확인·복구 필요. 완료 코드와 Python797/웹1060+1skip 검증 보존, 다음은 연구source 권리 PART C1/21-resume-after-quota.txt. 전체79±10%p 유지. 증거 output/dacon-remaining-20260930/quota-probe-restart-403-20260930.json.
+
+2026-09-30 18:36:27 지속정책 첫실행10 가동: `output/dacon-worker/20260930-183627-b93315af`, exec50813/PID26526·worker26535, running/write true/Dacon gpt-5.6-sol/personal_fallback false. 부모status·두프로세스생존독립확인. 첫작업은마지막owner보호+Ruff2건만, 최신지속정책에따라일시오류는대기·축소재개/단계별독립검증후후속. 아직수정완료아님/제품79±10%p유지.
+
+2026-09-30 최신 ‘계속 개발시켜 Api로. 자꾸 중단되면 너가 재개해 끝까지 개발하게’: [지속재개정책](DEVELOPMENT_CONTINUATION_POLICY_2026-09-30.md)으로 이전1회후승인대기/24회자동종료 대체. 일시오류120/240/480/900초+Retry-After,5연속시15분대기·검토후좁은재개; 사용자에게동일승인반복요청금지. 실제인증/총quota/모델거부/필수권한·자료는분리보고. 기존감독 재가동 지시, Dacon sol단일writer로 마지막쓰기owner+Ruff2건부터. call9후baseline Python770/웹1051+skip/빌드통과이나권한결함·Ruff2건미완료. 실제call10실행여부는전용STATUS최신기록우선. 영상/실DB/실계정/DNS/배포/commit/개인fallback금지유지. 완료추정79±10%p유지.
+
+2026-09-30 배포후속: 사용자는 심사위원 링크에서 실제기능이 동작해야 한다고 명확히 했고 기존서버없음 확인. 정적미리보기로대체불가. Render 1CPU/2GB $25+5GB영구디스크$1.25/월(세금·초과사용별도) 제안예정/비용승인전. Cloudflare DNS+가비아도메인분리 제안유지. 계정접근/결제/실배포아직없음; 로컬HTTPS·host·proxy·영구저장 보완과 외부실요청QA 필요. 제품개발감독은별개로계속.
+
+2026-09-30 신규배포희망: 사용자 Cloudflare 계정에서 trialboard.ai.kr 구매·연결/현재제품부터 배포 요청. [사전확인](DEPLOYMENT_READINESS_2026-09-30.md). .ai.kr은 CF구매목록없음/가비아등록지원(첫해16500원공식행사, 이름가용성미확인). 구매후CF DNS연결 제안. 현Python서버loopback/TrustedHost로컬/Secure cookie미설정이므로 원격베타 배포보완필요. 공개범위·기존호스팅유무 질문대기. 결제/DNS/배포/실계정생성아직없음, 기존제품감독계속/개발작업중인코드바로공개금지. 대시보드인증접근미확보/CF플러그인검색결과없음. 79±10%p유지.
+
+2026-09-30 사용자 ‘계속 개발시켜 작업’으로 대회 개발 지속 재확인. 기존 감독에게 중복worker 없이 실행7→협업 잔여 검증→계획3~10을 허용된24회한도에서 계속하도록 전달. 단계별 검증·오류보고/제한재시도·중지조건 유지. 영상/실사용DB/배포/개인fallback 금지. 실행 중이라는 이유로 완료율 상향하지 않으며 기존79±10%p 유지.
+
+2026-09-30 17:43:59 제품 재개 실행7 실제 가동 확인: `output/dacon-worker/20260930-174359-58696cba`, exec28872/PID60132·worker60133, state running/write true/provider trialboard_dacon/model gpt-5.6-sol/personal_fallback false. 부모도 status와두PID생존독립확인. 첫 작업은 preview무쓰기·동시import중복·명시동의 보정으로 축소. 부모 재개baseline auth20pass/기존경고2, 합성 협업QA에서DB생성1·동시200/200·프로젝트2 재현. 감독이 후속검증/허용범위의남은단계계속. 새구현완료주장아님/전체79±10%p유지.
+
+2026-09-30 제품 개발 재개 명시 승인: 사용자 ‘대회 api 무슨오류여? 대회 api 아직 많이남지아낫나? 재개해줘’. 마지막 중단은 stream transport/body decoding 오류(할당량 소진으로 확인된 것 아님). 부모 최소연결 gpt-5.6-luna 1회 HTTP200/completed/14tokens, 잔여헤더119999986(TPM1050774/RPM299). 최초메일3000만보다 큰 추정값이므로 실제잔액·증액으로 단정하지 않음. 비밀출력없음, 증거 `output/dacon-remaining-20260930/quota-probe-resume-20260930.json`. 기존 감독 `/root/dacon_product_supervisor` 재개 지시: Dacon sol 단일writer로 phase2 협업결함부터, 전체24회중6회실행/18회잔여. 단계별 독립검증 후3~10; 일시전송/429는 부분검토·최소60초/Retry-After준수 후 단계당1회 제한재시도, 재발/401/403/모델오류 중지보고. 개인fallback/영상변경/실사용DB/배포금지 유지. 실행상태는 DEVELOPMENT_REMAINING_STATUS 최신기록 우선. 제품79±10%p 추정 유지. 아래 ‘재개 방향 대기’는 이전 상태.
+
+2026-09-30 녹음 키트 v2: 사용자가 이률에게 몰린 쿠키를 찬규와 분담 요청. 최신 `output/video/recording-kit-20260930-v2/` 사용. 본편 변경 없음(이률 7개 영상+음성 동시, 찬규 7개 별도 더빙). 쿠키 이률 8개/174.1초, 찬규 도입·끝 포함 9개/167.4초(TTS 참고). 이률은 수집/DB/캐시/복원/동일시험/수치조건/협업/권한, 찬규는 도입/이용조건/반대근거/사전/질문우선순위/영향범위/인용점검/판단보류/끝인사. 새로 찬규가 맡는 7개는 사진·UI 위 음성이므로 추가 촬영/입모양 제약 없음. 대사 내용/본편/실영상/TTS/제품 불변, 구 키트 보존. 새 키트의 화자·파일번호가 아래 이전 배분보다 우선.
+
+2026-09-30 촬영·녹음 전달 키트 완료: `output/video/recording-kit-20260930/`에 화자별 가이드·31개 개별 읽기 대본·제출 메모·녹음 전 문구 확인 메모. 사용자 최종 확정은 이률 본편 7개 영상+음성 동시 촬영, 이률 쿠키 15개 음성, 찬규 본편 7개(팀+경력 합침)+쿠키 도입/끝 2개 별도 더빙. 전체 32개 대사 장면을 31개 파일로 누락/중복 없이 대응 검증. 학교 정식명·풀스택 직무·오타4개만 정정 기록, 미완료 기술 주장은 임의 개작하지 않고 15파일 확인 표시. 다음은 10~15초 시험 촬영/더빙 및 표시 문구 합의 후 원본 수령. 실제 영상/TTS/제품/API 변경 없음. 제품 진행 추정 불변.
+
+2026-09-30 밝기·피부색 v4 완료: exec30573 첫프레임수정→17렌더→조립→기술/음성→Apple재생QA 전부종료0. 최신 `output/video/changyu-footage-v4/trialboard-changyu-{preview,full-tts,main-tts,cookie-tts}.mp4`. 네이티브4K HDR→SDR + 실제601행렬유지/sRGB전달함수명시 + 사용4proxy첫프레임톤매핑누락을3프레임사전처리제거로해결. 원본프레임복제/타임라인변경없음. TS142tests,94스틸+유지구간최대2.32752/255(<4), Apple34표본최대.90935/255, 첫프레임4원본대조최대1.92347/255. 본편13045/쿠키10245/합본23290 및 음성보존/원본13파일21지문 통과. 보드 시각검토 완료. 기존가독성/TTS/대사/편집/v2v3출력 보존. 다음: 사용자원본과같은플레이어의실화면색감피드백; 실제더빙아직대기. 제품/Dacon호출없음, 제품추정79±10%p불변. 아래진행중은이력.
+
+2026-09-30 16:15 캡처 비교 후 색 보정 v4 진행: 원본보다 밝고 붉은 기존 proxy 확인. Apple AVFoundation 네이티브 SDR 변환으로10구간4K30/BT709/무음 교체, 초반 직접 시각대조에서 자연스러운 피부 명암 확인. `changyu-native-sdr`/`output/video/changyu-footage-v4`; v3 출력/코드snapshot/원본/TTS/편집/가독성 보존. prep exec65586 종료0, hook검증 완료, 전체17렌더 exec78162/26전환스틸 exec53384 진행. 조립 시 `--reuse-originals-from=output/video/changyu-footage-v3`로 기존비촬영화면 추가재압축 회피. 최종 QA/전달 아직 미완료. 제품작업·대회API 호출 없음. [영상 상세](PRESENTER_CHANGYU_FOOTAGE.md) 최신 항목 우선.
+
+2026-09-30 글씨 가독성 v3 완료: exec14001 17구간 렌더 종료0, exec19118 조립/기술/음성 QA 종료0. `output/video/changyu-footage-v3` 최신 가독성 검토본(약45초preview/본편/쿠키/합본12분56초). TS139tests, 68기준+26전환 스틸과 최종컷보드06~13 직접확인. 최종94스틸+유지구간 오차최대2.3732/255(<4), 23290프레임 시각/디코드 통과. 개별TTS 패킷원본동일/합본10초최소상관.9999759, 원본13파일21지문보존. HDR피부과노출·팀소개1080p후확대 선명도 문제는 미해결/최종색화질승인본아님. 이번에는 텍스트 대비만 수정. 대회API 호출없음/제품중지상태불변. 다음은 사용자 가독성 피드백 및 밝기/4K크롭 수정 협의.
+
+2026-09-30 후속 영상 승인: 첫 화면 흰 글씨가 배경에 묻히므로 유사 문제 전반 수정 요청. 부모 개인 세션에서 직접 가독성만 수정 중(현재 모델 ID는 노출되지 않아 Astra 여부 확정 발언 안 함), 대회 호출 없음. 새 `output/video/changyu-footage-v3/`에 출력해 v2 보존. Hook 좌우/하단 국소 명암, Team 이름/10년 받침, 모든 Camera 이름표 불투명 ink, Cookie 도입 밝은 글자 여백. 대사/TTS/타임라인 불변. 전체 기존영상 8초 간격 97표본/9보드 시각검토, TypeScript+139tests 통과. 렌더 exec14001 진행/전체조립QA 미완료. 원본HDR 과노출·팀소개 선명도는 별개 미해결이며 이번 수정으로 해결했다고 말하지 않음.
+
+2026-09-30 15:50경 최신 영상피드백: 45초프리뷰가 원본보다과하게밝고화질저하인지질문. 부모가Apple AVAssetImageGenerator.forceSDR로원본동일구간4K추출하여 직접대조, 현재mobius/npl100 proxy의피부·손과노출확인. 팀소개1080p proxy→2400×1350확대로디테일손실도확인. 원본손상아님. `changyu-footage-v2/REVIEW_STATUS.md` 우선: 현재MP4는구도/대응검토용,최종승인/QA완료아님. 실제밝기보정은아직착수안함(최신요청은진단질문). 다음:원본톤기준HDR변환+4K정보유지/크롭후최종축소의짧은비교본부터협의. 검사기준완화금지. 조립색태그/1msCadence보정과HDR과노출은서로다른문제임.
+
+2026-09-30 제품개발중지확인: 대회실행6의동일스트림전송오류재발로새호출/구현중지,활성worker없음. 감독보고에팀경계단계완료/문서협업부분미완료,pytest758/웹1045+1skip/ruff/build통과이나preview가DB생성·동시import중복재현. [남은개발상태](DEVELOPMENT_REMAINING_STATUS_2026-09-30.md)우선. 부분변경보존,미실행재개지시06-resume-collaboration-repair.txt. 후속대회호출은새명시재개방향확인후만. 영상과별개/개인fallback없음/제품79추정유지.
+
+2026-09-30 15:23 영상파일 정정: Archive 2의0~8 총9MOV와 찬규 메시지 제공. 이전3번 이후 장면 라벨이 밀렸고 이전8번39초는extension이며 새8번은실제cookie342.373초. 기존조립PID83547/자식87965 정확종료143/보존, 구출력OBSOLETE표시. 새출력 `output/video/changyu-footage-v2`에서재작업. [최신대응표](PRESENTER_CHANGYU_FOOTAGE.md)우선. 0은원래이률오프닝의찬규예비촬영,1·2연속,나머지이찬규파트중간의이률/기능영상유지. 새0~7=이전1~8 SHA동일확인/proxy재사용,새쿠키필요구간만추출. 기존TTS/자막/음악그대로. 영상은부모직접/대회아님. 렌더·최종QA는진행중.
+
+2026-09-30 영상 별도승인: Downloads/Archive 찬규MOV8개(4K HLG)를 기존TTS유지로 삽입 요청. [작업계획](PRESENTER_CHANGYU_FOOTAGE.md). 부모 개인세션만 작업, 대회제품감독은 계속 별도. 새 sibling `video/src/changyu-footage`/`output/video/changyu-footage`; 원본본편rev5/쿠키rich 및원본MOV보존. 쿠키실제파일은 `trialboard-cookie.mp4`로이름변경돼있음/복원안함. 소리없는proxy변환, 승인장면중촬영부만교체·기존타임라인/음성패킷복사 목표. 8번39초는첫/끝인사로임시분배/질문대기. 현재구현·스틸검토중/완성아님. 제품79추정변경없음.
+
+2026-09-30 후속: “나머지 작업 다 시켜줘 대회 Api로 개발은”. A/B/C 1차 완료(Python738/웹1032+1skip/제품ruff/build/합성PC·모바일QA). 이제 [남은 개발 계획](DEVELOPMENT_REMAINING_2026-09-30.md)으로 범위 확대, [새 상태](DEVELOPMENT_REMAINING_STATUS_2026-09-30.md) 우선. 기존 감독을 재개해 권한·문서협업·이용조건·갱신큐·조건캐시·다문서연결·입력/사전/인용·표/OCR·운영/평가를 단계별 위임한다. 구현Dacon gpt-5.6-sol, 감독별도. 영상·배포·기존 실사용DB 변경 금지. 임상/전문가/인프라 의존 항목 별도. 착수추정79%(±10%p)。새감사worker `output/dacon-worker/20260930-144757-58b7b0e1`(exec58775)/running/read-only/개인fallbackfalse 확인. 배치1/24, 기존dirty지문보존, 부모738tests재통과. 후속진행은새상태문서에서확인.
+
+2026-09-30 최신 요청: 찬규의 기술명세/대본 불일치 검토를 바탕으로 **개발만** 대회 API 백그라운드 위임·파트별 감독. 직후 사용자 재확인: 영상작업 금지/추후상담. [개발계획](DEVELOPMENT_DACON_2026-09-30.md), [전용상태](DEVELOPMENT_DACON_STATUS_2026-09-30.md). 감사→반대검색→KOL결정론우선순위→기록된영향범위→통합검증. 영상파일/대사/렌더와 제품고위험확장 제외. 구현 gpt-5.6-sol 대회전용, 감독은 별도; 개인fallback없음. 감독 `/root/dacon_product_supervisor` 및 읽기전용 감사worker `output/dacon-worker/20260930-141928-d6c0af2a`(exec71981) 실행중 확인. 기존제품 Python725/웹1011통과+1skip/ruff/TS·Vite빌드 통과. 새기능완료아님/제품79%(±10%p)유지. 앱종료·잠자기후무인계속보장없음. 이후상태는전용상태문서우선.
+
+2026-09-29 사진/모션강화판 완료: 아래진행기록의exec53122 전체재렌더·조립·기술/17음성/61모션/승인앞47초보존QA 모두종료0. [결과](PRESENTER_COOKIE_ASTRA_RICH.md). 새8사진(총15), 기존맥락/17대사/131자막/341.5초유지. TS131tests(exec4702)통과,377스틸42보드와후속50모션보드분담시각검토/수정전환부모재검토. 전역·국소점멸0(예외없음),17음성최소상관.9996114/누락0,승인앞1406f소스사진불변/최대차이.054861. source0c7ed0be…d1c5/pipelineqa-passed.
+전체 `output/video/cinematic-cookie-astra-rich/trialboard-cookie-astra-rich.mp4`(26,656,170B), 이어보기 `-continuation.mp4`(22,336,824B)/294.633초·8839f QA(exec17530)종료0. 70초preview/SRT/사진프롬프트보존. 기존Astra/본편수정5/구판쿠키지문보존. 대회API/새TTS없음, 제품79%(±10%p)유지. 다음: 사용자정상속도연출피드백. 기존Dictionary짧은crossfade글자겹침은이전승인본부터존재하는경미사항(계획문서기록),새사진회귀아님. 본편합본/공유PDF/촬영본교체는별도.
+
+2026-09-29 최신: “쿠키 지금 구성/맥락 좋음. 사진 조금 더 + 애니메이션 더 많이.” 새 sibling `cinematic-cookie-astra-rich`에서 보강 진행. [계획](PRESENTER_COOKIE_ASTRA_RICH.md). 기존 승인 완성본/앞47초/17음성/131자막/341.5초 유지. 새8사진 built-in 생성·저장완료(총15사진), 내용연결사진·세부확대모션61검사. 기존 개인Astra design A8씬/pipeline B7씬, 부모 사진·별도pipeline·통합QA.
+377스틸42보드 전부분담검토(exec43891), 후속전체draft점멸0(exec32224), Restore탭/Context조건위전환잔상2곳부모보정. exec71191스틸중좁은렌더프로세스중단후 exec53122 전체재렌더·조립·QA진행. 수정구간draft점멸0(exec12871)/수정3스틸3보드부모재확인. TS130전체tests통과(exec41367),추가겹침회귀포함5전용tests통과. 원본Astra/본편수정5/구판쿠키지문보존. 대회API/새TTS없음. 아직 새버전 최종출력·QA미완료. 제품79%(±10%p)유지.
+
+2026-09-29 최신: “좋아 괜찮다. 계속 이어서 해봐”. 승인한 첫47초를 유지하고 후속15장면까지 전체 쿠키 완성. [제작 기록](PRESENTER_COOKIE_ASTRA.md).
+개인내장Astra 기존design8씬/pipeline7씬 구현, 부모 새5사진 built-in생성·통합·QA. 대회API/새TTS없음. 기존17음성·131자막 유지. TS/126tests(exec20741), 최종렌더·조립·기술/음성/41모션/승인앞부분보존QA(exec52004) 모두종료0. 332스틸·37보드 검토 후5씬 보정/변경보드 재검토, 후속30모션보드 전부 부모 확인.
+전체10245f/341.5초/1080p30, 전역·국소점멸0(예외없음), 기준스틸최대차이0.20049/255. 최종17음성최소상관0.9996114/100ms누락0. 승인앞1406프레임 소스·사진불변/최대픽셀차이0.05486(인코딩오차). source=5657f0dfdc9a9959cb3127c9fd78fd01bddfcc8829614375f300d4b78dd2d369, pipeline-status=qa-passed.
+출력 `output/video/cinematic-cookie-astra/trialboard-cookie-astra.mp4`(21,151,557B), `-continuation.mp4`(16,574,402B),70초 `-preview.mp4`,SRT. 이어보기는global1406부터끝/8839f294.633초, 독립검사exec19902 디코드·길이·6프레임대조통과/음성상관0.9998280. 승인샘플 `approved-sample-20260929/`및원래sample파일 보존. 본편수정5/구판쿠키 소스지문 동일. 제품79%(±10%p) 유지. 다음: 사용자 정상속도 후반연출 피드백. 본편합본/새촬영본/공유PDF는별도이며 자동수행하지 않음.
+
+2026-09-29 최신 요청: “쿠키도 아스트라로 다시만들어”. [PRESENTER_COOKIE_ASTRA.md](PRESENTER_COOKIE_ASTRA.md).
+개인계정 내장gpt-6-astra 두 bounded작업: astra_cookie_design(장면), astra_cookie_pipeline(새렌더/조립/QA). 새 cinematic-cookie-astra 경로, 기존17음성·자막·341.5초유지. 대회API/새TTS없음. 제품79%유지.
+중간최신override “아니 사진도 이상하고 사진 전환도 이상해. 쿠키 다시만들어 그냥”. 기존20사진유지안폐기/해당code중단보존. 부모원레퍼런스67초실제contact검토→밝은실사콜라주+문서내용변경으로전면재설계. 새2built-in이미지 public/cookie-astra-v2/{research-table,report-hand}.png+프롬프트저장. 첫2장면1406프레임46.867초시안우선, 정확한range inclusive `0:1405`. 나머지15장면은방향확인후확장. 현재작업공간은설명용구성으로실제제품UI캡처아님.
+시안진행: exec14040 스틸검토후백지전환/민트peek/회색막대/조건동기화보정. exec4094 음성조립Node22 rawPCM stdin대기는정확child56188종료후파일입력/-nostdin/120초timeout으로해결. 원본17음성독립검사최소상관0.9999999960/100ms누락0. exec58536 50스틸·6보드및47초조립완료. 부모모든스틸·11모션보드검토. 기술QA exec25710 국소2후보(f1070)로실패→Astra 원고전환24f symmetric ease-in-out보정중(검사완화없음). 음성누락0/자막17개원문정확/기존쿠키·본편수정5지문보존. TS·전체122tests통과(exec36659). 아직시안최종QA미완료/전체15후속대기.
+최종 시안 완료: exec58389 전체재렌더·조립·기술QA·11모션QA 종료0. 1406f/46.8667초/1080p30, 전역·국소점멸0(예외없음),50스틸최대차이0.20049/255,2음성최소상관0.9996749/100ms누락0. 최종변경보드04와모션08부모시각확인. TS·122tests 최종exec27548통과. 파일 `output/video/cinematic-cookie-astra/trialboard-cookie-astra-sample.mp4`(4,191,196B),동명SRT. 첫2장면시안만완료/전체15후속미완료, 사진·전환방향사용자피드백대기. 대회API/새TTS없음, 제품79%유지.
+
+2026-09-29 20:54 최신 사용자 지시: “영상 5.6 말고 내 계정 아스트라로 다시해.” 영상용 대회 API 중단/개인계정 내장gpt-6-astra로 재검토·수정. 제품기본dacon은변경안함.
+phase5 exec77907 worker PID86202 TERM 요청후종료확인, parent86191도종료/추가대회프로세스없음. 중단전서체/수동motion검토옵션수정은보존/3회귀테스트통과. 개인인증파일열기없음/새대회호출금지.
+내장gpt-6-astra `/root/astra_video_revision` 완료: 원문/승인Rev4대조후 Problem4단계단어카드→누적타이포, Proposal자료상자→실제출처UI확대·팬(등록자료각주). 수정2스틸부모+agent확인. TS/Node113통과(exec93002).
+완료: 부모exec92135 193스틸+22보드 전부검토, exec75100 전체화면렌더. 첫조립 duration literal 파싱실패→Astra 네 literal만0접두수수정, 350파일중다른변경0/visualSHA보존·원래digest재현 증거는 duration-literals-migration/. QA·renderer수정없음. exec90792 조립종료0.
+최종 exec27917 기술QA/27823 음성QA/61387 모션QA 모두종료0. 13045프레임·1080p30·434.833초,193기준스틸최대차이0.90625/255,전역점멸0/미확인국소0. 국소3후보는 f7833/7834 패널·점 이동, 독립4프레임원본과최대0.070764/255/연속시각검토 근거로정확좌표만수동검토기록. 15음성최소상관0.997833/누락창0/12모션검사통과,최종4모션보드검토.
+출력 output/video/cinematic-rev5/trialboard-cinematic-rev5-main.mp4(80376728B), -preview.mp4(70초10999930B), .srt. pipeline-status=qa-passed. 새5TTS/기존10유지,수정4/쿠키원본지문보존. 새digest272fd819…c4b4,원래화면렌더digest ad9af901…f224a와비시각4치환이력보존. 제품79%유지. 다음은사용자정상속도피드백,쿠키합본/공유PDF/실제촬영본교체별도.
+
+2026-09-29 cinematic-rev5 대사반영 시작: 사용자 Downloads/현재영상_대사만.txt(찬규수정)로 쿠키전 본편만 수정 요청. [PRESENTER_CINEMATIC_REV5.md](PRESENTER_CINEMATIC_REV5.md).
+5구간 예상새TTS(team/problem/proposal/evaluation/closing),10기존음성재사용. 다섯평가지표의괄호메모는편집지시로제외/문장별실제타이밍전환. 기존인트로/수정4/쿠키보존.
+phase1대회worker exec79225 완료:12새테스트/기존99/TS통과. 부모검토후exec78489 신규5TTS완료/10음성복사(재호출금지). align중citation 예전로마자자막재사용버그로중단.
+phase2exec98239 완료:434.833초13045프레임/161자막/Node104·Python13·TS통과. 부모스틸4160에서자막숨김,실입력필터검사에서48k리샘플누락→음성1/4단축버그재현(전체렌더전차단).
+phase3exec94045 주요수정·음성단독QA완료후429종료1.15원본대조0.999999996+/누락0/정확20872000샘플. 부모스틸에서자막명조fallback발견→output/dacon-rev5-final-polish.txt 좁은후속위임대기(속도제한간격후). 개인자동대체금지.
+부모exec5226 TS/109Node/13Python통과. phase4exec68312/output/dacon-worker/20260929-204950-22b3c4d2 종료0:자막서체/평가실제상태함수/QA .9기준/보드단일장처리수정.
+phase5exec77907/output/dacon-worker/20260929-205235-014d2750 진행: Legacy인물overlay서체동일화+엄격한수동motion후보검토옵션(자동예외금지/원본지문+정확좌표+부모실검토파일필수). 이후부모스틸전체검토/전체렌더·QA필요. 수정5완성아님. 제품79%유지.
+
+2026-09-29 cinematic-cookie 1차완성본 출력·검증 완료: 사용자 수정4 본편 느낌 유지, 쿠키 전체의 사진/모션 강화 요청. [PRESENTER_CINEMATIC_COOKIE.md](PRESENTER_CINEMATIC_COOKIE.md).
+기존17음성/10245프레임341.5초 유지. 새20고유생성이미지/29프레임정렬효과음, 문서병합·조건비교·순위교체·브레이크 모션. 본편수정3·4지문보존/제품79%유지.
+대회5.6-sol worker 구현/시각보정/음성배선수정, 메인세션 이미지생성/150스틸전체검토/최종렌더·QA. 최종TS/99테스트통과(exec74420).
+exec84150 전체화면렌더완료, 첫조립오류는asplit명시분리로수정/실입력2초검사. exec63498 최종조립·기술·음성·모션QA모두종료0. pipeline-status=qa-passed.
+10245프레임PTS/디코드/음성길이,150스틸대조최대0.2675/255,점멸전역0/국소0(예외없음).17음성상관0.9997106이상/100ms누락창0.8개같은샷모션검사/최종4모션보드시각확인.
+파일 output/video/cinematic-cookie/trialboard-cinematic-cookie.mp4(341.5초/63,702,827B), -preview.mp4(70초/15,582,038B), 모두1080p30. SRT/chapters/prompt기록보존.
+원본지문daab16d97fac915dc731c4dbbb2158c6c8555d5962da83f3441cdd16afffacb7. Studio3013 exec22271. 새TTS0/commit·push·배포없음.
+다음: 사용자 정상속도 쿠키 디자인/연출 피드백. 실제촬영본/공유PDF갱신/본편합본은 별도이며 자동수행하지 않음.
+
+2026-09-29 cinematic-rev4 출력·검증 완료: 사용자 수정3 분위기 승인, 반복배경 제거+파랑빨강 대비 대안 요청. [PRESENTER_CINEMATIC_REV4.md](PRESENTER_CINEMATIC_REV4.md).
+22개 B-roll에22개고유이미지(새18 built-in생성+기존4각1회), Ink/Ivory 대비+Teal/Amber 보조색. 인트로/음성/길이/원본UI/인물/로고 보존.
+대회5.6-sol worker3회로 새rev4소스/스크립트 작성·시각보정·국소움직임 오탐구분, 메인세션 이미지·시각검토. 수정3원본지문 일치 확인.
+113스틸전체확인 및 보정 후 전체렌더, 최종 TS/81테스트통과. 본편442.7초/앞부분165.5333초/이어보기391.5333초, 모두1080p30.
+첫 QA의 국소후보3개는 f8157/8158 숫자패널·점 이동으로 확인. 8156~8159 독립원본스틸 vs 최종 차이0.073/255미만.
+원본지문+정확한3개좌표에만 시각검토 예외를묶고 원시후보보존. 전체점멸0/미확인국소후보0. 기술QA exec15145 종료0, 음성·모션·앞부분 exec43674 종료0.
+113스틸최대차이0.87660/255,15음성상관0.99794이상/누락창0,7개모션검사통과. 최종모션보드확인. 실제정상속도사용자평가와구분.
+최신파일 output/video/cinematic-rev4/trialboard-cinematic-rev4-{main,front,continuation}.mp4. pipeline-status=qa-passed. 제품79%유지/새TTS0/쿠키제외.
+
+2026-09-29 대회 API 작업 위임 실행기 설정 진행 중: 현재 대화창은 개인 계정 유지, 영상/제품 실제 작업을 대회 Codex worker로 위임 요청.
+scripts/dacon_worker.py 작성. 명시 key-file만 로드, 개인 설정 변경/키 재저장 없음. gpt-5.6-sol 실제 임시 폴더 파일작성·Python검사 성공.
+첫 실행 output/dacon-worker/20260929-173003-d7960e95: input42396/cache31609/output307(CLI 집계, 대회 차감량과 다를 수 있음), 키 셸환경 미전달 확인.
+후속 테스트 작성 위임은 빈 model_catalog 설정 오류로 API 요청 전 종료. 해당 설정/실험용 빈 JSON 제거, tests/test_dacon_worker.py 아직 없음.
+최신 사용자 승인으로 gpt-6-astra 최소 직접호출1회 실시: 2026-09-29, 대회 Responses에서 HTTP404 DeploymentNotFound(0.42초).
+공식 모델ID 그대로/Reply only OK/max_output_tokens128/low/storefalse. 재시도0/개인계정대체0, 기본모델변경없음.
+응답usage없음, x-team-tokens-consumed=4. 잔여추정헤더120000000은 메일3000만과 달라 실제한도로 단정금지.
+현재 해당 endpoint/model 배포 미확인(404), 6계열 전체의 영구 미지원으로 일반화하지 않기. 실행기 설정마무리는 여전히 남음.
+설정 완료나 전체 안전성 검증 완료로 취급하지 않기. 제품/영상 원본 변경 없음, 제품79% 유지. 개인 계정 자동대체 금지.
+
+2026-09-29 현재영상 전사본+스토리보드 공유문서 완료: 찬규 검토용, 제작 당시 cinematic-rev3 본편442.7초 기준. 이후 rev4는 배경·색상만 변경(대사동일), 공유PDF이미지는 수정3 유지. 영상 수정/외부발송없음.
+output/share/TrialBoard_현재영상_전사본_스토리보드_20260929.zip: PDF19쪽·편집MD·대사TXT·원본SRT·최종MP4추출이미지32장.
+PDF별도 output/pdf/TrialBoard_현재영상_전사본_스토리보드_20260929.pdf. 16장면/101화면구간/15발화4035자 원문대조통과,19페이지렌더시각확인/본문경계초과0.
+새ASR전사아닌 최종TTS spokenText+자막타이밍 기반. 학교명/풀스택/용량추천 등 음성-화면 차이와 어색한 원문표현을 분리 기록, 임의교정없음.
+재현 scripts/build_cinematic_review.py + cinematic_review_storyboard.json. PDF스킬 적용,19쪽페이지검증완료. reportlab/pypdf/fonttools/brotli는로컬.venv,PDF렌더용Poppler 설치(Homebrew 의존성업데이트/구버전캐시자동정리). 영상원본삭제없음.
+제품79%(±10%p)유지. 사용자파일전달만,찬규에게직접발송/노션수정/Git commit·push/배포없음.
+
+2026-09-29 cinematic 수정3 출력·QA 완료: 사용자 본편 화면미감/정적UI/추상도해 거절. 인트로 유지, 학교·풀스택 표기 및 소개용 예시각주 제거.
+5종 이미지 built-in 생성(protein/lab/archive/meeting/chemistry), 실제UI 3D진입·크롭이동·타이핑, 양분색상대조/후반수치연출 재설계.
+[PRESENTER_CINEMATIC_REV3.md](PRESENTER_CINEMATIC_REV3.md). 새 소스 video/src/cinematic-rev3, 출력 output/video/cinematic-rev3.
+기존출력보존. TS/71테스트/113스틸완료. exec89825 전체렌더·조립·기술/음성/모션QA 종료0. pipeline-status=qa-passed.
+본편442.7초/13281프레임, 앞부분165.5333초/4966프레임(exec88403 QA종료0), 이어보기391.5333초/11746프레임. 모두1080p30.
+전체PTS/디코드/음성길이 통과. 점멸전역0/타일0,113스틸최대차이0.91681/255. 15음성구간원본대조상관0.99794이상/누락창0.
+7개같은샷ROI 변화검사통과(타이핑/문서이동/검색어확대/인용/학습범위/계산/색분할). 실제최종모션보드확인. 사용자미감승인과별개.
+최신파일 output/video/cinematic-rev3/trialboard-cinematic-rev3-{main,front,continuation}.mp4. 사용자정상속도피드백대기.
+원문TTS재사용(새호출0), 화면만 학교전체명/풀스택 정정, 기존음성의 학교약칭·개발자표현은 그대로. 쿠키제외/제품79%유지.
+
+2026-09-29 editorial 본편 확장: 사용자 앞부분 수정2 승인, KAIST 로고 축소 후 쿠키 직전까지 계속 제작 요청.
+[PRESENTER_EDITORIAL_MAIN.md](PRESENTER_EDITORIAL_MAIN.md). 로고 약20% 축소, 본편13281프레임/442.7초 구성·113대표스틸확인.
+노션 원문/지정성우 유지, 기존공개기록DPR3 읽기전용 재캡처. 대회/새TTS호출0. 쿠키 제외·이전출력보존.
+TS/영상66테스트통과. exec46951 전체렌더→음성조립→QA 종료0, pipeline-status=qa-passed.
+본편 trialboard-editorial-main.mp4(442.7초/13281프레임), 이어보기 trialboard-editorial-continuation.mp4(391.5333초/11746프레임), 모두1080p30.
+전체PTS·디코드·음성길이·인트로후반음성·점멸전역0/타일0 통과.113기준스틸 최대차이0.20743/255, 이어보기첫프레임차이0.04799.
+추가음성검사 exec15593 종료0:15구간 원본대조 상관0.99794이상/누락창0. 실제연출·발음에대한사람의청취승인과구분.
+최신산출물 output/video/presenter-editorial-main/. 사용자본편정상속도피드백대기. 쿠키는이번재설계범위아님.
+제품추정79%유지. 실제촬영본없음(가상대역사진). Git commit/push/배포없음.
+
+2026-09-29 앞부분 수정2 출력·QA 완료: [PRESENTER_EDITORIAL_REV2.md](PRESENTER_EDITORIAL_REV2.md).
+사용자 추가피드백: 로고배경판/첫화면/새검토클릭/전산학부로고/워드마크잘림/얇은서체/유치한도해.
+두 KAIST 이미지 채팅첨부→원본보존, 두번째 전산학부마크 사용. 로고CSS배경판제거, 사진 위 흰 로고, 첫화면전폭인물/대사연동타이포.
+Pretendard Variable/OFL 추가, 대형워드마크크롭제거. 수학실제최적화계산/광학DFT/합성시계열과위험제한예시로교체.
+노션음성/앞51.1667초범위유지. 구판보존, output/video/presenter-editorial-v2/trialboard-editorial-front.mp4. exec28737 종료0.
+TS/62테스트통과,20스틸확인/대조 최대0.18723, 점멸전역0/타일0,1535프레임PTS/디코드/음성길이/인트로후반검사통과.
+실제촬영본의크롭과배경제거·TTS입모양동기는별도임을안내. 제품79%유지. 사용자 디자인피드백 대기, 전체렌더먼저하지않기.
+
+2026-09-29 앞부분 디자인 시안 출력완료: [PRESENTER_EDITORIAL_20260929.md](PRESENTER_EDITORIAL_20260929.md).
+사용자 presenter-motion의 AI풍/단어카드/연결선/반복모션 거절. frontend-design+remotion-best-practices 설치/지침 적용.
+최신 지시: 쿠키 말고 실제 시작부터 앞부분 시안. 51.1667초1535프레임, hook→intro→team→bio앞부분 새구도.
+인트로 마지막4.88초무음확인→원본모션직접렌더/score-v4직접연결. 실제브랜드PNG사용, 진행바/제작용문구삭제.
+스크린샷 임시경로 접근차단→채팅첨부요청(우회안함). 기존출력보존. 전체영상재작업완료아님. 제품79%유지.
+최신파일 output/video/presenter-editorial/trialboard-editorial-front.mp4. exec14592 종료0/QA통과.
+1535프레임/1080p30/51.1667초,점멸0/15스틸대조/PTS/디코드/음성검사통과,인트로후반무음해소. TS/58테스트통과.
+사용자앞부분디자인피드백대기. 다음에전체렌더먼저하지않기. Studio3012(session53884),캡처Vite5173(session26235).
+
+2026-09-29 추가수정 출력·QA 완료: [PRESENTER_MOTION_20260929.md](PRESENTER_MOTION_20260929.md).
+사용자: 멘트마다 요소/구도가 계속 바뀌게, UI파란사각형대신정확한대상확대, 이미지생성적극활용.
+32장면149발화연동큐/투명생성이미지6개/실제UI원본좌표확대 구현. 원문음성·길이유지, 기존노션판보존.
+presenter-motion 합본784.2초/본편442.7초/쿠키341.5초 및80.4초검토본완료. exec88357 종료0/qa-passed.
+모두1080p30. 32장면점멸/로고누락0,149스틸최대차이0.38625. 전체디코드/PTS/자막/음성/분리본검사통과.
+최종TS/영상54테스트통과. 사용자정상속도연출평가·실제촬영본교체는별도. 제품79%유지.
+
+2026-09-29 노션 원문 영상 출력·QA 완료: [PRESENTER_NOTION_20260929.md](PRESENTER_NOTION_20260929.md).
+사용자 최종수정은 찬규 노션의 대사·순서 그대로, 임의80/160비교 삭제. 팀소개+본편+쿠키31섹션/32음성.
+새 성우 eMzlsWTml7eAEDvSiETn, 키 저장명시승인→저장소밖 elevenlabs-api-key(700/600), 값출력금지.
+노션 원문7304자 TTS완료,784.2초/23526프레임(본편442.7/쿠키341.5). 로마자정렬을 한글원문 어절타이밍으로 복원.
+video/public/presenter-notion 및 output/video/presenter-notion. 최종exec46538 종료0/pipeline-status=qa-passed.
+합본784.2초/본편442.7초/쿠키341.5초, 모두1920×1080/30fps. 32장면 점멸·로고누락0, 전체디코드/연속PTS/분리본검사통과.
+131짧은 자막공백 연결로1프레임자막점멸해결. 음성정규화후PTS/정수샘플수보정으로누적동기오차예방. 원문대사추가·삭제0.
+trialboard-notion-full/main/cookie.mp4 및SRT/chapters.json. 사용자정상속도연출평가·실제촬영본교체는별도. 기존가상대역사용표시.
+기존v4/이전시안보존. product79%유지. 새대회호출/제품변경/commit/push/배포없음.
+
+2026-09-29 UI만 Git공유 완료: 사용자 범위변경에 따라 web/src의17개 파일만3d1c977로커밋/push.
+원격main/로컬HEAD 모두3d1c977e27a785f6ffe3a6a0c67da3e4e6dff093 확인. UI미커밋변경없음.
+README·docs(기술명세포함)는로컬보존/미커밋. 영상/키/DB 제외. 초기명세·README 공유용편집취소.
+웹1011통과/1skip/실패0 및TS·Vite빌드재검증. 기존MUI·번들경고유지, 제품기능79%추정유지.
+
+2026-09-29 기술 명세·Git 점검: `docs/TECHNICAL_SPECIFICATION_2026-09-29.md` 작성.
+원격 ls-remote main과 로컬 HEAD 모두597b76c(9/22). 작성 전 추적20개변경/미추적11개; 9/26 UI polish·후속문서 미커밋. push 안 함.
+공개 조사/검토 PDF→AI제안→계산/별도MOC 경로·데이터계약·DB·실제OpenAPI·한도·보안·한계·실행법 정리.
+이번 재검증 Python725통과(경고2), 웹1011통과/1skip(고정FDA PDF부재)/실패0, Ruff·TS·Vite통과. MUI/대형청크경고남음.
+새 모델 호출·DB내용읽기·UI수정·영상렌더없음. 제품79%계획추정유지.
+찬규 피드백: 근거 숫자 대조와 설계 시뮬레이션은 별도 기능이며 후자의 설득력 있는 예시 필요.
+명세서18절에 80/160명×효과차/독성가정 비교를 후속 시연 제안으로만 기록. 새 사례 계산·영상 추가는 아직 안 함.
+
+2026-09-28 전사문 추가: 공유 폴더에 `TrialBoard_현재영상_전사문.md` 작성, 스토리보드에서 링크하고 기존 공유ZIP에도 포함.
+현재 v4가 사용하는 편집 후 자막10개 장면+훅 대사 기준. 무내레이션 인트로, 장면 시간, 역할 배정 명시.
+오디오를 새로 음성 인식하거나 전 구간 청취한 전사본이 아니라 제작 대본·자막 기반임을 구분. 영상 변경 없음.
+
+2026-09-28 공유 문서: 사용자가 현재 영상의 전체 스토리보드·대사·화면 문구·제작 프롬프트를 친구에게 전달할 문서로 요청.
+`output/share/TrialBoard_Storyboard_20260928/TrialBoard_스토리보드_대본_프롬프트.md` 작성.
+현재 v4 3분54초 기준 12장면, 전체 대사, 모션, 발표자 파트·영문 소개·촬영 가이드·원문 이미지 프롬프트 포함.
+최종 MP4에서 추출한 대표 이미지12장과 함께 `output/share/TrialBoard_Storyboard_20260928.zip`으로 묶음.
+대본은 현재 timing.json의10개 장면 자막과 일치 확인. 재현용 제작 프롬프트는 이번에 정리한 문구임을 명시.
+실제 공개 조사/별도 MOC 구분, 원문열기·입력변경·저장복구 시연 부족은 후속 수정 후보로 분리.
+제품·영상 소스 수정/새 렌더/외부 전달/Git push/새 API·TTS 호출 없음. UI 확대 화질 개선은 이후 작업.
+
+2026-09-27 v4 최신: [PRESENTER_FILM_V4.md](PRESENTER_FILM_V4.md). 사용자v3초반정적/파란숫자설명박스거절.
+첫56초에 실제캡처조각·곡선연결·대사동기타이포·입력화면확대전환. 연구82/8은 원본UI픽셀영역 native lift.
+기존인트로/훅/1.4배음성/234.133초유지. 발표자는소개, 제품은큰화면. v3보존.
+v4 완료: exec74185 렌더후잔여핸들종료. exec56476 시간단위정규화/음성조립/전체QA 정상종료. 타입/49테스트통과.
+3836/20332체인은 전환연결·크롭여백보정위해종료. SIGTERM후남은45416와49534는SIGKILL로종료확인. 99258은Node확장자해결실패(수정됨). 이후74185도완료.
+완성파일 output/video/presenter-v4/trialboard-presenter-v4.mp4. 234.133초/7024프레임/720p/19,794,607B.
+수정부분61초발췌 trialboard-v4-motion-review.mp4. 전체디코드/연속PTS/음성길이통과, 점멸전역0/타일0/로고누락0,43스틸최대차이1.399375.
+5174브라우저1회재시도완료. 최초인트로/본문timescale불일치검출→90000정규화로해결. 최종v3/v4음성스트림해시일치. 임의프레임보정없음.
+대표최종모션보드확인. 사용자 정상속도 연출평가/실제촬영본교체/1080p남음. 제품79%유지,새TTS/대회API0,Gitpush없음.
+
+2026-09-27 v3 최신: [PRESENTER_FILM_V3.md](PRESENTER_FILM_V3.md). 사용자가 v2 깜빡임/반복카드/측면인물/음성속도거절.
+추가요청: 핵심시연은 제품화면크게, 목소리만. v3는 중앙착석대역2장(imagegen), 1.4배음성, 234.133초/7024프레임.
+48beat중첩제거→챕터별지속화면, 제품6챕터에는 인물없음. IntroV4 hideProductionNote로 왼쪽제작설명제거.
+새 swangle/PNG/동시성1. 도입651프레임 무보정 전역/48타일점멸0·로고누락0, 기준차이최대0.553통과.
+exec session14558 정상완료: 검사도입재사용/본문600프레임씩렌더→음성→전체QA. 최종MP4는 output/video/presenter-v3/trialboard-presenter-v3.mp4.
+14805는 느린Chrome153렌더중단,77810은 ENOSPC종료. 종료된14805의 임시PNG폴더 react-motion-render3bQjtP만 삭제(재생성가능1.7GB). 기존영상/원본보존.
+본문은551프레임검사통과한 Remotion Headless Shell149/ANGLE로 전환. 전체PNG누적을피하는 --chunked 추가.
+타입/영상45테스트통과. 새 입력11캡처(글자별/동의체크)완료, 버튼누르지않음/모델호출0/DB저장0. 제품79%유지.
+최종234.133초/7024프레임/1280×720/14,908,204바이트. 전체디코드/PTS/음성길이통과, 점멸전역0/48타일0/로고누락0.
+33기준스틸최대차이1.388/255미만. 최종9장면contact sheet확인. 사후프레임보정없음. 음성평균−21.1/최대−3.6dB.
+정상속도 사용자 피드백/실제촬영본교체/최종1080p남음. v2이하이전파일보존. 제품79%유지·새TTS/대회호출0·push없음.
+
+2026-09-27 최신 영상 수정: [PRESENTER_FILM_V2.md](PRESENTER_FILM_V2.md).
+사용자가 v1의 느린말/긴정지씬을 거절. 1.6배음성, 전체인물배경+몸앞UI, 48개구절컷, 지속적레이어/카메라모션으로재작성.
+첫3.8초 제품정의훅→기존17초(디테일2건수정)→본문. 전체206.233초/6187프레임. 기존v1/원본오프닝보존.
+추가스크린샷피드백: SVG 경로로 바꾼 흰선도 사용자가 거절. 흰선/stroke 자체 제거→넓고은은한파란radial-gradient로최종수정.
+sotorasib 마지막b 지연은 등간격glyph opacity로수정.
+video/src/presenter-v2-entry.tsx 별도Remotion엔트리. TS/영상41테스트통과, 대표33스틸/오프닝14스틸확인.
+exec session60093은 사용자의 흰선 추가수정 반영 위해 renderer PID23426 종료.
+최종 파란 diffuse glow 반영/오프닝재렌더 및 전체 조립 완료. exec session89602 종료.
+67145/27654는 비효율적인 OffthreadVideo 오프닝 재렌더로 중단. 훅/본문만 JPEG92·동시성3으로렌더→수정오프닝오프라인연결→음성→QA.
+PNG스틸과전체프레임비교검증으로결과확인필수. 이전부모/렌더프로세스명시종료했으며다른앱프로세스는건드리지않음.
+출력 output/video/presenter-v2/trialboard-presenter-v2.mp4. 206.233초/6187프레임/1280×720/50,418,995B.
+최초QA에서 타일/배경 누락9프레임 검출→동일시점의 새PNG로 보정, 원본보존. repair-presenter-v2.mjs/session86229 완료.
+보정프레임442,778,1307,1447,1484,2401,2649,3594,4151. 오프닝 로컬329도 보정해 standalone과합본일치.
+최종전체디코드/33기준스틸+9보정스틸대조/510오프닝대조통과, 점멸후보0. QA-report/frame-repair.json 저장.
+음성평균-21.0dB/최대-3.6dB. TS/41테스트 재통과. 정상속도 음성/연출 사용자검토는남음.
+중간 hook/body 렌더는 보정전이므로 --join-only/재조립시 재QA/보정필수. 근본Chromium readback문제해결을의미하지않음.
+기존대역이미지재사용. ElevenLabs 도입1건추가(키숨김입력/미저장), 본문기존음성atempo1.6. 대회호출0, 제품79%유지.
+
+2026-09-27 최신 추가: 사용자가 대회 키 비공개 저장을 다시 요청. 기존 `/Users/ryul/.config/trialboard/dacon-api-key`와
+숨김 입력/상수시간 비교로 같은 키임을 확인. 폴더700/파일600, 기존 서버PID50808도 --dacon-key-file로 사용 중.
+키 재기록/서버 재시작/새 대회 호출 없음. 인용된 ‘진단 코드 적용을 위한 재입력’은 9/16 과거 병목이며 이후 해소됨.
+값은 문서·Git·프런트엔드에 쓰지 않았다. 키가 채팅에 공유되어 재발급 권장 안내.
+
+2026-09-27 출연형 영상 진행: [PRESENTER_FILM_V1.md](PRESENTER_FILM_V1.md).
+이률/이찬규 가상 대역2장+배경을 builtin imagegen 생성. 제공한 실제 학력/경력으로 영어 타이포 소개 반영.
+RYUL LEE / CHANGYU LEE, CS major, EE double major/minor 구분. 찬규 PhD Student · AX / AI for Science · Life Sciences.
+ElevenLabs 요청 성우 가이드10클립 생성(1844자); 키는숨김입력/메모리만. 327.30초=오프닝17초+본문310.30초.
+video/src/presenter.tsx/CSS/plan, TrialBoardPresenterV1. 실제저장공개조사발췌와 별도MOC를표시. 80/160제안과별도변경비교.
+20장1080p스틸렌더/시각점검,TS/영상35테스트통과. 본문720p전체렌더 진행 중 (exec session2975).
+렌더PID80520/session2975. 완료 후 조립+QA 자동후속 finish-presenter.mjs PID감시 실행 중(session84215).
+다음 재개 때 output/video/presenter-v1/pipeline-status.json 및 qa-report.json 확인 후 최종MP4 전달.
+정상속도 음성/모션 사용자승인은남음. 가이드 합본310.30초/57MB, 평균-22.3dB/최대-5.0dB 확인.
+초기음성믹싱PTS오류는 파트별리샘플링→asetpts→길이제한WAV→concat으로 수정. 잘못된 중간파일은 같은출력에서교체.
+키한정메모/이미지프롬프트/교체방법은 위문서. 제품79%유지. 제품코드수정/새대회호출/커밋push없음.
+
+2026-09-26 최신 ‘멋있는 인트로 유지, 영상 디자인 자체가 재미없다’: [DEMO_CINEMATIC_V4.md](DEMO_CINEMATIC_V4.md).
+설명형v3를 최종 방향으로 취급하지 않기. 기존17초 인트로 파일 그대로 + 새28초 입체 제품 필름 시안 =45초.
+output/video/cinematic-v4/trialboard-cinematic-v4.mp4. src/cinematic.tsx/CSS/plan, TrialBoardCinematicV4.
+큰 실제 UI/분리된 수치 레이어/다크→아이스블루→다크/짧은 카피/각기 다른 카메라. 긴 자막과 임시 Yuna 제외.
+입력 인트로→저장 조사→명시적 별도MOC대조→가정 비교→회의 질문→브랜드. 원본 음악의17초 이후를 이어 사용.
+이 파일은 전체 설명/발표 최종본이 아닌 아트디렉션 샘플. 사용자 디자인 확인 후 전체 길이·콘티·음성 작업 확장.
+TS/영상31테스트 통과. 새 대표 프레임16개 및 전체 조립본 대조. 최종 상세 QA는 출력 qa-report.json 참조.
+최종45초/1350프레임/11,085,895B. 전체디코드/PTS/16기준대조 통과, 점멸0/브랜드실패0. 상단 안전영역 수정 후 재렌더.
+기존 영상/제품 수정/서비스/키/DB 보존. 새 AI/API/DB 저장0. Git commit/push/배포 없음. 제품79%(±10%p) 유지.
+
+2026-09-26 ‘무엇을 만들었는지 모르겠다, 문제 제기와 설명부터’: [DEMO_NARRATIVE_V3.md](DEMO_NARRATIVE_V3.md).
+이전 화면 중심 v2 대신 문제→제품 정의→입력/결과→공개 조사→별도 합성 사례→대조/비교/회의→가치 요약으로 재구성.
+output/video/narrative-v3/trialboard-narrative-v3.mp4 및 SRT. 88.9667초/2669프레임/1920×1080/30fps/6,031,356B.
+video/src/narrative.tsx/CSS/plan, TrialBoardNarrativeV3. 큰 한국어 설명과 옆 해설, macOS Yuna 로컬 임시 음성9개.
+실제 저장 조사와 별도 MOC 합성 대조·계산/규칙 기반 질문 구분. 98.7%는 성공률이 아닌 두 용량 모두 미선택 계산 비율.
+PNG/단일동시성/ANGLE로 렌더. TS/영상28테스트, 전체디코드/PTS/브랜드/표면/27PNG대조 통과, 점멸후보0, 보정프레임0.
+음성 평균−17.3dB/최대−1.4dB. 정상속도 사용자 시청·최종 내레이션/연출 승인은 남음. 기존17초 오프닝과 영상 보존.
+이번 제품 변경/새 모델·검색 호출/DB 저장 없음. 기존 제품 수정/서비스/키 보존. 전체79%(±10%p) 유지.
+video/output은 로컬 Git 제외. 커밋/push/배포 없음. 다음: 첫30초 이해도→대본/목소리 고정→최종 모션→전체 발표 콘티 연결.
+
+2026-09-26 ‘다음 작업’: 최신 UI를 Remotion 중간 시연으로 교체. [DEMO_WALKTHROUGH_V2.md](DEMO_WALKTHROUGH_V2.md).
+로컬 video/src/walkthrough.tsx/CSS/plan, TrialBoardWalkthroughV2. 55초, 기존17초 오프닝 연결본72초.
+output/video/walkthrough-v2/trialboard-walkthrough-v2.mp4 및 trialboard-demo-v2.mp4. 이전 오프닝/중간/220초 발표본 보존.
+실제 저장 sotorasib/NCT05845450 이벤트4개 발췌→브리핑→명시적별도MOC→분모대조→60/120명가정비교→KOL.
+최신 제품 실제 캡처/DOM버튼 좌표 사용, 0.0/0.0→98.7/99.9% 실제 합성 로컬 계산 대조. 새모델/검색0·DB프로젝트저장0.
+영상 커서·강조·음악/효과음 편집이며 라이브 실행이 아니다. 내레이션 초안만 저장, 음성/정상속도 사용자검토 남음.
+TS/영상25테스트 통과. 55초1650프레임전체디코드/PTS/밝은표면/14경계기준대조/브랜드영역불변검사 통과.
+Chromium 타일readback손상13프레임(1,2,3,47,212,530,535,656,682,727,834,1152,1544) 동일시점 PNG로 보정.
+원본/보정기록 보존, 삭제·복제·리타이밍 없음. 근본 렌더러 수정 아님: 이후 재렌더도 QA 필수.
+첫 QA의 단일점멸 검사로 연속초반3프레임을 놓쳐 시각확인 후 불변영역 검사 추가. 최종후보0.
+최종55초5,362,147B/연결72초2,160프레임9,340,494B. 연결본 전체디코드/원본프레임 대조최대명도차이0.090/255이하.
+기존 제품 수정사항/서비스/키/DB 보존. 이번 제품 기능 변경 없음. 전체79% 주관적 추정 유지. Gitcommit/push없음.
+다음: 72초시연 정상속도 피드백→내레이션/제출시간 확정→전체발표콘티와 연결. 실제OCR/임상평가 과제 유지.
+
+2026-09-26 ‘데모를 위한 제품 UI 완성, 예쁜 화면 우선’: [PRODUCT_UI_POLISH.md](PRODUCT_UI_POLISH.md).
+Sites 디자인 가이드 참고, 기존 로컬 React/MUI와 실제 API 동작 유지. 사이트 등록/배포는 하지 않았다.
+product-polish.css + theme, 실행/브리핑/설계결과 CSS, KOL 헤더/첫질문 선택·스크롤, 필드관리 접기.
+공개 결과에 질문 최대3개 표시. 실제 숫자·보류·가정·MOC·재생 구분·모델 전송 동의 유지.
+웹1011통과/선택적PDF1skip, build/Ruff/diff검사. 기존 큰번들/MUI경고 유지.
+1920/1440/390px QA, 가로넘침0/콘솔0, 합성2경로 실제 로컬 계산 및 메모 탭 왕복 보존 확인.
+output/product-polish/ 및 tmp/qa-product-polish.mjs. 기존 video 로컬 Playwright 사용, 제품 의존성 변경 없음.
+새 모델호출0·DB 프로젝트 저장0. 기존 서비스/키/DB/영상 유지. Git commit/push 없음.
+전체79% 주관적 계획 추정 유지. 다음: 사용자 디자인 확인→대표 사례/범위 고정→최신 UI로 Remotion 교체.
+
 2026-09-22 ‘깃에 일단 배포’: 최신 제품 코드를 origin/main에 공유하는 요청. 사이트 배포가 아니다.
 제품 엔진/API·웹 화면/테스트·문서로 커밋을 나누며 영상·출력물·로컬 DB·API 키는 제외한다.
 Python725/웹1012/Ruff/build 통과. Git 대상만 별도 폴더에 풀어 uv sync --locked/API import/npm ci/build 확인.

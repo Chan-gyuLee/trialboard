@@ -8,6 +8,10 @@ from pydantic import Field, model_validator
 
 from trialboard.agent.field_review_contract import Box
 from trialboard.agent.models import AgentInput, AgentReport, Contract, Digest, Id, Text
+from trialboard.api.team_auth import TeamDataPath
+from trialboard.research.pdf_policy import raw_bytes as pdf_bytes
+from trialboard.research.pdf_policy import source as pdf_source
+from trialboard.research.source_policy import existing_connection, require_content_con, tables
 from trialboard.research.store import ResearchStore
 from trialboard.serialization import sha256_json
 
@@ -189,12 +193,28 @@ class AutomationStore(ResearchStore):
         return con
 
     def get(self, run_id):
-        con = self.connect()
+        team = isinstance(self.path, TeamDataPath)
+        con = existing_connection(self.path) if team else self.connect()
         try:
+            if team:
+                con.execute("BEGIN")
+                require_content_con(con, run_id)
+                if "research_automation" not in tables(con):
+                    return None
             row = con.execute(
                 "SELECT data FROM research_automation WHERE run_id=?", (run_id,)
             ).fetchone()
-            return json.loads(row[0]) if row else None
+            value = json.loads(row[0]) if row else None
+            if team and value:
+                try:
+                    document = value["document"]
+                    source = pdf_source(con, run_id, document["sourceId"])
+                    pdf_bytes(con, (run_id, source.id, source.digest, document["source"]["sha256"]))
+                except (KeyError, TypeError):
+                    from fastapi import HTTPException
+
+                    raise HTTPException(409, "AUTOMATION_PDF_BINDING_REQUIRED") from None
+            return value
         finally:
             con.close()
 
@@ -255,6 +275,12 @@ class AutomationStore(ResearchStore):
         try:
             with con:
                 con.execute("BEGIN IMMEDIATE")
+                if isinstance(self.path, TeamDataPath):
+                    require_content_con(con, run_id)
+                    current_source = pdf_source(con, run_id, source.id, source.digest)
+                    if current_source != source:
+                        raise ValueError("AUTOMATION_VERSION_CONFLICT")
+                    pdf_bytes(con, (run_id, source.id, source.digest, preparation.source.sha256))
                 old = con.execute(
                     "SELECT digest,data FROM research_automation WHERE run_id=?", (run_id,)
                 ).fetchone()

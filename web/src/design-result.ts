@@ -6,7 +6,7 @@ import { readRecritique, type RecritiqueResult } from "./recritique-result.ts";
 import { arr, bindBrief, exact, fail, hash, id, num, obj, proposalReviewDigest, same, str, unique, type DesignBrief, type Plan } from "./design-brief.ts";
 
 export type Blocker = { code: string; arm_id: string | null; observation_id: string | null; detail: string };
-export type KolQuestion = { id: string; category: string; priority: "BEFORE_COMPARISON" | "BEFORE_PROTOCOL"; trigger: Record<string, unknown>; question: string; answer_status: "UNANSWERED" };
+export type KolQuestion = { id: string; category: string; priority: "BEFORE_COMPARISON" | "BEFORE_PROTOCOL"; trigger: Record<string, unknown>; question: string; answer_status: "UNANSWERED"; urgency_score?: number; urgency_reasons?: string[] };
 export type Simulation = { scenarioId: string; planId: string; total: number; correct: number; unsafe: number; noSelection: number;
   selection: Record<string, number>; se: Record<string, number>; bestArms: string[] };
 export type Tradeoff = { scenario_id: string; reference_plan_id: string; alternative_plan_id: string; additional_participants: number;
@@ -15,13 +15,64 @@ export type DesignResult = { raw: Record<string, unknown>; reportKey: string; ru
   status: "BLOCKED_EVIDENCE_LINK" | "HYPOTHETICAL_COMPARISON_ONLY"; rules: RevalidationResult; ai: RecritiqueResult | null;
   blockers: Blocker[]; questions: KolQuestion[]; simulations: Simulation[]; tradeoffs: Tradeoff[]; plans: (Plan & { total_sample_size: number })[]; limitations: string[] };
 const close = (a: number, b: number) => Math.abs(a - b) <= 1e-10;
+const protocolQuestionOrder = ["dose_schedule", "endpoint", "assumptions", "decision_rule", "feasibility", "statistics", "sample_size_tradeoff"];
+const blockerUrgency: Record<string, [number, string]> = {
+  OBSERVATION_WITHHELD: [400, "필수 원문 관측값이 보류·제외되어 비교에 사용할 수 없습니다."],
+  SOURCE_DOSE_MISMATCH: [400, "설계 용량과 원문 용량 연결이 일치하지 않습니다."],
+  ONE_ENDPOINT_ROW_REQUIRED: [400, "용량별 필수 반응·이상반응 근거가 하나로 확정되지 않았습니다."],
+  ENDPOINT_MISSING: [400, "용량 비교에 필요한 평가변수 근거가 없습니다."],
+  SECOND_DOSE_MISSING: [400, "두 번째 용량의 비교 근거가 없습니다."],
+  COMPARISON_CONTEXT_MISMATCH: [300, "용량군 사이의 비교 문맥이 일치하지 않습니다."],
+  ENDPOINT_SUBTYPE_MISMATCH: [300, "용량군 사이의 세부 평가변수가 일치하지 않습니다."],
+  COMPARISON_CONTEXT_MISSING: [300, "비교에 필요한 집단·기간·정의 문맥이 보고되지 않았습니다."],
+};
+const protocolUrgencyReason: Record<string, string> = {
+  dose_schedule: "프로토콜 확정 전에 투여·감량·중단 규칙을 확인할 의제입니다.",
+  endpoint: "프로토콜 확정 전에 평가변수와 분석 시점을 확인할 의제입니다.",
+  assumptions: "프로토콜 확정 전에 사용자 지정 가정과 민감도 범위를 확인할 의제입니다.",
+  decision_rule: "프로토콜 확정 전에 효용·안전 한계와 보류 규칙을 확인할 의제입니다.",
+  feasibility: "프로토콜 확정 전에 모집·관찰·결측과 운영 가능성을 확인할 의제입니다.",
+  statistics: "프로토콜 확정 전에 별도 확증 통계 설계 필요성을 확인할 의제입니다.",
+  sample_size_tradeoff: "프로토콜 확정 전에 표본수 차이와 가정 계산 차이를 검토할 의제입니다.",
+};
+const frequencyCount = (value: number, repetitions: number) => Math.floor(value * repetitions + 0.5);
+function urgency(question: KolQuestion, simulations: Simulation[], repetitions: number): { score: number; reasons: string[] } {
+  if (question.priority === "BEFORE_COMPARISON") {
+    const [score, detail] = blockerUrgency[String(question.trigger.code)] ?? [200, "비교 근거에 대한 검토 한계가 해결되지 않았습니다."];
+    return { score, reasons: ["비교 계산 전 해결해야 하는 근거 차단 항목입니다.", detail] };
+  }
+  const reasons = [protocolUrgencyReason[question.category]];
+  if (question.category === "decision_rule" && simulations.length) {
+    const unsafe = Math.max(...simulations.map(s => frequencyCount(s.unsafe, repetitions)));
+    const abstained = Math.max(...simulations.map(s => frequencyCount(s.noSelection, repetitions)));
+    reasons.push(`가정 시뮬레이션에서 한계 초과 군 선택은 최대 ${unsafe}/${repetitions}회, 선택 보류는 최대 ${abstained}/${repetitions}회였습니다. 측정 위험이 아닌 입력 가정 결과입니다.`);
+  }
+  if (question.category === "sample_size_tradeoff") {
+    const reference = simulations.find(s => s.scenarioId === question.trigger.scenario_id && s.planId === question.trigger.reference_plan_id)!;
+    const alternative = simulations.find(s => s.scenarioId === question.trigger.scenario_id && s.planId === question.trigger.alternative_plan_id)!;
+    const unsafeDelta = frequencyCount(alternative.unsafe, repetitions) - frequencyCount(reference.unsafe, repetitions);
+    const abstentionDelta = frequencyCount(alternative.noSelection, repetitions) - frequencyCount(reference.noSelection, repetitions);
+    reasons.push(`이 가정 비교의 한계 초과 군 선택 빈도 차이는 ${unsafeDelta >= 0 ? "+" : ""}${unsafeDelta}/${repetitions}회, 선택 보류 빈도 차이는 ${abstentionDelta >= 0 ? "+" : ""}${abstentionDelta}/${repetitions}회입니다.`);
+  }
+  return { score: 100, reasons };
+}
+function questionOrder(a: KolQuestion, b: KolQuestion): number {
+  const score = (b.urgency_score ?? 0) - (a.urgency_score ?? 0); if (score) return score;
+  const categoryA = a.category === "evidence_gap" ? -1 : protocolQuestionOrder.indexOf(a.category);
+  const categoryB = b.category === "evidence_gap" ? -1 : protocolQuestionOrder.indexOf(b.category);
+  if (categoryA !== categoryB) return categoryA - categoryB;
+  const suffixA = /^(.*)-(\d+)$/.exec(a.id), suffixB = /^(.*)-(\d+)$/.exec(b.id);
+  if (suffixA && suffixB && suffixA[1] === suffixB[1]) return Number(suffixA[2]) - Number(suffixB[2]);
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
 const probability = (v: unknown, repetitions: number) => {
   const p = num(v, 0, 1); if (!close(p * repetitions, Math.round(p * repetitions))) fail("선택 빈도가 반복 수와 일치하지 않습니다."); return p;
 };
 
 export async function readDesignResult(raw: string, review: FieldReview, source: PdfSource, expectedBrief?: DesignBrief): Promise<DesignResult> {
   const r = obj(strictJson(raw, RESULT_BYTES * 2, 900000));
-  if (r.schema_version !== "design-comparison/1" || r.clinical_approval !== false || r.recommended_plan_id !== null || r.model_calls !== 0) fail();
+  const schema = r.schema_version;
+  if (!['design-comparison/1', 'design-comparison/2'].includes(String(schema)) || r.clinical_approval !== false || r.recommended_plan_id !== null || r.model_calls !== 0) fail();
   const b = await bindBrief(r.brief, review, source);
   if (expectedBrief && !same(b, expectedBrief)) fail("입력한 설계안·가정과 다른 결과입니다. 현재 입력으로 다시 계산하세요.");
   const material = str(r.brief_canonical, 100000);
@@ -109,9 +160,11 @@ export async function readDesignResult(raw: string, review: FieldReview, source:
     for (const k of Object.keys(se)) if (!close(num(se[k], 0, 1), t.delta_monte_carlo_se[k])) fail();
   });
   const questions: KolQuestion[] = arr(r.kol_questions, 6, 2024).map(v => {
-    const q = obj(v); exact(q, ["id", "category", "priority", "trigger", "question", "answer_status"]);
+    const q = obj(v); exact(q, schema === "design-comparison/2" ? ["id", "category", "priority", "trigger", "question", "answer_status", "urgency_score", "urgency_reasons"] : ["id", "category", "priority", "trigger", "question", "answer_status"]);
     if (!["BEFORE_COMPARISON", "BEFORE_PROTOCOL"].includes(String(q.priority)) || q.answer_status !== "UNANSWERED") fail();
-    return { id: id(q.id), category: str(q.category, 100), priority: q.priority as KolQuestion["priority"], trigger: obj(q.trigger), question: str(q.question), answer_status: "UNANSWERED" };
+    const question = { id: id(q.id), category: str(q.category, 100), priority: q.priority as KolQuestion["priority"], trigger: obj(q.trigger), question: str(q.question), answer_status: "UNANSWERED" as const };
+    if (schema === "design-comparison/1") return question;
+    return { ...question, urgency_score: num(q.urgency_score, 100, 400, true), urgency_reasons: arr(q.urgency_reasons, 1, 3).map(v => str(v, 1000)) };
   });
   unique(questions.map(q => q.id));
   if (questions.length !== blockers.length + 6 + tradeoffs.length) fail();
@@ -121,6 +174,17 @@ export async function readDesignResult(raw: string, review: FieldReview, source:
     if (!q || q.category !== category || q.priority !== "BEFORE_PROTOCOL" || !same(q.trigger, { plan_ids: b.plans.map(p => p.id), scenario_ids: b.scenarios.map(s => s.id) })) fail();
   }
   reported.forEach((t, i) => { const q = questions.find(q => q.id === `tradeoff-${i + 1}`); if (!q || q.category !== "sample_size_tradeoff" || q.priority !== "BEFORE_PROTOCOL" || !same(q.trigger, t)) fail(); });
+  const legacyOrder = [...blockers.map((_, i) => `gap-${i + 1}`), ...protocolQuestionOrder.slice(0, 6), ...tradeoffs.map((_, i) => `tradeoff-${i + 1}`)];
+  if (schema === "design-comparison/1") {
+    if (!same(questions.map(q => q.id), legacyOrder)) fail("이전 형식의 질문 순서가 일치하지 않습니다.");
+  } else {
+    for (const question of questions) {
+      const expected = urgency(question, simulations, b.repetitions);
+      if (question.urgency_score !== expected.score || !same(question.urgency_reasons, expected.reasons)) fail("질문 긴급도 점수·이유가 규칙과 일치하지 않습니다.");
+    }
+    const expectedOrder = [...questions].sort(questionOrder).map(q => q.id);
+    if (!same(questions.map(q => q.id), expectedOrder)) fail("질문 긴급도 순서가 규칙과 일치하지 않습니다.");
+  }
   const limitations = arr(r.limitations, 1, 30).map(v => str(v));
   return { raw: r, reportKey: await digest(canonical(r)), runId: str(r.run_id, 100), reviewKey: rules.reviewKey, brief: b, briefDigest: r.brief_digest as string,
     status: r.status as DesignResult["status"], rules, ai, blockers, questions, plans, simulations, tradeoffs, limitations };

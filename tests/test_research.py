@@ -1,6 +1,7 @@
 """MOC connectors and provider: no network, credentials or clinical validation in these tests."""
 
 import asyncio
+import hashlib
 import json
 import sqlite3
 from threading import BoundedSemaphore
@@ -108,7 +109,10 @@ class FakeModel:
         self.calls.append(kwargs)
         if len(self.calls) == 1:
             value = {
-                "followup_terms": ["dose comparison"],
+                "followups": [
+                    {"term": "adverse discontinuation", "intent": "CONTRARIAN"},
+                    {"term": "dose comparison", "intent": "EVIDENCE_GAP"},
+                ],
                 "priorities": [{"source_id": "paper_123", "reason": "MOC priority"}],
                 "missing_evidence": ["MOC second dose"],
             }
@@ -130,6 +134,8 @@ class FakeModel:
 
 
 async def execute(path, request, provider=None):
+    if provider is not None:
+        request = request.model_copy(update={"model_consent": True})
     store = ResearchStore(path)
     run = store.start(request)
 
@@ -165,8 +171,30 @@ def test_ai_plan_drives_real_followup_connector_and_cited_review(setup):
     run = asyncio.run(execute(path, request, provider))
     assert len(provider.calls) == 2
     assert any("dose comparison" in p.get("query", "") for _, p in queries)
+    assert any("adverse discontinuation" in p.get("query", "") for _, p in queries)
+    assert len(run.followup_executions) == 2
+    assert run.followup_executions[0].intent == "CONTRARIAN"
+    assert run.followup_executions[0].attempted is True
+    receipt = run.coverage[run.followup_executions[0].coverage_index]
+    assert receipt.query == run.followup_executions[0].query
+    assert receipt.status == run.followup_executions[0].status
     assert run.review.findings[0].source_id == "paper_123"
     assert run.execution_mode == "SCRIPTED_TEST_DOUBLE"
+
+
+def test_no_model_consent_runs_zero_followups_and_zero_model_calls(setup):
+    path, request, queries = setup
+    provider = FakeModel()
+    store = ResearchStore(path)
+    run = store.start(request)
+
+    async def emit(stage, message, **extra):
+        run.events.append({"stage": stage, "message": message, **extra})
+
+    asyncio.run(run_research(run, store, emit, provider))
+    assert provider.calls == []
+    assert run.followup_executions == []
+    assert not any("AI 추가" in p.get("query", "") for _, p in queries)
 
 
 def test_new_followup_evidence_reaches_second_model_input(setup, monkeypatch):
@@ -228,6 +256,84 @@ def test_source_search_is_local_and_scoped_and_repeat_has_no_fake_changes(setup)
     assert changes["added"] == [] and changes["not_retrieved"] == []
 
 
+def test_recorded_direct_impact_is_exact_scoped_deduplicated_and_read_only(setup):
+    path, request, _ = setup
+    anchor = asyncio.run(execute(path, request, FakeModel()))
+    exact = asyncio.run(execute(path, request, FakeModel()))
+    inventory_only = asyncio.run(execute(path, request))
+    different_version = asyncio.run(execute(path, request, FakeModel()))
+    unrelated_project = asyncio.run(
+        execute(path, request.model_copy(update={"asset": "Other MOC drug"}), FakeModel())
+    )
+    store = ResearchStore(path)
+    anchor_source = next(source for source in anchor.sources if source.id == "paper_123")
+
+    different_version.sources = [
+        source.model_copy(update={"digest": "d" * 64})
+        if source.id == "paper_123"
+        else source
+        for source in different_version.sources
+    ]
+    store.save_run(different_version)
+    before = hashlib.sha256(path.read_bytes()).hexdigest()
+    impact = store.recorded_direct_impact(anchor.id, anchor_source.id, anchor_source.digest)
+    after = hashlib.sha256(path.read_bytes()).hexdigest()
+    assert before == after
+    assert impact["scope"] == "RECORDED_DIRECT_ONLY"
+    assert impact["candidate_count"] == 1
+    assert [candidate["run_id"] for candidate in impact["candidates"]] == [exact.id]
+    assert impact["candidates"][0]["uses"] == [
+        {"kind": "REVIEW_FINDING", "reference_count": 1},
+        {"kind": "REVIEW_INPUT_PRIORITY", "reference_count": 1},
+    ]
+    assert inventory_only.id not in {candidate["run_id"] for candidate in impact["candidates"]}
+    assert different_version.id not in {
+        candidate["run_id"] for candidate in impact["candidates"]
+    }
+    assert unrelated_project.id not in {
+        candidate["run_id"] for candidate in impact["candidates"]
+    }
+    assert any("PDF 바이트 지문" in caveat for caveat in impact["caveats"])
+    assert any("다운스트림" in caveat for caveat in impact["caveats"])
+
+
+def test_recorded_direct_impact_api_distinguishes_empty_missing_version_and_failure(setup):
+    path, request, _ = setup
+    anchor = asyncio.run(execute(path, request, FakeModel()))
+    source = next(item for item in anchor.sources if item.id == "paper_123")
+    app = FastAPI()
+    app.include_router(research_router(path, BoundedSemaphore(1)))
+    url = f"/api/research/runs/{anchor.id}/impact"
+    params = {"source_id": source.id, "source_digest": source.digest}
+    with TestClient(app) as client:
+        before = hashlib.sha256(path.read_bytes()).hexdigest()
+        response = client.get(url, params=params)
+        assert response.status_code == 200
+        assert response.json()["candidate_count"] == 0
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == before
+        assert client.get(url.replace(anchor.id, "missing"), params=params).status_code == 404
+        assert client.get(url, params={**params, "source_id": "missing"}).status_code == 404
+        mismatch = client.get(url, params={**params, "source_digest": "f" * 64})
+        assert mismatch.status_code == 409
+        malicious = client.get(url, params={**params, "source_id": "x' OR 1=1 --"})
+        assert malicious.status_code == 404
+        with sqlite3.connect(path) as db:
+            assert db.execute(
+                "SELECT COUNT(*) FROM research_runs WHERE id=?", (anchor.id,)
+            ).fetchone()[0] == 1
+            db.execute(
+                "INSERT INTO research_runs VALUES (?, ?, ?, ?)",
+                ("corrupt", anchor.project_id, "2026-09-30T00:00:00Z", "{}"),
+            )
+            db.execute(
+                "INSERT INTO research_sources VALUES (?, ?, ?)",
+                ("corrupt", source.id, source.digest),
+            )
+        failed = client.get(url, params=params)
+        assert failed.status_code == 500
+        assert failed.json() == {"detail": "IMPACT_LOOKUP_FAILED"}
+
+
 def test_failed_connector_is_partial_not_zero_evidence(setup, monkeypatch):
     path, request, _ = setup
 
@@ -239,6 +345,24 @@ def test_failed_connector_is_partial_not_zero_evidence(setup, monkeypatch):
     assert run.status == "PARTIAL" and any(c.status == "FAILED" for c in run.coverage)
     assert "sensitive diagnostics" not in run.model_dump_json()
     assert len(run.sources) == 2
+
+
+def test_failed_contrarian_search_is_attempted_but_not_success(setup, monkeypatch):
+    path, request, _ = setup
+    original = collect.get_json
+
+    async def fail_contrarian(url, params):
+        if "adverse discontinuation" in params.get("query", ""):
+            raise TimeoutError("synthetic followup timeout")
+        return await original(url, params)
+
+    monkeypatch.setattr(collect, "get_json", fail_contrarian)
+    run = asyncio.run(execute(path, request, FakeModel()))
+    contrarian = run.followup_executions[0]
+    assert contrarian.intent == "CONTRARIAN"
+    assert contrarian.attempted is True and contrarian.status == "FAILED"
+    assert run.status == "PARTIAL"
+    assert "synthetic followup timeout" not in run.model_dump_json()
 
 
 @pytest.mark.parametrize(

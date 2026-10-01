@@ -37,12 +37,19 @@ def payload():
     }
     return {
         "consent": True,
+        "public_authorized_non_sensitive": True,
         "expected_revision": 0,
         "project_id": None,
         "title": "MOC checkpoint",
         "pdf_base64": base64.b64encode(f["pdf"]).decode(),
         "bundle_json": json.dumps(bundle),
     }
+
+
+def test_legacy_checkpoint_payload_remains_compatible_without_team_attestation(tmp_path, payload):
+    legacy = {k: v for k, v in payload.items() if k != "public_authorized_non_sensitive"}
+    saved = ProjectStore(tmp_path / "legacy.sqlite3").save(CheckpointInput(**legacy))
+    assert saved["revision"] == 1
 
 
 def test_append_restore_deduplicate_and_process_restart(tmp_path, payload):
@@ -150,6 +157,15 @@ def test_routes_consent_origin_limits_and_conflict(tmp_path, payload):
             ).status_code
             == 422
         )
+        non_true_values = [1, 1.0, "true", "1", False, 0, 0.0, "false", "0", [], {}]
+        for field in ("consent", "public_authorized_non_sensitive"):
+            for value in non_true_values:
+                assert (
+                    client.post(
+                        "/api/projects", headers=ORIGIN, json={**payload, field: value}
+                    ).status_code
+                    == 422
+                )
         assert (
             client.post(
                 "/api/projects", headers=ORIGIN, json={**payload, "token": "not-a-key"}

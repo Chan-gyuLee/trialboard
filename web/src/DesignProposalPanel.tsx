@@ -8,11 +8,14 @@ import { acknowledgeProposal, briefFromDraft, draftFromBrief, proposalAcknowledg
 import { PROPOSAL_STAGES, requestDesignProposal, type DesignProposal } from "./design-proposal";
 import { downloadText } from "./review";
 import styles from "./DesignProposalPanel.module.css";
+import {useTeamSession} from './AccessShell';
+import {projectModelBinding,type ProjectReceipt} from './project-checkpoint';
 
-export default function DesignProposalPanel({review, source, pdf, agentRaw, disabled, onBusy, onAdopt, onSelectRow}: {
+export default function DesignProposalPanel({review, source, pdf, agentRaw, disabled, onBusy, onAdopt, onSelectRow, projectReceipt}: {
   review: FieldReview; source: PdfSource; pdf: File | null; agentRaw?: string | null; disabled: boolean;
-  onBusy: (value: boolean) => void; onAdopt: (draft: DesignDraft) => boolean; onSelectRow: (id: string) => void;
+  onBusy: (value: boolean) => void; onAdopt: (draft: DesignDraft) => boolean; onSelectRow: (id: string) => void;projectReceipt:ProjectReceipt|null;
 }) {
+  const session=useTeamSession(),binding=projectModelBinding(projectReceipt),policyBlocked=!!session&&!binding;
   const [objective, setObjective] = useState("모집 부담과 용량 선택의 불확실성을 비교할 표본수 대안과 민감도 가정을 검토합니다.");
   const [maximum, setMaximum] = useState("80"), [consent, setConsent] = useState(false);
   const [running, setRunning] = useState(false), [error, setError] = useState("");
@@ -20,20 +23,21 @@ export default function DesignProposalPanel({review, source, pdf, agentRaw, disa
   const [stages, setStages] = useState<(keyof typeof PROPOSAL_STAGES)[]>([]);
   const controller = useRef<AbortController | null>(null), ticket = useRef(0);
   const key = reviewKey(review, source);
+  const bindingKey=JSON.stringify({binding,sharingScope:projectReceipt?.sharing_scope??null,aclRevision:projectReceipt?.acl_revision??null,accessSource:projectReceipt?.access_source??null});
   useEffect(() => {
-    ticket.current++; controller.current?.abort(); setRunning(false); setResult(null); setConsent(false); setStages([]); setError("");
+    ticket.current++; controller.current?.abort(); controller.current=null; setRunning(false); setResult(null); setAdopted(false); setConsent(false); setStages([]); setError("");
     return () => {ticket.current++; controller.current?.abort();};
-  }, [key, pdf, agentRaw, objective, maximum]);
+  }, [key, pdf, agentRaw, objective, maximum, bindingKey]);
   useEffect(() => {onBusy(running); return () => onBusy(false);}, [running, onBusy]);
   const eligible = !!pdf && !!agentRaw && review.origin.kind === "imported_agent_report";
   async function run() {
-    if (disabled || running || !consent || !pdf || !agentRaw) return;
+    if (disabled || running || !consent || !pdf || !agentRaw || policyBlocked) return;
     const task = ++ticket.current, abort = new AbortController(); controller.current = abort;
     setRunning(true); setError(""); setResult(null); setAdopted(false); setStages([]);
     const timer = setTimeout(() => abort.abort(), 135000);
     try {
       const next = await requestDesignProposal({origin: window.location.origin, consent, review, source, pdf, agentRaw,
-        constraints: {objective, max_per_arm: Number(maximum)}, signal: abort.signal,
+        constraints: {objective, max_per_arm: Number(maximum)}, signal: abort.signal,modelBinding:binding??undefined,
         onProgress: stage => {if (task === ticket.current) setStages(previous => [...previous, stage]);}});
       if (task === ticket.current && !abort.signal.aborted) setResult(next);
     } catch (e) {if (task === ticket.current) setError(abort.signal.aborted ? "대기를 중단했습니다. 결과는 적용하지 않으며 이미 사용한 토큰은 반환되지 않을 수 있습니다." : e instanceof Error ? e.message : "제안을 완료하지 못했습니다.");}
@@ -43,12 +47,13 @@ export default function DesignProposalPanel({review, source, pdf, agentRaw, disa
     <header className={styles.heading}><div><span className={styles.kicker}>EVIDENCE → DESIGN</span><h3>검토한 근거로 비교 초안 만들기</h3></div><Chip size="small" label="AI 제안 · 확인 후 계산" variant="outlined" /></header>
     <p>AI가 비교 가능한 용량군을 확인하고, 표본수 2안과 민감도 가정을 제안합니다. 근거가 부족하면 필요한 자료부터 알려줍니다.</p>
     {!eligible && <Alert severity="info">PDF 자료의 에이전트 추출 결과와 필드 검토를 먼저 연결하세요. 약물 검색 결과만으로 수치 가정을 만들지는 않습니다.</Alert>}
+    {policyBlocked&&<Alert severity="warning">{!projectReceipt?'TEAM 모드에서는 현재 PDF를 프로젝트에 저장하고 외부 AI 이용조건을 ALLOW로 기록해야 합니다.':projectReceipt.sharing_scope==='restricted'?'제한 공유 프로젝트의 내용은 현재 외부 AI 설계 제안에 사용할 수 없습니다. 공유 범위가 바뀌면 대기 중 결과를 폐기하고 최신 권한을 다시 확인합니다.':`현재 프로젝트의 외부 AI 이용조건이 ${projectReceipt.usage_policy?.external_ai??'UNKNOWN'}입니다. 정확한 정책 revision이 연결되기 전에는 자료를 전송하지 않습니다.`}</Alert>}
     <div className={styles.inputs}>
       <TextField label="이번 비교에서 확인할 것" value={objective} disabled={disabled || running} onChange={e => setObjective(e.target.value)} multiline minRows={2} slotProps={{htmlInput:{maxLength:2000}}} />
       <TextField label="군당 최대 참여자 수" value={maximum} disabled={disabled || running} onChange={e => setMaximum(e.target.value)} helperText="제안 범위 제한 · 3–500명" slotProps={{htmlInput:{inputMode:"numeric", maxLength:3}}} />
     </div>
-    <FormControlLabel className={styles.consent} control={<Checkbox checked={consent} disabled={disabled || running || !eligible} onChange={e => setConsent(e.target.checked)} />} label="공개·사용 허가된 자료만 사용하며, 선택 원문·검토값·비교 목표를 설정된 외부 AI에 보내 초안을 요청합니다. 최대 1회 호출합니다." />
-    <div className={styles.actions}><Button variant="contained" startIcon={running ? <CircularProgress size={16} color="inherit"/> : <Sparkles size={17}/>} disabled={disabled || running || !eligible || !consent} onClick={() => void run()}>AI 비교 초안 제안</Button>
+    <FormControlLabel className={styles.consent} control={<Checkbox checked={consent} disabled={disabled || running || !eligible || policyBlocked} onChange={e => setConsent(e.target.checked)} />} label="공개·사용 허가된 자료만 사용하며, 선택 원문·검토값·비교 목표를 설정된 외부 AI에 보내 초안을 요청합니다. 최대 1회 호출합니다." />
+    <div className={styles.actions}><Button variant="contained" startIcon={running ? <CircularProgress size={16} color="inherit"/> : <Sparkles size={17}/>} disabled={disabled || running || !eligible || !consent || policyBlocked} onClick={() => void run()}>AI 비교 초안 제안</Button>
       {running && <Button onClick={() => controller.current?.abort()}>대기 중단</Button>}</div>
     {!!stages.length && <ol className={styles.progress} aria-live="polite">{stages.map((stage,i) => <li key={`${stage}-${i}`} data-active={running && i===stages.length-1}>{running && i===stages.length-1 ? PROPOSAL_STAGES[stage] : `${({REVALIDATING_EVIDENCE:"근거·비교 조건 확인",PROPOSING_HYPOTHESES:"AI 초안 요청",CHECKING_PROPOSAL:"제안 조건 검사"})[stage]} · ${i<stages.length-1 || result?.status==="AWAITING_REVIEW" ? "처리 완료" : "처리 종료 · 결과 확인"}`}</li>)}</ol>}
     {error && <Alert severity="error">{error}</Alert>}

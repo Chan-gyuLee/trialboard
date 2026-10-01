@@ -11,15 +11,16 @@ import type { DesignResult } from "./design-result";
 import { MocFileButton } from "./MocDemo";
 import { isMocSource } from "./moc-data";
 
-export default function LocalDesignRunner({ draft, review, source, pdf, locked, hasDraft, onBusy, onResult, confirmReplace, suppliedAgentRaw }: {
+export default function LocalDesignRunner({ draft, review, source, pdf, locked, hasDraft, onBusy, onResult, confirmReplace, suppliedAgentRaw, initialContext }: {
   draft: DesignDraft; review: FieldReview; source: PdfSource; pdf: File | null; locked: boolean; hasDraft: boolean;
   onBusy: (busy: boolean) => void; onResult: (result: DesignResult) => void;
   confirmReplace: () => boolean;
   suppliedAgentRaw?: string|null;
+  initialContext?:{asset:string;indication:string;study:string};
 }) {
   const [agent, setAgent] = useState<{ raw: string; name: string } | null>(null);
   const [ai, setAi] = useState<{ raw: string; name: string; key: string } | null>(null);
-  const [context, setContext] = useState({ asset: "", indication: "", study: "" });
+  const [context, setContext] = useState(() => ({ asset: initialContext?.asset??"", indication: initialContext?.indication??"", study: initialContext?.study??"" }));
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
