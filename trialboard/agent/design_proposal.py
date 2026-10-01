@@ -6,17 +6,59 @@ deterministic comparison checks run before AND after proposal generation.
 
 import asyncio
 import json
+import re
 from typing import Literal
 from uuid import uuid4
 
 from pydantic import Field, ValidationError, model_validator
 
+from trialboard.agent.clinical import metric_identity, percentage
 from trialboard.agent.design_compare import DesignBrief, Plan, Probability, compare_designs
 from trialboard.agent.models import Contract, Id, Text
 from trialboard.agent.provider import ModelError, Provider
 from trialboard.agent.revalidate import revalidate
 from trialboard.agent.review_context import critique_payload
+from trialboard.review.tabular_model import DoseResponsePoint, estimate_rate_at_dose
 from trialboard.serialization import sha256_json
+
+_NUMERIC_DOSE = re.compile(r"\d+(?:\.\d+)?")
+
+
+def _parse_numeric_dose(text: str) -> float | None:
+    match = _NUMERIC_DOSE.search(text or "")
+    return float(match.group()) if match else None
+
+
+def _dose_response_points(groups: dict, accepted_by_id: dict) -> list[DoseResponsePoint]:
+    """One averaged (dose, response rate) point per arm, from already-verified fields only.
+
+    Heuristic feature extraction for an auxiliary tabular reference, never a
+    substitute for the field-by-field comparison checks in design_compare.py.
+    """
+    points = []
+    for dose_label, observation_ids in groups.items():
+        dose = _parse_numeric_dose(dose_label)
+        if dose is None:
+            continue
+        rates = []
+        for oid in observation_ids:
+            row = accepted_by_id.get(oid)
+            if row is None:
+                continue
+            fields = row["fields"]
+            family, _ = metric_identity(
+                fields["metric"]["value"],
+                fields["definition"]["value"],
+                fields["definition"]["quote"],
+            ) or (None, None)
+            if family != "response":
+                continue
+            rate = percentage(fields["reported_rate"]["value"])
+            if rate is not None:
+                rates.append(float(rate))
+        if rates:
+            points.append(DoseResponsePoint(dose=dose, rate=sum(rates) / len(rates)))
+    return sorted(points, key=lambda p: p.dose)
 
 PROMPT_VERSION = "design-proposal/2"
 INSTRUCTIONS = """You draft research-only fixed, equally allocated sample-size comparisons.
@@ -123,11 +165,13 @@ async def propose_design(
         summary="",
         questions=[],
         new_dose_suggestion=None,
+        tabular_reference=None,
         blockers=[],
         calls=[],
         errors=[],
     )
-    accepted_ids = {row["id"] for row in checked["accepted"]}
+    accepted_by_id = {row["id"]: row for row in checked["accepted"]}
+    accepted_ids = set(accepted_by_id)
     groups = {}
     for row in checked["accepted"]:
         dose = row["fields"]["dose"]["value"]
@@ -236,6 +280,13 @@ async def propose_design(
         result["new_dose_suggestion"] = (
             output.new_dose_suggestion.model_dump() if output.new_dose_suggestion else None
         )
+        if output.new_dose_suggestion is not None:
+            queried_dose = _parse_numeric_dose(output.new_dose_suggestion.dose)
+            if queried_dose is not None:
+                points = _dose_response_points(groups, accepted_by_id)
+                result["tabular_reference"] = estimate_rate_at_dose(
+                    points, queried_dose
+                ).model_dump()
         brief["plans"] = [p.model_dump() for p in output.plans]
         brief["scenarios"] = [
             dict(

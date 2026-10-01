@@ -176,6 +176,25 @@ def test_new_dose_suggestion_forbidden_alongside_abstention():
 def test_no_new_dose_suggestion_defaults_to_none():
     r = propose()
     assert r["new_dose_suggestion"] is None
+    assert r["tabular_reference"] is None
+
+
+def test_new_dose_suggestion_attaches_tabular_reference_when_dose_is_numeric():
+    p = Proposer(
+        lambda v: v.update(
+            new_dose_suggestion={
+                "dose": "7.5 mg",
+                "rationale": "인용된 논문 고찰에서 7.5 mg 추가 시험을 제안합니다.",
+                "evidence_ids": ["obs-0"],
+            }
+        )
+    )
+    r = propose(provider=p)
+    assert r["status"] == "AWAITING_REVIEW"
+    ref = r["tabular_reference"]
+    assert ref is not None
+    assert ref["status"] in ("ESTIMATED", "UNAVAILABLE", "INSUFFICIENT_DATA")
+    assert ref["queried_dose"] == 7.5 or ref["status"] == "INSUFFICIENT_DATA"
 
 
 @pytest.mark.parametrize("exception", [ModelError("PRIVATE_DETAIL"), TimeoutError()])
