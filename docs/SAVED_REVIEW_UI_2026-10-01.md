@@ -22,7 +22,6 @@ frontend-design을 읽고 기존 DM Sans/Noto Sans KR, ink#15223b/navy#122346/bl
 - 새6tests: target/source/revision, 허가/상한/명시동의, 인용digest·유니코드offset, 상태/목록내용누출, SSE순서·내용누출·불완전종료, 실제TEAM FastAPI+fakeprovider 응답/SSE→TS엄격reader roundtrip. 모두통과. Python fixture는 임시DB,1fakecall이며 대회호출0.
 - TypeScript/Vite production build 통과. 기존 MUI use-client 경고와 chunk>500kB 경고가 남으며 경고를 숨기지 않았다.
 - 실제컴포넌트+합성API 1440/390: 거부출처disabled/명시동의/409입력보존·새revisionPOST/완료인용/권리철회시결과clear/중단후지연결과무시/키보드진입 통과. pageerrors[]/overflowfalse. 부모가 두 화면 직접검토.
-- 임시화면 `/var/folders/nq/5rr31cs56rsgsvvmxnnmzffw0000gn/T/trialboard-saved-review-ui-k5Fm22`.
 - 부모 C2 관련32Python 독립회귀 통과. 저장검토추가후 전체웹/서버독립회귀는 진행 중이며 후속기록으로 대체한다.
 
 당시 사용률37%, secondary미제공. 전체계획추정79±10%p 유지. 당시45% 선제중단 지시는 최신 사용자 요청의 **50% 중단 / 48%부터 작은 검증 단위**로 대체했다.

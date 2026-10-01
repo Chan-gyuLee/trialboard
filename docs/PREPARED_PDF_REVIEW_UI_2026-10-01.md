@@ -18,7 +18,7 @@
 - PDF reader 7개 + 기존 SOURCE reader 6개 = **13개 통과**. 실제 TEAM 임시 DB의 합성 준비→정책 2→fake provider 1회→SSE/결과/준비별 이력/별도 사용량을 TypeScript reader로 검증했다. SOURCE 사용량은 0으로 보존.
 - TypeScript 검사 통과.
 - `check-prepared-pdf-review-ui.mjs`: 실제 TEAM context/StrictMode 컴포넌트, 1440/390 화면 각각 전송허가 없는 상태·명시 동의·409·성공·만들어낸 인용 거부·403 결과 제거·중단 뒤 응답 무시·미확정 이력·viewer 비활성 검증. 합성 POST 3회(충돌/성공/대기중단), 실제 provider 호출 0. SOURCE 사용량 API 호출 0, 가로 넘침 0, 페이지 오류 0.
-- QA 출력: `/var/folders/nq/5rr31cs56rsgsvvmxnnmzffw0000gn/T/trialboard-pdf-review-ui-RDMbkm`. 모바일 결과 스크린샷을 직접 열어 인용/질문/사용량 구분을 확인했다.
+- 모바일 결과 스크린샷을 직접 열어 인용/질문/사용량 구분을 확인했다.
 - 부모 전체 Python **958개 통과/기존 경고 2개(114.70초)**, 웹 **1,095개 통과/1개 건너뜀**, TypeScript/Vite 빌드 통과. 기존 SOURCE 검토 및 서버 PDF 준비 화면 1440/390 회귀도 통과했다. 이후 RAW 기능 추가 전 시점의 전체 결과다.
 
 ## 남은 경계

@@ -15,7 +15,6 @@ C3A 서버와 확정된 RESEARCH_PDF_POLICY_CONTRACT_2026-10-01.md를 따른다.
 
 - 신규4웹tests:metadata원문/URL비노출,source/pdfdigest강결속,legacy권리자동상승거부,불변이력·CAS,실제TEAM fake-download API의metadata/history→TSreader 왕복. 초기Node검사에서확장자없는runtime import를찾지못한1실패를 `.ts` 명시로보정한뒤통과했다.
 - 실제StrictMode컴포넌트+합성API 1440/390에서키보드진입,다운로드전명시동의/네트워크0,수신sha확인,external_ai UNKNOWN,409입력보존/정확revision저장,권한회수readonly,잘못된수신sha거부,콘솔오류0/가로넘침0 통과. 부모가 두스크린샷직접확인.
-- 화면임시경로 `/var/folders/nq/5rr31cs56rsgsvvmxnnmzffw0000gn/T/trialboard-pdf-policy-ui-b3McQR`.
 - 부모전체웹1075pass/1skip/0fail,TS/Vite build통과. 부모서버독립관련47tests통과. 자식전체Python852pass/경고2는별도C3서버문서참고.
 - 교차 검수 완료: 복수 버전에서 선택한 SHA의 정확한 캐시 GET을 호출하는 파일 저장 버튼을 추가했다. 서버의 현재 권리 검사와 클라이언트의 선택 SHA/응답 헤더/실제 수신 해시/PDF 형식 검사를 모두 거친다. 읽기 전용 사용자는 허가된 파일만 받을 수 있다. 이미 내려받은 파일을 권리 철회가 회수한다고 주장하지 않는다.
 - 수정 후 부모 전체 웹 **1076 통과 / 1 건너뜀**, TypeScript/Vite build 통과. 자식의 별도 실컴포넌트 QA는 1440/390에서 두 번째 버전 선택, 키보드, SHA 불일치 및 권리403의 다운로드 차단을 확인했다. 부모 독립 재실행 결과는 아래에 추가한다.
