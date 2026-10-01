@@ -30,7 +30,7 @@
 - 키/할당 확인 후 기존 서버를 안전하게 재시작할 명령:
 
 ```sh
-.venv/bin/python -m trialboard.api --agent-provider dacon --dacon-key-file /Users/ryul/.config/trialboard/dacon-api-key --enable-evidence-scout --enable-designs --enable-agent-demo --enable-pdf-agent
+.venv/bin/python -m trialboard.api --agent-provider dacon --dacon-key-file ~/.config/trialboard/dacon-api-key --enable-evidence-scout --enable-designs --enable-agent-demo --enable-pdf-agent
 ```
 
 키 값은 Git/프런트엔드/명령 인자에 넣지 않는다. 서버 시작만으로 모델을 실행하지 않는다. 제품 실행 버튼/동의/기존 제한을 통과한 요청만 모델을 호출한다. 이 문서는 외부 배포나 개발 자동 재개 승인이 아니다.
