@@ -10,6 +10,7 @@ from trialboard.research.citations import (
     citation_context,
     resolve_citations,
 )
+from trialboard.research.glossary import search_term
 from trialboard.research.models import Collection, Coverage, FollowupExecution, SearchPlan
 from trialboard.research.relevance import select_review_sources, selection_record, signals
 from trialboard.research.validation import (
@@ -222,7 +223,7 @@ async def run_research(run: Collection, store, emit, provider: Provider | None =
     # Exact registry bibliography, trial-number search and broad drug search are distinct.
     queries = [
         (f'"{run.request.nct_id}" AND SRC:MED', "NCT_SEARCH"),
-        (f'TITLE_ABS:"{run.request.asset.strip()}" AND SRC:MED', "DRUG_SEARCH"),
+        (f'TITLE_ABS:{search_term(run.request.asset)} AND SRC:MED', "DRUG_SEARCH"),
     ]
     if refs:
         ids = list(refs)[:20]
@@ -329,7 +330,7 @@ async def run_research(run: Collection, store, emit, provider: Provider | None =
             initial_ids = {s.id for s in run.sources}
             for item in plan.followups:
                 query = (
-                    f'TITLE_ABS:"{run.request.asset.strip()}" AND ({item.term}) AND SRC:MED'
+                    f'TITLE_ABS:{search_term(run.request.asset)} AND ({item.term}) AND SRC:MED'
                 )
                 await channel(
                     "AI 추가 PubMed",

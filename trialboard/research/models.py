@@ -2,6 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from trialboard.research.glossary import search_term
+
 
 class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
@@ -194,7 +196,7 @@ class Collection(Contract):
                 raise ValueError("FOLLOWUP_COVERAGE_MISMATCH")
             receipt = self.coverage[execution.coverage_index]
             expected_query = (
-                f'TITLE_ABS:"{self.request.asset.strip()}" AND ({execution.term}) AND SRC:MED'
+                f'TITLE_ABS:{search_term(self.request.asset)} AND ({execution.term}) AND SRC:MED'
             )
             if (
                 receipt.channel != "Europe PMC / PubMed"
